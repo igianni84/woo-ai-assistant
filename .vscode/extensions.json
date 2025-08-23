@@ -1,0 +1,37 @@
+{
+  "recommendations": [
+    "bmewburn.vscode-intelephense-client",
+    "xdebug.php-debug",
+    "wongjn.php-sniffer",
+    "phpstan.vscode-phpstan",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer",
+    "recca0120.vscode-phpunit",
+    "orta.vscode-jest",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-markdown",
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "visualstudioexptteam.vscodeintellicode",
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    "alefragnani.bookmarks",
+    "ms-vscode.wordcount",
+    "shardulm94.trailing-spaces",
+    "editorconfig.editorconfig"
+  ],
+  "unwantedRecommendations": [
+    "felixfbecker.php-intellisense",
+    "devsense.phptools-vscode"
+  ]
+}

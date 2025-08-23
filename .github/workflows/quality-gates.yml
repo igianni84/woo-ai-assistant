@@ -1,0 +1,315 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  php-standards:
+    runs-on: ubuntu-latest
+    name: PHP Standards & Security
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, hash, json, mbstring, pcre, pdo, zlib
+        coverage: xdebug
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run PHP Standards Verification
+      run: php scripts/verify-standards.php
+
+    - name: Run Path Verification
+      run: bash scripts/verify-paths.sh
+
+    - name: Run PHP CodeSniffer
+      run: composer run phpcs
+
+    - name: Run PHPStan Static Analysis
+      run: composer run phpstan
+
+    - name: Run PHPUnit Tests
+      run: composer run test
+
+    - name: Generate Test Coverage
+      run: composer run test:coverage
+
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: php
+        name: php-coverage
+
+  javascript-quality:
+    runs-on: ubuntu-latest
+    name: JavaScript/React Quality
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install JavaScript dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Run Prettier Check
+      run: npm run format:check
+
+    - name: Run Jest Tests
+      run: npm run test:coverage
+
+    - name: Build Production Bundle
+      run: npm run build
+
+    - name: Check Bundle Size
+      run: |
+        BUNDLE_SIZE=$(wc -c < assets/js/widget.js)
+        echo "Bundle size: $BUNDLE_SIZE bytes"
+        if [ $BUNDLE_SIZE -gt 51200 ]; then
+          echo "❌ Bundle size exceeds 50KB limit"
+          exit 1
+        else
+          echo "✅ Bundle size within limits"
+        fi
+
+    - name: Upload JS Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: javascript
+        name: js-coverage
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scanning
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run Security Checker
+      uses: symfonycorp/security-checker-action@v4
+      with:
+        lock: composer.lock
+
+    - name: Run PHP Security Scan
+      run: |
+        # Check for dangerous functions
+        echo "Checking for dangerous PHP functions..."
+        if grep -r "eval\|exec\|system\|passthru\|shell_exec" src/ --include="*.php"; then
+          echo "❌ Dangerous PHP functions found"
+          exit 1
+        fi
+        echo "✅ No dangerous PHP functions found"
+
+    - name: Check for hardcoded credentials
+      run: |
+        echo "Checking for hardcoded credentials..."
+        if grep -r "password.*=\|api_key.*=\|secret.*=" src/ --include="*.php"; then
+          echo "❌ Potential hardcoded credentials found"
+          exit 1
+        fi
+        echo "✅ No hardcoded credentials found"
+
+    - name: WordPress Security Best Practices
+      run: |
+        echo "Checking WordPress security practices..."
+        
+        # Check for nonce verification
+        NONCE_FILES=$(find src/ -name "*.php" -exec grep -l "wp_verify_nonce\|wp_create_nonce" {} \; | wc -l)
+        if [ $NONCE_FILES -eq 0 ]; then
+          echo "⚠️  No nonce verification found"
+        else
+          echo "✅ Nonce verification implemented"
+        fi
+        
+        # Check for capability checks
+        CAP_FILES=$(find src/ -name "*.php" -exec grep -l "current_user_can\|user_can" {} \; | wc -l)
+        if [ $CAP_FILES -eq 0 ]; then
+          echo "⚠️  No capability checks found"
+        else
+          echo "✅ Capability checks implemented"
+        fi
+        
+        # Check for input sanitization
+        SANIT_FILES=$(find src/ -name "*.php" -exec grep -l "sanitize_\|wp_kses" {} \; | wc -l)
+        if [ $SANIT_FILES -eq 0 ]; then
+          echo "⚠️  No input sanitization found"
+        else
+          echo "✅ Input sanitization implemented"
+        fi
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    name: WordPress Integration Tests
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306/tcp
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mysqli, zip, gd
+        coverage: none
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Setup WordPress Test Environment
+      run: |
+        bash scripts/install-wp-tests.sh wordpress_test root password 127.0.0.1:${{ job.services.mysql.ports['3306'] }} latest
+
+    - name: Run WordPress Integration Tests
+      run: composer run test:integration
+
+  performance-check:
+    runs-on: ubuntu-latest
+    name: Performance Benchmarks
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Check for performance anti-patterns
+      run: |
+        echo "Checking for performance issues..."
+        
+        # Check for unlimited queries
+        if grep -r "posts_per_page.*-1\|nopaging.*true" src/ --include="*.php"; then
+          echo "⚠️  Unlimited database queries found"
+        else
+          echo "✅ No unlimited queries found"
+        fi
+        
+        # Check for caching usage
+        CACHE_FILES=$(find src/ -name "*.php" -exec grep -l "wp_cache_\|transient" {} \; | wc -l)
+        if [ $CACHE_FILES -eq 0 ]; then
+          echo "⚠️  No caching implementation found"
+        else
+          echo "✅ Caching implementation found"
+        fi
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    name: Documentation Quality
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check DocBlock Coverage
+      run: |
+        PHP_FILES=$(find src/ -name "*.php" | wc -l)
+        DOCUMENTED_FILES=$(find src/ -name "*.php" -exec grep -l "/\*\*" {} \; | wc -l)
+        
+        if [ $PHP_FILES -eq 0 ]; then
+          echo "No PHP files found"
+          exit 0
+        fi
+        
+        COVERAGE=$(( DOCUMENTED_FILES * 100 / PHP_FILES ))
+        echo "DocBlock coverage: $COVERAGE% ($DOCUMENTED_FILES/$PHP_FILES files)"
+        
+        if [ $COVERAGE -lt 70 ]; then
+          echo "⚠️  DocBlock coverage below 70%"
+        else
+          echo "✅ Good DocBlock coverage"
+        fi
+
+    - name: Check README Quality
+      run: |
+        if [ ! -f "README.md" ]; then
+          echo "⚠️  README.md not found"
+        else
+          README_SIZE=$(wc -c < README.md)
+          if [ $README_SIZE -lt 1000 ]; then
+            echo "⚠️  README.md seems too short"
+          else
+            echo "✅ README.md exists and has good length"
+          fi
+        fi
+
+  mandatory-verification:
+    runs-on: ubuntu-latest
+    name: Mandatory Quality Gates
+    needs: [php-standards, javascript-quality, security-scan, integration-tests, performance-check, documentation-check]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install all dependencies
+      run: |
+        composer install --prefer-dist --no-progress
+        npm ci
+
+    - name: Run Mandatory Verification
+      run: bash scripts/mandatory-verification.sh
+
+    - name: Verify Task Completion Readiness
+      run: |
+        echo "🚀 All quality gates passed!"
+        echo "✅ Task is ready for completion"
+        echo "📝 Remember to update ROADMAP.md with completion status"

@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🐛 Debug PHP with Xdebug",
+      "type": "php",
+      "request": "launch",
+      "program": "${workspaceFolder}/woo-ai-assistant.php",
+      "cwd": "${workspaceFolder}",
+      "port": 9003,
+      "runtimeArgs": [
+        "-dxdebug.mode=debug",
+        "-dxdebug.start_with_request=yes",
+        "-dxdebug.client_port=9003"
+      ]
+    },
+    {
+      "name": "🧪 Debug PHPUnit Tests",
+      "type": "php", 
+      "request": "launch",
+      "program": "${workspaceFolder}/vendor/bin/phpunit",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": [
+        "-dxdebug.mode=debug",
+        "-dxdebug.start_with_request=yes",
+        "-dxdebug.client_port=9003"
+      ],
+      "args": [
+        "--configuration",
+        "phpunit.xml",
+        "--verbose"
+      ]
+    },
+    {
+      "name": "🌐 Listen for Xdebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant": "${workspaceFolder}"
+      }
+    }
+  ]
+}
