@@ -1,0 +1,597 @@
+/**
+ * Woo AI Assistant - Chat Widget Styles
+ *
+ * Styles for the frontend chat widget including chat window,
+ * message bubbles, product cards, and mobile responsiveness.
+ *
+ * @package WooAiAssistant
+ * @subpackage Assets
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Widget Container & Positioning
+   ========================================================================== */
+
+#woo-ai-assistant-root {
+    position: fixed;
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.woo-ai-assistant-widget {
+    position: relative;
+}
+
+.woo-ai-assistant-widget.position-bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.woo-ai-assistant-widget.position-bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+/* ==========================================================================
+   Chat Trigger Button
+   ========================================================================== */
+
+.woo-ai-chat-trigger {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #0073aa;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 115, 170, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.woo-ai-chat-trigger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0, 115, 170, 0.4);
+}
+
+.woo-ai-chat-trigger.has-notification::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    background: #ff4757;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.woo-ai-chat-trigger-icon {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.woo-ai-chat-trigger.is-open .woo-ai-chat-trigger-icon {
+    transform: rotate(45deg);
+}
+
+/* ==========================================================================
+   Chat Window
+   ========================================================================== */
+
+.woo-ai-chat-window {
+    width: 350px;
+    max-height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0) translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom right;
+}
+
+.woo-ai-chat-window.is-open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.woo-ai-chat-window.position-bottom-left {
+    right: auto;
+    left: 0;
+    transform-origin: bottom left;
+}
+
+/* Chat Header */
+.woo-ai-chat-header {
+    background: #0073aa;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.woo-ai-chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.woo-ai-chat-status {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.woo-ai-chat-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.woo-ai-chat-action {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.woo-ai-chat-action:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chat Messages Area */
+.woo-ai-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: #c3c4c7 transparent;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar-thumb {
+    background: #c3c4c7;
+    border-radius: 3px;
+}
+
+/* ==========================================================================
+   Message Bubbles
+   ========================================================================== */
+
+.woo-ai-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 80%;
+}
+
+.woo-ai-message.user-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.woo-ai-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.woo-ai-message-avatar.ai-avatar {
+    background: #0073aa;
+}
+
+.woo-ai-message-avatar.user-avatar {
+    background: #646970;
+}
+
+.woo-ai-message-content {
+    background: #f6f7f7;
+    padding: 12px 15px;
+    border-radius: 18px;
+    position: relative;
+}
+
+.woo-ai-message.user-message .woo-ai-message-content {
+    background: #0073aa;
+    color: white;
+}
+
+.woo-ai-message-text {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.woo-ai-message-time {
+    font-size: 11px;
+    color: #646970;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.woo-ai-message.user-message .woo-ai-message-time {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Typing Indicator */
+.woo-ai-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #f6f7f7;
+    border-radius: 18px;
+    margin-left: 42px;
+}
+
+.woo-ai-typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.woo-ai-typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #646970;
+    border-radius: 50%;
+    animation: woo-ai-typing 1.5s infinite ease-in-out;
+}
+
+.woo-ai-typing-dot:nth-child(1) { animation-delay: 0s; }
+.woo-ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.woo-ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes woo-ai-typing {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   Product Cards
+   ========================================================================== */
+
+.woo-ai-product-card {
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    background: white;
+}
+
+.woo-ai-product-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.woo-ai-product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #f6f7f7;
+}
+
+.woo-ai-product-info {
+    flex: 1;
+}
+
+.woo-ai-product-name {
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+.woo-ai-product-price {
+    color: #0073aa;
+    font-weight: 600;
+}
+
+.woo-ai-product-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.woo-ai-product-btn {
+    padding: 6px 12px;
+    border: 1px solid #0073aa;
+    background: transparent;
+    color: #0073aa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.woo-ai-product-btn:hover {
+    background: #0073aa;
+    color: white;
+}
+
+.woo-ai-product-btn.primary {
+    background: #0073aa;
+    color: white;
+}
+
+.woo-ai-product-btn.primary:hover {
+    background: #005a87;
+}
+
+/* ==========================================================================
+   Chat Input
+   ========================================================================== */
+
+.woo-ai-chat-input-area {
+    padding: 15px 20px;
+    border-top: 1px solid #e1e1e1;
+    background: white;
+}
+
+.woo-ai-chat-input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.woo-ai-chat-input {
+    flex: 1;
+    border: 1px solid #c3c4c7;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    line-height: 1.4;
+    resize: none;
+    min-height: 40px;
+    max-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.woo-ai-chat-input:focus {
+    border-color: #0073aa;
+}
+
+.woo-ai-chat-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #0073aa;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.woo-ai-chat-send:hover {
+    background: #005a87;
+}
+
+.woo-ai-chat-send:disabled {
+    background: #c3c4c7;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Quick Actions
+   ========================================================================== */
+
+.woo-ai-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.woo-ai-quick-action {
+    padding: 6px 12px;
+    background: #f6f7f7;
+    border: 1px solid #c3c4c7;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.woo-ai-quick-action:hover {
+    background: #0073aa;
+    color: white;
+    border-color: #0073aa;
+}
+
+/* ==========================================================================
+   Rating System
+   ========================================================================== */
+
+.woo-ai-rating {
+    text-align: center;
+    padding: 15px;
+    border-top: 1px solid #e1e1e1;
+}
+
+.woo-ai-rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.woo-ai-rating-star {
+    font-size: 20px;
+    color: #c3c4c7;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.woo-ai-rating-star.active,
+.woo-ai-rating-star:hover {
+    color: #ffc107;
+}
+
+/* ==========================================================================
+   Mobile Responsiveness
+   ========================================================================== */
+
+@media (max-width: 480px) {
+    .woo-ai-chat-window {
+        width: 100vw;
+        height: 100vh;
+        max-height: none;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 0;
+        transform: translateY(100%);
+        transform-origin: bottom center;
+    }
+    
+    .woo-ai-chat-window.is-open {
+        transform: translateY(0);
+    }
+    
+    .woo-ai-chat-messages {
+        flex: 1;
+        max-height: none;
+    }
+    
+    .woo-ai-message {
+        max-width: 90%;
+    }
+    
+    #woo-ai-assistant-root {
+        bottom: 10px;
+        right: 10px;
+    }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+.woo-ai-assistant-widget [tabindex="0"]:focus,
+.woo-ai-assistant-widget button:focus,
+.woo-ai-assistant-widget input:focus,
+.woo-ai-assistant-widget textarea:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+.screen-reader-text {
+    position: absolute !important;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Animations & Transitions
+   ========================================================================== */
+
+.woo-ai-message-enter {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: woo-ai-message-slide-in 0.3s ease forwards;
+}
+
+@keyframes woo-ai-message-slide-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.woo-ai-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #0073aa;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.woo-ai-notification.show {
+    transform: translateX(0);
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .woo-ai-chat-window {
+        background: #1d2327;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-chat-input-area {
+        background: #1d2327;
+        border-top-color: #3c434a;
+    }
+    
+    .woo-ai-chat-input {
+        background: #2c3338;
+        border-color: #3c434a;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-message-content {
+        background: #2c3338;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-product-card {
+        background: #2c3338;
+        border-color: #3c434a;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-quick-action {
+        background: #2c3338;
+        border-color: #3c434a;
+        color: #c9c9c9;
+    }
+}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+    configVersion="3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://www.phpdoc.org"
+    xsi:schemaLocation="https://www.phpdoc.org https://docs.phpdoc.org/latest/phpdoc.xsd"
+>
+    <title>Woo AI Assistant API Documentation</title>
+    <description><![CDATA[
+        API documentation for the Woo AI Assistant plugin - an AI-powered chatbot for WooCommerce 
+        that automatically creates a knowledge base from site content and provides 24/7 customer support.
+    ]]></description>
+    
+    <paths>
+        <output>docs/api</output>
+        <cache>.phpdoc/cache</cache>
+    </paths>
+    
+    <version number="1.0.0">
+        <api>
+            <source dsn=".">
+                <paths>
+                    <path>src</path>
+                </paths>
+                <ignore>
+                    <path>vendor</path>
+                    <path>node_modules</path>
+                    <path>tests</path>
+                    <path>coverage</path>
+                    <path>.git</path>
+                    <path>.github</path>
+                    <path>assets</path>
+                    <path>widget-src</path>
+                    <path>docs</path>
+                    <path>scripts</path>
+                </ignore>
+            </source>
+        </api>
+    </version>
+    
+    <settings>
+        <setting name="graphs.enabled" value="true"/>
+        <setting name="graphs.format" value="svg"/>
+        <setting name="guides.enabled" value="true"/>
+        <setting name="linker.enabled" value="true"/>
+    </settings>
+    
+    <extensions>
+        <extension>php</extension>
+    </extensions>
+    
+    <plugins>
+        <plugin path="phpDocumentor\Plugin\Scrybe\ScrybePlugin"/>
+        <plugin path="phpDocumentor\Plugin\Graphs\GraphsPlugin"/>
+    </plugins>
+    
+    <templates>
+        <template name="clean"/>
+    </templates>
+    
+    <!-- Custom project information -->
+    <settings>
+        <setting name="project.name" value="Woo AI Assistant"/>
+        <setting name="project.version" value="1.0.0"/>
+        <setting name="project.copyright" value="© 2025 Claude Code Assistant"/>
+        <setting name="project.author" value="Claude Code Assistant"/>
+        <setting name="project.email" value="support@woo-ai-assistant.com"/>
+        <setting name="project.homepage" value="https://woo-ai-assistant.com"/>
+        <setting name="project.license" value="GPL-3.0-or-later"/>
+    </settings>
+    
+    <!-- Visibility settings -->
+    <settings>
+        <setting name="visibility" value="public,protected,private"/>
+    </settings>
+    
+    <!-- Markers (for TODO, FIXME, etc.) -->
+    <settings>
+        <setting name="markers.items" value="TODO,FIXME,XXX"/>
+    </settings>
+    
+    <!-- Enable parsing of interfaces and traits -->
+    <settings>
+        <setting name="parsers.enabled" value="true"/>
+    </settings>
+    
+    <!-- Custom namespace configuration -->
+    <settings>
+        <setting name="namespace.aliases" value="WooAiAssistant"/>
+    </settings>
+    
+    <!-- Error reporting level -->
+    <settings>
+        <setting name="logging.level" value="warn"/>
+    </settings>
+</phpdocumentor>

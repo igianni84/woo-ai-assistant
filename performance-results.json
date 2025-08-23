@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-08-23T15:22:53Z",
+  "project": "woo-ai-assistant",
+  "version": "1.0.0",
+  "environment": {
+    "php_version": "8.2.28",
+    "node_version": "v23.11.0",
+    "os": "Darwin",
+    "memory_limit": "128M"
+  },
+  "benchmarks": {
+    "memory_usage": {
+      "result": "0MB",
+      "status": "pass",
+      "details": "Under threshold"
+    },
+    "bundle_size": {
+      "result": "N/A",
+      "status": "skip",
+      "details": "Bundle not found"
+    },
+    "total_assets": {
+      "result": "68.52KB",
+      "status": "info",
+      "details": "Total assets size"
+    },
+    "database_queries": {
+      "result": "Clean",
+      "status": "pass",
+      "details": "No N+1 patterns"
+    },
+    "caching": {
+      "result": "       1 files",
+      "status": "pass",
+      "details": "Caching implemented"
+    },
+    "prepared_statements": {
+      "result": "Implemented",
+      "status": "pass",
+      "details": "Safe queries"
+    },
+    "load_time": {
+      "result": "N/A",
+      "status": "skip",
+      "details": "Measurement failed"
+    },
+    "test_coverage": {
+      "result": "N/A",
+      "status": "skip",
+      "details": "Tests failed or not found"
+    },
+    "js_linting": {
+      "result": "Issues",
+      "status": "warning",
+      "details": "Linting problems"
+    },
+    "js_performance": {
+      "result": "Issues detected",
+      "status": "warning",
+      "details": "Performance anti-patterns found"
+    },
+    "js_tests": {
+      "result": "Issues",
+      "status": "warning",
+      "details": "Test failures"
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "compilerOptions": {
+    // Target and Module Configuration
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+
+    // JSX Configuration
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+
+    // Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Module Detection
+    "moduleDetection": "force",
+
+    // Emit Configuration
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist/types",
+    "removeComments": true,
+    "noEmit": false,
+    "noEmitOnError": true,
+
+    // Interop Constraints
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    // Path Mapping (matching webpack aliases)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["widget-src/src/*"],
+      "@components/*": ["widget-src/src/components/*"],
+      "@hooks/*": ["widget-src/src/hooks/*"],
+      "@services/*": ["widget-src/src/services/*"],
+      "@utils/*": ["widget-src/src/utils/*"],
+      "@styles/*": ["widget-src/src/styles/*"],
+      "@types/*": ["widget-src/src/types/*"]
+    }
+  },
+
+  // Include patterns
+  "include": [
+    "widget-src/**/*",
+    "widget-src/**/*.json"
+  ],
+
+  // Exclude patterns
+  "exclude": [
+    "node_modules",
+    "dist",
+    "assets",
+    "coverage",
+    "**/*.test.{js,jsx,ts,tsx}",
+    "**/*.spec.{js,jsx,ts,tsx}",
+    "**/__tests__/**/*"
+  ],
+
+  // Type checking for JavaScript files
+  "compileOnSave": false,
+  
+  // TypeScript-ESLint Parser Options
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}

@@ -1,0 +1,385 @@
+/**
+ * Woo AI Assistant - Admin Styles
+ *
+ * Styles for WordPress admin interface pages including dashboard,
+ * settings, conversations log, and knowledge base management.
+ *
+ * @package WooAiAssistant
+ * @subpackage Assets
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Admin Layout & General Styles
+   ========================================================================== */
+
+.woo-ai-assistant-admin {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.woo-ai-assistant-header {
+    background: #0073aa;
+    color: white;
+    padding: 20px;
+    margin: 0 -20px 20px -22px;
+}
+
+.woo-ai-assistant-header h1 {
+    color: white;
+    font-size: 1.8em;
+    margin: 0;
+}
+
+.woo-ai-assistant-header .version {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+/* ==========================================================================
+   Navigation Tabs
+   ========================================================================== */
+
+.woo-ai-assistant-nav-tab-wrapper {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #c3c4c7;
+}
+
+.woo-ai-assistant-nav-tab {
+    display: inline-block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #646970;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.woo-ai-assistant-nav-tab:hover {
+    color: #0073aa;
+}
+
+.woo-ai-assistant-nav-tab.nav-tab-active {
+    color: #0073aa;
+    border-bottom-color: #0073aa;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Dashboard Widgets
+   ========================================================================== */
+
+.woo-ai-assistant-dashboard .dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.woo-ai-assistant-widget {
+    background: white;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.woo-ai-assistant-widget h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    color: #1d2327;
+}
+
+.woo-ai-assistant-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.woo-ai-assistant-stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #0073aa;
+}
+
+.woo-ai-assistant-stat-label {
+    color: #646970;
+    font-size: 0.9em;
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+
+.woo-ai-assistant-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.woo-ai-assistant-table th,
+.woo-ai-assistant-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.woo-ai-assistant-table th {
+    background: #f6f7f7;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.woo-ai-assistant-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+/* ==========================================================================
+   Forms & Settings
+   ========================================================================== */
+
+.woo-ai-assistant-form {
+    background: white;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.woo-ai-assistant-form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.woo-ai-assistant-form-row label {
+    flex: 0 0 200px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.woo-ai-assistant-form-row input,
+.woo-ai-assistant-form-row select,
+.woo-ai-assistant-form-row textarea {
+    flex: 1;
+    max-width: 400px;
+}
+
+.woo-ai-assistant-form-row .description {
+    flex: 1;
+    color: #646970;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.woo-ai-assistant-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.woo-ai-assistant-btn-primary {
+    background: #0073aa;
+    color: white;
+}
+
+.woo-ai-assistant-btn-primary:hover {
+    background: #005a87;
+    color: white;
+}
+
+.woo-ai-assistant-btn-secondary {
+    background: #f0f0f1;
+    color: #1d2327;
+    border: 1px solid #c3c4c7;
+}
+
+.woo-ai-assistant-btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.woo-ai-assistant-btn-danger {
+    background: #d63638;
+    color: white;
+}
+
+.woo-ai-assistant-btn-danger:hover {
+    background: #b32d2e;
+    color: white;
+}
+
+/* ==========================================================================
+   Status Indicators
+   ========================================================================== */
+
+.woo-ai-assistant-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.woo-ai-assistant-status.active {
+    background: #d1e7dd;
+    color: #0a3622;
+}
+
+.woo-ai-assistant-status.completed {
+    background: #cff4fc;
+    color: #055160;
+}
+
+.woo-ai-assistant-status.failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ==========================================================================
+   Progress Bars
+   ========================================================================== */
+
+.woo-ai-assistant-progress {
+    background: #f0f0f1;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.woo-ai-assistant-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #0073aa, #005a87);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.woo-ai-assistant-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* ==========================================================================
+   Notices & Alerts
+   ========================================================================== */
+
+.woo-ai-assistant-notice {
+    padding: 15px 20px;
+    border-left: 4px solid #0073aa;
+    background: white;
+    border-radius: 0 4px 4px 0;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.woo-ai-assistant-notice.notice-success {
+    border-left-color: #00a32a;
+}
+
+.woo-ai-assistant-notice.notice-warning {
+    border-left-color: #dba617;
+}
+
+.woo-ai-assistant-notice.notice-error {
+    border-left-color: #d63638;
+}
+
+.woo-ai-assistant-notice p {
+    margin: 0;
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+.woo-ai-assistant-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #646970;
+}
+
+.woo-ai-assistant-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f0f0f1;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: woo-ai-spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes woo-ai-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .woo-ai-assistant-form-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .woo-ai-assistant-form-row label {
+        flex: none;
+    }
+    
+    .woo-ai-assistant-form-row .description {
+        margin-left: 0;
+    }
+    
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   Dark Mode Support (for WordPress 5.7+)
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .woo-ai-assistant-admin {
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-assistant-widget {
+        background: #1d2327;
+        border-color: #3c434a;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-assistant-table {
+        background: #1d2327;
+        color: #c9c9c9;
+    }
+    
+    .woo-ai-assistant-table th {
+        background: #2c3338;
+        color: #c9c9c9;
+    }
+}

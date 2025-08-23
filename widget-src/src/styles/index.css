@@ -1,0 +1,277 @@
+/**
+ * Woo AI Assistant Widget Styles
+ * 
+ * Main stylesheet for the React chat widget with WordPress integration
+ * 
+ * @package WooAiAssistant
+ * @subpackage Styles
+ * @since 1.0.0
+ * @author Claude Code Assistant
+ */
+
+/* CSS Reset and Base Styles for Widget Isolation */
+.woo-ai-assistant-app,
+.woo-ai-assistant-app * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.woo-ai-assistant-app {
+  /* CSS Custom Properties (CSS Variables) */
+  --widget-primary-color: #007cba;
+  --widget-secondary-color: #f0f0f1;
+  --widget-text-color: #1e1e1e;
+  --widget-border-color: #dcdcde;
+  --widget-shadow-color: rgba(0, 0, 0, 0.1);
+  --widget-border-radius: 8px;
+  --widget-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --widget-font-size: 14px;
+  --widget-line-height: 1.5;
+  --widget-z-index: 999999;
+  
+  /* Animation variables */
+  --widget-transition-fast: 0.15s ease-out;
+  --widget-transition-normal: 0.25s ease-out;
+  --widget-transition-slow: 0.35s ease-out;
+  
+  /* Spacing scale */
+  --widget-space-xs: 4px;
+  --widget-space-sm: 8px;
+  --widget-space-md: 16px;
+  --widget-space-lg: 24px;
+  --widget-space-xl: 32px;
+  
+  /* Typography scale */
+  --widget-font-size-sm: 12px;
+  --widget-font-size-md: 14px;
+  --widget-font-size-lg: 16px;
+  --widget-font-size-xl: 18px;
+  
+  /* Widget positioning */
+  position: fixed;
+  z-index: var(--widget-z-index);
+  font-family: var(--widget-font-family);
+  font-size: var(--widget-font-size);
+  line-height: var(--widget-line-height);
+  color: var(--widget-text-color);
+  
+  /* Prevent interference with page styles */
+  all: initial;
+  font-family: var(--widget-font-family) !important;
+}
+
+/* Widget Positioning */
+.woo-ai-assistant-app[data-position="bottom-right"] {
+  bottom: var(--widget-space-lg);
+  right: var(--widget-space-lg);
+}
+
+.woo-ai-assistant-app[data-position="bottom-left"] {
+  bottom: var(--widget-space-lg);
+  left: var(--widget-space-lg);
+}
+
+.woo-ai-assistant-app[data-position="top-right"] {
+  top: var(--widget-space-lg);
+  right: var(--widget-space-lg);
+}
+
+.woo-ai-assistant-app[data-position="top-left"] {
+  top: var(--widget-space-lg);
+  left: var(--widget-space-lg);
+}
+
+/* Responsive positioning adjustments */
+@media (max-width: 768px) {
+  .woo-ai-assistant-app {
+    bottom: var(--widget-space-md) !important;
+    right: var(--widget-space-md) !important;
+    left: var(--widget-space-md) !important;
+    top: auto !important;
+  }
+}
+
+/* Dark Theme */
+.woo-ai-assistant-app.dark {
+  --widget-primary-color: #3582c4;
+  --widget-secondary-color: #2c3e50;
+  --widget-text-color: #ffffff;
+  --widget-border-color: #4a5568;
+  --widget-shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Auto Theme (follows system preference) */
+@media (prefers-color-scheme: dark) {
+  .woo-ai-assistant-app.auto {
+    --widget-primary-color: #3582c4;
+    --widget-secondary-color: #2c3e50;
+    --widget-text-color: #ffffff;
+    --widget-border-color: #4a5568;
+    --widget-shadow-color: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Error Styles */
+.woo-ai-widget-error {
+  position: fixed;
+  bottom: var(--widget-space-lg);
+  right: var(--widget-space-lg);
+  max-width: 320px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: var(--widget-border-radius);
+  padding: var(--widget-space-md);
+  font-family: var(--widget-font-family);
+  font-size: var(--widget-font-size);
+  z-index: calc(var(--widget-z-index) + 1);
+  box-shadow: 0 4px 12px var(--widget-shadow-color);
+}
+
+.woo-ai-widget-error .error-content h4 {
+  margin: 0 0 var(--widget-space-sm) 0;
+  font-size: var(--widget-font-size-lg);
+  font-weight: 600;
+}
+
+.woo-ai-widget-error .error-content p {
+  margin: 0 0 var(--widget-space-sm) 0;
+  line-height: var(--widget-line-height);
+}
+
+.woo-ai-widget-error details {
+  margin-top: var(--widget-space-sm);
+  font-size: var(--widget-font-size-sm);
+}
+
+.woo-ai-widget-error summary {
+  cursor: pointer;
+  padding: var(--widget-space-xs);
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--widget-space-xs);
+}
+
+.woo-ai-widget-error pre {
+  margin-top: var(--widget-space-xs);
+  padding: var(--widget-space-sm);
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--widget-space-xs);
+  font-size: var(--widget-font-size-sm);
+  font-family: 'Courier New', Monaco, 'Lucida Console', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Loading State */
+.woo-ai-assistant-app[data-loaded="false"] {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity var(--widget-transition-normal), 
+              transform var(--widget-transition-normal);
+}
+
+.woo-ai-assistant-app[data-loaded="true"] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--widget-transition-normal), 
+              transform var(--widget-transition-normal);
+}
+
+/* Focus Management for Accessibility */
+.woo-ai-assistant-app *:focus {
+  outline: 2px solid var(--widget-primary-color);
+  outline-offset: 2px;
+}
+
+.woo-ai-assistant-app button:focus,
+.woo-ai-assistant-app input:focus,
+.woo-ai-assistant-app textarea:focus {
+  outline: 2px solid var(--widget-primary-color);
+  outline-offset: -2px;
+}
+
+/* Screen Reader Only Content */
+.woo-ai-assistant-app .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .woo-ai-assistant-app {
+    --widget-border-color: #000000;
+    --widget-shadow-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .woo-ai-assistant-app button,
+  .woo-ai-assistant-app input,
+  .woo-ai-assistant-app textarea {
+    border: 2px solid var(--widget-border-color) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-assistant-app,
+  .woo-ai-assistant-app *,
+  .woo-ai-assistant-app *::before,
+  .woo-ai-assistant-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print Styles (hide widget when printing) */
+@media print {
+  .woo-ai-assistant-app {
+    display: none !important;
+  }
+}
+
+/* RTL Language Support */
+.woo-ai-assistant-app[dir="rtl"] {
+  direction: rtl;
+}
+
+.woo-ai-assistant-app[dir="rtl"][data-position="bottom-right"] {
+  bottom: var(--widget-space-lg);
+  left: var(--widget-space-lg);
+  right: auto;
+}
+
+.woo-ai-assistant-app[dir="rtl"][data-position="bottom-left"] {
+  bottom: var(--widget-space-lg);
+  right: var(--widget-space-lg);
+  left: auto;
+}
+
+/* WordPress Admin Bar Adjustment */
+body.admin-bar .woo-ai-assistant-app[data-position*="top"] {
+  top: calc(var(--widget-space-lg) + 32px);
+}
+
+@media screen and (max-width: 782px) {
+  body.admin-bar .woo-ai-assistant-app[data-position*="top"] {
+    top: calc(var(--widget-space-lg) + 46px);
+  }
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 480px) {
+  .woo-ai-assistant-app {
+    --widget-space-lg: 12px;
+    --widget-space-md: 8px;
+  }
+}

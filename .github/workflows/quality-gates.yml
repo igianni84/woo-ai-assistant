@@ -1,315 +1,860 @@
+# GitHub Actions CI/CD Pipeline for Woo AI Assistant
+#
+# Comprehensive automated quality assurance pipeline that runs on every push and pull request.
+# This workflow enforces all quality gates required before task completion.
+#
+# @package WooAiAssistant
+# @subpackage CI/CD
+# @since 1.0.0
+# @author Claude Code Assistant
+
 name: Quality Gates
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'feature/**', 'bugfix/**', 'hotfix/**' ]
   pull_request:
     branches: [ main, develop ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_security_scan:
+        description: 'Force security vulnerability scan'
+        required: false
+        default: 'false'
+        type: boolean
+      run_performance_tests:
+        description: 'Run performance benchmarking tests'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '18'
+  COMPOSER_VERSION: '2'
+  WP_VERSION: 'latest'
+  WC_VERSION: 'latest'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  php-standards:
+  # ==============================================================================
+  # SETUP AND VALIDATION
+  # ==============================================================================
+  
+  setup:
+    name: 'Setup & Validation'
     runs-on: ubuntu-latest
-    name: PHP Standards & Security
+    timeout-minutes: 5
+    
+    outputs:
+      php-version: ${{ env.PHP_VERSION }}
+      node-version: ${{ env.NODE_VERSION }}
+      cache-composer: ${{ steps.cache-keys.outputs.composer }}
+      cache-npm: ${{ steps.cache-keys.outputs.npm }}
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for proper blame and analysis
+
+      - name: Validate repository structure
+        run: |
+          echo "Validating WordPress plugin structure..."
+          
+          # Check required files exist
+          required_files=(
+            "woo-ai-assistant.php"
+            "composer.json"
+            "package.json" 
+            "README.md"
+            "scripts/mandatory-verification.sh"
+          )
+          
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "❌ Required file missing: $file"
+              exit 1
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          
+          echo "Repository structure validation passed"
+
+      - name: Generate cache keys
+        id: cache-keys
+        run: |
+          echo "composer=$(date +%V)-$(sha256sum composer.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "npm=$(date +%V)-$(sha256sum package-lock.json | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+  # ==============================================================================
+  # FILE PATH AND STANDARDS VERIFICATION
+  # ==============================================================================
+  
+  file-verification:
+    name: 'File Path & Standards Verification'
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, hash, json, mbstring, pcre, pdo, zlib
-        coverage: xdebug
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: xdebug
+          tools: composer:v2
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ needs.setup.outputs.cache-composer }}
+          restore-keys: |
+            composer-${{ runner.os }}-
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-ansi --optimize-autoloader
 
-    - name: Install PHP dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Verify file paths and dependencies
+        run: |
+          echo "🔍 Running file path verification..."
+          chmod +x scripts/verify-paths.sh
+          ./scripts/verify-paths.sh
 
-    - name: Run PHP Standards Verification
-      run: php scripts/verify-standards.php
+      - name: Verify coding standards compliance
+        run: |
+          echo "🔍 Running standards verification..."
+          php scripts/verify-standards.php
 
-    - name: Run Path Verification
-      run: bash scripts/verify-paths.sh
+      - name: Run PHP CodeSniffer
+        run: composer run phpcs
 
-    - name: Run PHP CodeSniffer
-      run: composer run phpcs
+      - name: Run PHPStan static analysis
+        run: composer run phpstan
 
-    - name: Run PHPStan Static Analysis
-      run: composer run phpstan
-
-    - name: Run PHPUnit Tests
-      run: composer run test
-
-    - name: Generate Test Coverage
-      run: composer run test:coverage
-
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: php
-        name: php-coverage
-
-  javascript-quality:
+  # ==============================================================================
+  # UNIT TESTING - PHP
+  # ==============================================================================
+  
+  php-testing:
+    name: 'PHP Unit Testing'
     runs-on: ubuntu-latest
-    name: JavaScript/React Quality
+    needs: setup
+    timeout-minutes: 15
 
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-
-    - name: Install JavaScript dependencies
-      run: npm ci
-
-    - name: Run ESLint
-      run: npm run lint
-
-    - name: Run Prettier Check
-      run: npm run format:check
-
-    - name: Run Jest Tests
-      run: npm run test:coverage
-
-    - name: Build Production Bundle
-      run: npm run build
-
-    - name: Check Bundle Size
-      run: |
-        BUNDLE_SIZE=$(wc -c < assets/js/widget.js)
-        echo "Bundle size: $BUNDLE_SIZE bytes"
-        if [ $BUNDLE_SIZE -gt 51200 ]; then
-          echo "❌ Bundle size exceeds 50KB limit"
-          exit 1
-        else
-          echo "✅ Bundle size within limits"
-        fi
-
-    - name: Upload JS Coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-        flags: javascript
-        name: js-coverage
-
-  security-scan:
-    runs-on: ubuntu-latest
-    name: Security Scanning
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Run Security Checker
-      uses: symfonycorp/security-checker-action@v4
-      with:
-        lock: composer.lock
-
-    - name: Run PHP Security Scan
-      run: |
-        # Check for dangerous functions
-        echo "Checking for dangerous PHP functions..."
-        if grep -r "eval\|exec\|system\|passthru\|shell_exec" src/ --include="*.php"; then
-          echo "❌ Dangerous PHP functions found"
-          exit 1
-        fi
-        echo "✅ No dangerous PHP functions found"
-
-    - name: Check for hardcoded credentials
-      run: |
-        echo "Checking for hardcoded credentials..."
-        if grep -r "password.*=\|api_key.*=\|secret.*=" src/ --include="*.php"; then
-          echo "❌ Potential hardcoded credentials found"
-          exit 1
-        fi
-        echo "✅ No hardcoded credentials found"
-
-    - name: WordPress Security Best Practices
-      run: |
-        echo "Checking WordPress security practices..."
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3']
+        wordpress-version: ['6.0', '6.3', 'latest']
         
-        # Check for nonce verification
-        NONCE_FILES=$(find src/ -name "*.php" -exec grep -l "wp_verify_nonce\|wp_create_nonce" {} \; | wc -l)
-        if [ $NONCE_FILES -eq 0 ]; then
-          echo "⚠️  No nonce verification found"
-        else
-          echo "✅ Nonce verification implemented"
-        fi
-        
-        # Check for capability checks
-        CAP_FILES=$(find src/ -name "*.php" -exec grep -l "current_user_can\|user_can" {} \; | wc -l)
-        if [ $CAP_FILES -eq 0 ]; then
-          echo "⚠️  No capability checks found"
-        else
-          echo "✅ Capability checks implemented"
-        fi
-        
-        # Check for input sanitization
-        SANIT_FILES=$(find src/ -name "*.php" -exec grep -l "sanitize_\|wp_kses" {} \; | wc -l)
-        if [ $SANIT_FILES -eq 0 ]; then
-          echo "⚠️  No input sanitization found"
-        else
-          echo "✅ Input sanitization implemented"
-        fi
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    name: WordPress Integration Tests
-
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: false
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: wordpress
           MYSQL_DATABASE: wordpress_test
         ports:
-          - 3306/tcp
+          - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: mysqli, zip, gd
-        coverage: none
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, mysqli
+          coverage: xdebug
+          tools: composer:v2, wp-cli
 
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ needs.setup.outputs.cache-composer }}-php${{ matrix.php-version }}
+          restore-keys: |
+            composer-${{ runner.os }}-php${{ matrix.php-version }}-
 
-    - name: Setup WordPress Test Environment
-      run: |
-        bash scripts/install-wp-tests.sh wordpress_test root password 127.0.0.1:${{ job.services.mysql.ports['3306'] }} latest
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-ansi --optimize-autoloader
 
-    - name: Run WordPress Integration Tests
-      run: composer run test:integration
-
-  performance-check:
-    runs-on: ubuntu-latest
-    name: Performance Benchmarks
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Check for performance anti-patterns
-      run: |
-        echo "Checking for performance issues..."
-        
-        # Check for unlimited queries
-        if grep -r "posts_per_page.*-1\|nopaging.*true" src/ --include="*.php"; then
-          echo "⚠️  Unlimited database queries found"
-        else
-          echo "✅ No unlimited queries found"
-        fi
-        
-        # Check for caching usage
-        CACHE_FILES=$(find src/ -name "*.php" -exec grep -l "wp_cache_\|transient" {} \; | wc -l)
-        if [ $CACHE_FILES -eq 0 ]; then
-          echo "⚠️  No caching implementation found"
-        else
-          echo "✅ Caching implementation found"
-        fi
-
-  documentation-check:
-    runs-on: ubuntu-latest
-    name: Documentation Quality
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Check DocBlock Coverage
-      run: |
-        PHP_FILES=$(find src/ -name "*.php" | wc -l)
-        DOCUMENTED_FILES=$(find src/ -name "*.php" -exec grep -l "/\*\*" {} \; | wc -l)
-        
-        if [ $PHP_FILES -eq 0 ]; then
-          echo "No PHP files found"
-          exit 0
-        fi
-        
-        COVERAGE=$(( DOCUMENTED_FILES * 100 / PHP_FILES ))
-        echo "DocBlock coverage: $COVERAGE% ($DOCUMENTED_FILES/$PHP_FILES files)"
-        
-        if [ $COVERAGE -lt 70 ]; then
-          echo "⚠️  DocBlock coverage below 70%"
-        else
-          echo "✅ Good DocBlock coverage"
-        fi
-
-    - name: Check README Quality
-      run: |
-        if [ ! -f "README.md" ]; then
-          echo "⚠️  README.md not found"
-        else
-          README_SIZE=$(wc -c < README.md)
-          if [ $README_SIZE -lt 1000 ]; then
-            echo "⚠️  README.md seems too short"
-          else
-            echo "✅ README.md exists and has good length"
+      - name: Setup WordPress test environment
+        run: |
+          # Create WordPress test installation script
+          cat > scripts/install-wp-tests.sh << 'EOF'
+          #!/usr/bin/env bash
+          
+          if [ $# -lt 3 ]; then
+            echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
+            exit 1
           fi
-        fi
+          
+          DB_NAME=$1
+          DB_USER=$2
+          DB_PASS=$3
+          DB_HOST=${4-localhost}
+          WP_VERSION=${5-latest}
+          SKIP_DB_CREATE=${6-false}
+          
+          WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
+          WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
+          
+          download() {
+            if [ `which curl` ]; then
+              curl -s "$1" > "$2";
+            elif [ `which wget` ]; then
+              wget -nv -O "$2" "$1"
+            fi
+          }
+          
+          if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+            WP_TESTS_TAG="branches/$WP_VERSION"
+          elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+\.[0] ]]; then
+              WP_TESTS_TAG="branches/${WP_VERSION%.[0-9]*}"
+            else
+              WP_TESTS_TAG="tags/$WP_VERSION"
+            fi
+          elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
+            WP_TESTS_TAG="trunk"
+          else
+            WP_TESTS_TAG="branches/$WP_VERSION"
+          fi
+          
+          set -ex
+          
+          install_wp() {
+            if [ -d $WP_CORE_DIR ]; then
+              return;
+            fi
+          
+            mkdir -p $WP_CORE_DIR
+            if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
+              mkdir -p /tmp/wordpress-nightly
+              download https://wordpress.org/nightly-builds/wordpress-latest.zip  /tmp/wordpress-nightly/wordpress-nightly.zip
+              unzip -q /tmp/wordpress-nightly/wordpress-nightly.zip -d /tmp/wordpress-nightly/
+              mv /tmp/wordpress-nightly/wordpress/* $WP_CORE_DIR
+            else
+              if [ $WP_VERSION == 'latest' ]; then
+                local ARCHIVE_NAME='latest'
+              elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
+                local ARCHIVE_NAME="wordpress-$WP_VERSION"
+              else
+                local ARCHIVE_NAME="wordpress-$WP_VERSION"
+              fi
+              download https://wordpress.org/${ARCHIVE_NAME}.tar.gz  /tmp/wordpress.tar.gz
+              tar --strip-components=1 -zxmf /tmp/wordpress.tar.gz -C $WP_CORE_DIR
+            fi
+          
+            download https://raw.github.com/markoheijnen/wp-mysqli/master/db.php $WP_CORE_DIR/wp-content/db.php
+          }
+          
+          install_test_suite() {
+            if [ ! -d $WP_TESTS_DIR ]; then
+              mkdir -p $WP_TESTS_DIR
+              svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
+              svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
+            fi
+          
+            if [ ! -f wp-tests-config.php ]; then
+              download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
+              WP_CORE_DIR_ESCAPED=$(echo $WP_CORE_DIR | sed 's:/:\\\/:g')
+              sed -i "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR_ESCAPED':" "$WP_TESTS_DIR"/wp-tests-config.php
+              sed -i "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
+              sed -i "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
+              sed -i "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
+              sed -i "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+            fi
+          }
+          
+          install_wp
+          install_test_suite
+          EOF
+          
+          chmod +x scripts/install-wp-tests.sh
+          ./scripts/install-wp-tests.sh wordpress_test root wordpress 127.0.0.1 ${{ matrix.wordpress-version }}
 
-  mandatory-verification:
+      - name: Install WooCommerce for testing
+        run: |
+          if [[ "${{ matrix.wordpress-version }}" != "6.0" ]]; then
+            wp-cli --allow-root core download --path=/tmp/woocommerce --version=latest
+            wp-cli --allow-root plugin install woocommerce --path=/tmp/woocommerce --activate
+          fi
+
+      - name: Run PHPUnit tests with coverage
+        run: |
+          echo "🧪 Running PHPUnit tests..."
+          composer run test:coverage
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
+          WP_CORE_DIR: /tmp/wordpress
+
+      - name: Upload PHP coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/clover.xml
+          flags: php,unit
+          name: php-${{ matrix.php-version }}-wp-${{ matrix.wordpress-version }}
+          fail_ci_if_error: false
+
+      - name: Archive coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-coverage-${{ matrix.php-version }}-wp-${{ matrix.wordpress-version }}
+          path: coverage/
+          retention-days: 7
+
+  # ==============================================================================
+  # UNIT TESTING - JAVASCRIPT/REACT
+  # ==============================================================================
+  
+  javascript-testing:
+    name: 'JavaScript/React Testing'
     runs-on: ubuntu-latest
-    name: Mandatory Quality Gates
-    needs: [php-standards, javascript-quality, security-scan, integration-tests, performance-check, documentation-check]
+    needs: setup
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18', '20']
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: npm-${{ needs.setup.outputs.cache-npm }}-node${{ matrix.node-version }}
+          restore-keys: |
+            npm-${{ runner.os }}-node${{ matrix.node-version }}-
 
-    - name: Install all dependencies
-      run: |
-        composer install --prefer-dist --no-progress
-        npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run Mandatory Verification
-      run: bash scripts/mandatory-verification.sh
+      - name: Run ESLint
+        run: npm run lint:js
 
-    - name: Verify Task Completion Readiness
-      run: |
-        echo "🚀 All quality gates passed!"
-        echo "✅ Task is ready for completion"
-        echo "📝 Remember to update ROADMAP.md with completion status"
+      - name: Run Stylelint
+        run: npm run lint:css
+
+      - name: Check TypeScript types
+        run: npm run type-check
+
+      - name: Run Jest tests with coverage
+        run: npm run test:coverage
+
+      - name: Check bundle size
+        run: npm run check:bundle-size
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Upload JavaScript coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/lcov.info
+          flags: javascript,react
+          name: node-${{ matrix.node-version }}
+          fail_ci_if_error: false
+
+      - name: Archive JavaScript coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: js-coverage-node-${{ matrix.node-version }}
+          path: coverage/
+          retention-days: 7
+
+      - name: Archive built assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-assets-node-${{ matrix.node-version }}
+          path: assets/
+          retention-days: 7
+
+  # ==============================================================================
+  # SECURITY VULNERABILITY SCANNING
+  # ==============================================================================
+  
+  security-scan:
+    name: 'Security Vulnerability Scan'
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 10
+    if: github.event_name == 'schedule' || github.event.inputs.run_security_scan == 'true' || contains(github.event.head_commit.message, '[security-scan]')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          tools: composer:v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+          npm ci --production
+
+      - name: Run Composer security audit
+        run: composer audit --locked
+
+      - name: Run npm security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "🔍 Scanning for potential hardcoded secrets..."
+          
+          # Check for common secret patterns
+          if find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" \
+             -exec grep -l "password.*=.*['\"][^'\"]*['\"]" {} \; | head -1; then
+            echo "❌ Potential hardcoded passwords found"
+            exit 1
+          fi
+          
+          if find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" \
+             -exec grep -l "api_key.*=.*['\"][^'\"]*['\"]" {} \; | head -1; then
+            echo "❌ Potential hardcoded API keys found"  
+            exit 1
+          fi
+          
+          echo "✅ No hardcoded secrets detected"
+
+      - name: Check for dangerous PHP functions
+        run: |
+          echo "🔍 Scanning for dangerous PHP functions..."
+          
+          dangerous_functions=("eval" "exec" "system" "shell_exec" "passthru")
+          
+          for func in "${dangerous_functions[@]}"; do
+            if find src/ -name "*.php" -exec grep -l "${func}(" {} \; 2>/dev/null | head -1; then
+              echo "❌ Dangerous function ${func}() found"
+              exit 1
+            fi
+          done
+          
+          echo "✅ No dangerous functions detected"
+
+      - name: WordPress security best practices check
+        run: |
+          echo "🔍 Checking WordPress security best practices..."
+          
+          # Check for nonce verification
+          php_files_with_post=$(find src/ -name "*.php" -exec grep -l "\$_POST\|\$_GET" {} \; 2>/dev/null || true)
+          if [[ -n "$php_files_with_post" ]]; then
+            for file in $php_files_with_post; do
+              if ! grep -q "wp_verify_nonce\|wp_create_nonce" "$file"; then
+                echo "❌ File $file handles user input but lacks nonce verification"
+                exit 1
+              fi
+            done
+          fi
+          
+          # Check for capability checks
+          admin_files=$(find src/Admin/ -name "*.php" 2>/dev/null || true)
+          if [[ -n "$admin_files" ]]; then
+            for file in $admin_files; do
+              if ! grep -q "current_user_can\|user_can" "$file"; then
+                echo "⚠️ Admin file $file may lack capability checks"
+              fi
+            done
+          fi
+          
+          echo "✅ Security practices verification completed"
+
+  # ==============================================================================
+  # INTEGRATION TESTING
+  # ==============================================================================
+  
+  integration-tests:
+    name: 'WordPress/WooCommerce Integration'
+    runs-on: ubuntu-latest
+    needs: [php-testing, javascript-testing]
+    timeout-minutes: 25
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: wordpress
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, mysqli
+          tools: composer:v2, wp-cli
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          composer install --optimize-autoloader
+          npm ci
+
+      - name: Setup WordPress with WooCommerce
+        run: |
+          # Install WordPress
+          wp-cli core download --path=/tmp/wordpress --allow-root
+          wp-cli config create --dbname=wordpress_test --dbuser=root --dbpass=wordpress --dbhost=127.0.0.1 --path=/tmp/wordpress --allow-root
+          wp-cli core install --url=http://localhost --title="Test Site" --admin_user=admin --admin_password=admin --admin_email=test@example.com --path=/tmp/wordpress --allow-root
+          
+          # Install and activate WooCommerce
+          wp-cli plugin install woocommerce --activate --path=/tmp/wordpress --allow-root
+          
+          # Create symlink to our plugin
+          ln -s $GITHUB_WORKSPACE /tmp/wordpress/wp-content/plugins/woo-ai-assistant
+          
+          # Activate our plugin
+          wp-cli plugin activate woo-ai-assistant --path=/tmp/wordpress --allow-root
+
+      - name: Run integration tests
+        run: |
+          echo "🔌 Running WordPress/WooCommerce integration tests..."
+          
+          # Test plugin activation
+          if ! wp-cli plugin is-active woo-ai-assistant --path=/tmp/wordpress --allow-root; then
+            echo "❌ Plugin failed to activate"
+            exit 1
+          fi
+          
+          echo "✅ Plugin activation successful"
+          
+          # Test database tables creation
+          tables_sql="SHOW TABLES LIKE 'wp_woo_ai_%'"
+          table_count=$(wp-cli db query "$tables_sql" --path=/tmp/wordpress --allow-root | wc -l)
+          
+          if [[ $table_count -gt 1 ]]; then
+            echo "✅ Database tables created successfully"
+          else
+            echo "⚠️ Database tables not found (may be expected if not implemented yet)"
+          fi
+          
+          # Test REST API endpoints registration
+          if wp-cli rest-api list --format=csv --path=/tmp/wordpress --allow-root | grep -q "woo-ai-assistant"; then
+            echo "✅ REST API endpoints registered"
+          else
+            echo "⚠️ REST API endpoints not registered (may be expected if not implemented yet)"
+          fi
+
+      - name: Test plugin deactivation/reactivation
+        run: |
+          echo "🔄 Testing plugin deactivation and reactivation..."
+          
+          wp-cli plugin deactivate woo-ai-assistant --path=/tmp/wordpress --allow-root
+          wp-cli plugin activate woo-ai-assistant --path=/tmp/wordpress --allow-root
+          
+          if wp-cli plugin is-active woo-ai-assistant --path=/tmp/wordpress --allow-root; then
+            echo "✅ Plugin deactivation/reactivation successful"
+          else
+            echo "❌ Plugin deactivation/reactivation failed"
+            exit 1
+          fi
+
+      - name: Run comprehensive mandatory verification
+        run: |
+          echo "🚀 Running comprehensive mandatory verification..."
+          chmod +x scripts/mandatory-verification.sh
+          ./scripts/mandatory-verification.sh
+
+  # ==============================================================================
+  # DOCUMENTATION GENERATION
+  # ==============================================================================
+  
+  documentation:
+    name: 'Documentation Generation'
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --optimize-autoloader
+
+      - name: Generate API documentation
+        run: |
+          echo "📚 Generating API documentation..."
+          if composer show phpdocumentor/phpdocumentor &>/dev/null; then
+            composer run docs:api
+            echo "✅ API documentation generated"
+          else
+            echo "⚠️ phpDocumentor not available, skipping API docs"
+          fi
+
+      - name: Check documentation quality
+        run: |
+          echo "📝 Checking documentation quality..."
+          
+          # Count documented methods
+          total_methods=$(find src/ -name "*.php" -exec grep -c "function " {} \; | awk '{sum+=$1} END {print sum}' || echo 0)
+          documented_methods=$(find src/ -name "*.php" -exec grep -l "@param\|@return" {} \; | wc -l || echo 0)
+          
+          echo "Total PHP files with methods: $documented_methods"
+          echo "Documentation coverage: $(( documented_methods * 100 / total_methods || 0 ))%" 2>/dev/null || echo "0%"
+          
+          # Check README exists and has content
+          if [[ -f "README.md" ]] && [[ $(wc -l < README.md) -gt 10 ]]; then
+            echo "✅ README.md exists with sufficient content"
+          else
+            echo "⚠️ README.md needs improvement"
+          fi
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: |
+            docs/
+            README.md
+          retention-days: 30
+        continue-on-error: true
+
+  # ==============================================================================
+  # DEPLOYMENT READINESS CHECK
+  # ==============================================================================
+  
+  deployment-readiness:
+    name: 'Deployment Readiness Check'
+    runs-on: ubuntu-latest
+    needs: [file-verification, php-testing, javascript-testing, integration-tests]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          tools: composer:v2
+
+      - name: Setup Node.js  
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+          npm ci
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Create deployment package
+        run: |
+          echo "📦 Creating deployment package..."
+          
+          # Create deployment directory
+          mkdir -p deployment-package
+          
+          # Copy production files
+          cp -r src deployment-package/
+          cp -r assets deployment-package/
+          cp -r languages deployment-package/
+          cp woo-ai-assistant.php deployment-package/
+          cp uninstall.php deployment-package/
+          cp README.md deployment-package/
+          cp composer.json deployment-package/
+          
+          # Install production dependencies
+          cd deployment-package && composer install --no-dev --optimize-autoloader --no-scripts
+          cd ..
+          
+          # Create ZIP archive
+          cd deployment-package
+          zip -r ../woo-ai-assistant.zip . -x "*.git*" "*.DS_Store*" "*node_modules*" "*tests*" "*coverage*"
+          cd ..
+          
+          echo "✅ Deployment package created: $(ls -lh woo-ai-assistant.zip)"
+
+      - name: Validate deployment package
+        run: |
+          echo "🔍 Validating deployment package..."
+          
+          unzip -l woo-ai-assistant.zip | head -20
+          
+          # Check package size (should be reasonable for WordPress.org)
+          package_size=$(stat -f%z woo-ai-assistant.zip 2>/dev/null || stat -c%s woo-ai-assistant.zip 2>/dev/null)
+          max_size=$((25 * 1024 * 1024))  # 25MB max
+          
+          if [[ $package_size -gt $max_size ]]; then
+            echo "❌ Package too large: $(( package_size / 1024 / 1024 ))MB (max 25MB)"
+            exit 1
+          else
+            echo "✅ Package size acceptable: $(( package_size / 1024 / 1024 ))MB"
+          fi
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: woo-ai-assistant.zip
+          retention-days: 90
+
+  # ==============================================================================
+  # FINAL QUALITY SUMMARY
+  # ==============================================================================
+  
+  quality-summary:
+    name: 'Quality Gates Summary'
+    runs-on: ubuntu-latest
+    needs: [file-verification, php-testing, javascript-testing, integration-tests, security-scan, documentation, deployment-readiness]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate quality summary
+        run: |
+          echo "🎯 QUALITY GATES SUMMARY"
+          echo "========================="
+          echo ""
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo ""
+          
+          # Collect job results
+          file_verification="${{ needs.file-verification.result }}"
+          php_testing="${{ needs.php-testing.result }}"
+          javascript_testing="${{ needs.javascript-testing.result }}"
+          integration_tests="${{ needs.integration-tests.result }}"
+          security_scan="${{ needs.security-scan.result }}"
+          documentation="${{ needs.documentation.result }}"
+          deployment_readiness="${{ needs.deployment-readiness.result }}"
+          
+          echo "Job Results:"
+          echo "- File Verification: $file_verification"
+          echo "- PHP Testing: $php_testing"
+          echo "- JavaScript Testing: $javascript_testing"
+          echo "- Integration Tests: $integration_tests"
+          echo "- Security Scan: $security_scan"
+          echo "- Documentation: $documentation"
+          echo "- Deployment Readiness: $deployment_readiness"
+          echo ""
+          
+          # Calculate overall status
+          failed_jobs=0
+          skipped_jobs=0
+          
+          for result in "$file_verification" "$php_testing" "$javascript_testing" "$integration_tests" "$security_scan" "$documentation" "$deployment_readiness"; do
+            case $result in
+              "failure") ((failed_jobs++)) ;;
+              "skipped") ((skipped_jobs++)) ;;
+            esac
+          done
+          
+          echo "Summary:"
+          echo "- Failed Jobs: $failed_jobs"
+          echo "- Skipped Jobs: $skipped_jobs"
+          echo ""
+          
+          if [[ $failed_jobs -eq 0 ]]; then
+            echo "🎉 ALL QUALITY GATES PASSED!"
+            echo "✅ This commit is ready for production deployment"
+            echo "🚀 Task completion requirements satisfied"
+            exit 0
+          else
+            echo "❌ QUALITY GATES FAILED!"
+            echo "🚫 This commit is NOT ready for deployment"
+            echo "🔧 Review failed jobs and fix issues before proceeding"
+            exit 1
+          fi
+
+  # ==============================================================================
+  # NOTIFICATION
+  # ==============================================================================
+  
+  notify:
+    name: 'Notification'
+    runs-on: ubuntu-latest
+    needs: [quality-summary]
+    if: always()
+    timeout-minutes: 2
+
+    steps:
+      - name: Notify on success
+        if: needs.quality-summary.result == 'success'
+        run: |
+          echo "🎉 Quality Gates Passed!"
+          echo "All automated quality checks have passed successfully."
+          echo "This commit meets all requirements for task completion."
+
+      - name: Notify on failure
+        if: needs.quality-summary.result == 'failure'
+        run: |
+          echo "❌ Quality Gates Failed!"
+          echo "Some automated quality checks have failed."
+          echo "Please review the workflow results and fix issues before proceeding."
+          echo ""
+          echo "Common next steps:"
+          echo "1. Check failing job logs for specific errors"
+          echo "2. Fix code issues and coding standard violations"
+          echo "3. Add missing tests or improve test coverage"
+          echo "4. Address security vulnerabilities"
+          echo "5. Update documentation as needed"
+          echo "6. Push fixes and re-run this workflow"

@@ -40,6 +40,140 @@ For **EVERY** task you perform on this project, you **MUST**:
 - **File tracking:** Update the "File Coverage Checklist" section when files are created
 - **Bug tracking:** Log any bugs discovered in the Bug Tracker section
 
+## 🤖 SPECIALIZED AGENTS WORKFLOW
+
+> **CRITICAL:** This project uses specialized AI agents for different development tasks. You MUST use the correct agent for each type of work.
+
+### 🎯 Agent Selection Rules
+
+#### **wp-backend-developer** 🔧
+**Use for:** All PHP backend development and WordPress/WooCommerce integration
+
+**Trigger Keywords:** PHP class, WooCommerce, WordPress hooks, database, PSR-4, backend, API endpoint, REST controller
+**File Extensions:** `.php` files in `src/` directory
+**Example Tasks:**
+- Task 0.1: Plugin Skeleton (Main.php, Activator.php, etc.)
+- Task 1.x: Core Infrastructure (AdminMenu.php, RestController.php, Database schema)
+- Task 2.x: Knowledge Base Core (Scanner.php, Indexer.php, VectorManager.php, AIManager.php)
+- Task 3.x: Server Integration (IntermediateServerClient.php, LicenseManager.php)
+- Task 5.x: Chat Logic & AI (ConversationHandler.php, ChatEndpoint.php)
+- Task 6.x-8.x: Advanced Features (CouponHandler.php, ProactiveTriggers.php, etc.)
+
+**Always use when:**
+- Creating or modifying PHP classes
+- Implementing WordPress hooks and filters
+- Working with WooCommerce integration
+- Database operations and schema changes
+- REST API endpoint development
+
+#### **react-frontend-specialist** ⚛️
+**Use for:** All React frontend development for the chat widget
+
+**Trigger Keywords:** React, widget, frontend, JavaScript, chat interface, components, hooks
+**File Extensions:** `.js`, `.jsx` files in `widget-src/` directory
+**Example Tasks:**
+- Task 4.1: React Widget Base (App.js, index.js)
+- Task 4.2: Chat Components (ChatWindow.js, Message.js)
+- Task 4.3: API Service Layer (ApiService.js)
+- Task 4.4: Product Cards & Actions (ProductCard.js, QuickAction.js)
+- Task 4.5: Widget Loader (WidgetLoader.php integration with React)
+
+**Always use when:**
+- Creating or modifying React components
+- Managing state and hooks (useChat.js)
+- Implementing chat UI and user interactions
+- API service layer for frontend-backend communication
+- Widget styling and responsive design
+
+#### **qa-testing-specialist** ✅
+**Use for:** MANDATORY quality assurance before completing ANY task
+
+**Trigger Keywords:** completed, finished, quality gates, testing, verification, standards
+**Required for:** EVERY SINGLE TASK before marking as completed
+**Example Usage:**
+- After implementing KnowledgeBaseScanner class
+- Before marking any task as "completed" in roadmap
+- When running comprehensive test suites
+- Verifying code standards compliance
+- Pre-deployment verification
+
+**MANDATORY use when:**
+- Running quality gates verification (./scripts/mandatory-verification.sh)
+- Executing unit tests with coverage requirements
+- Verifying naming conventions and coding standards
+- Testing WordPress/WooCommerce integration
+- Checking file paths and class loading
+
+#### **roadmap-project-manager** 📋
+**Use for:** Managing project roadmap, tracking progress, coordinating tasks
+
+**Trigger Keywords:** roadmap, task status, next task, dependencies, progress, milestone
+**Required for:** Task coordination and project management
+**Example Usage:**
+- Before starting any new task (mark as in_progress)
+- After completing a task (mark as completed)
+- When updating progress summaries
+- Managing task dependencies
+- Tracking bugs and issues
+
+**Always use when:**
+- Starting a new task (update ROADMAP.md status)
+- Completing a task (only after QA passes)
+- Checking task dependencies
+- Updating project progress metrics
+- Managing the File Coverage Checklist
+
+### 🔄 MANDATORY WORKFLOW SEQUENCE
+
+For **EVERY** task, follow this exact sequence:
+
+```
+1. 📋 roadmap-project-manager
+   - Mark task as "in_progress" in ROADMAP.md
+   - Verify all dependencies are completed
+   - Update start date
+
+2. 🔧 wp-backend-developer OR ⚛️ react-frontend-specialist
+   - Implement the actual functionality
+   - Follow coding standards exactly
+   - Create comprehensive documentation
+
+3. ✅ qa-testing-specialist (MANDATORY)
+   - Execute ALL quality gates
+   - Run unit tests with >90% coverage
+   - Verify naming conventions
+   - Test WordPress/WooCommerce integration
+   - ONLY proceed if ALL checks pass
+
+4. 📋 roadmap-project-manager
+   - Mark task as "completed" (ONLY after QA passes)
+   - Update completion date and notes
+   - Update File Coverage Checklist
+   - Recalculate progress metrics
+```
+
+### ⚠️ CRITICAL RULES
+
+1. **NEVER mark a task completed without qa-testing-specialist approval**
+2. **ALWAYS use roadmap-project-manager for status updates**
+3. **Use the correct specialist agent based on file type and task nature**
+4. **Backend tasks = wp-backend-developer, Frontend tasks = react-frontend-specialist**
+5. **Every task completion = qa-testing-specialist verification**
+
+### 🎯 Agent Usage by Task Phase
+
+| Task Phase | Primary Agent | Secondary Agent | QA Required |
+|------------|---------------|----------------|-------------|
+| **0.x Foundation** | wp-backend-developer | roadmap-project-manager | ✅ |
+| **1.x Core Infrastructure** | wp-backend-developer | roadmap-project-manager | ✅ |
+| **2.x Knowledge Base** | wp-backend-developer | roadmap-project-manager | ✅ |
+| **3.x Server Integration** | wp-backend-developer | roadmap-project-manager | ✅ |
+| **4.x Widget Frontend** | react-frontend-specialist | roadmap-project-manager | ✅ |
+| **5.x Chat Logic** | wp-backend-developer + react-frontend-specialist | roadmap-project-manager | ✅ |
+| **6.x+ Advanced Features** | wp-backend-developer + react-frontend-specialist | roadmap-project-manager | ✅ |
+
+---
+
 ## 🏗️ Architecture Overview
 
 > **📋 Complete Architecture:** For detailed architectural design, component relationships, data flow diagrams, and system specifications, see `ARCHITETTURA.md`.
@@ -981,14 +1115,22 @@ La cartella contiene 5 file di documentazione completa:
 - PROJECT_SPECIFICATIONS.md - Specifiche funzionali
 - README.md - Setup e comandi
 
-WORKFLOW OBBLIGATORIO:
+WORKFLOW OBBLIGATORIO CON AGENTI:
 1. **Leggi TUTTI i 5 file** per avere il contesto completo del progetto
-2. Identifica in ROADMAP.md il prossimo task "TO DO" disponibile  
-3. Segui esattamente le specifiche del task
-4. Rispetta tutti gli standard definiti in CLAUDE.md
-5. **🚨 CRITICO: Prima di completare qualsiasi task, DEVI eseguire tutti i quality gates automatici specificati in CLAUDE.md (sezione "MANDATORY Quality Assurance Process")**
-6. Aggiorna ROADMAP.md (in_progress → completed) SOLO dopo che tutti i quality gates passano
+2. **USA roadmap-project-manager** per identificare il prossimo task "TO DO" disponibile
+3. **USA roadmap-project-manager** per marcare task come "in_progress"
+4. **USA l'agente specializzato corretto**:
+   - wp-backend-developer per classi PHP e integrazione WordPress/WooCommerce
+   - react-frontend-specialist per componenti React e widget frontend
+5. **USA SEMPRE qa-testing-specialist** prima di completare qualsiasi task (OBBLIGATORIO)
+6. **USA roadmap-project-manager** per marcare task come "completed" SOLO dopo che QA passa
 7. Usa TodoWrite per tracciare sub-task durante lo sviluppo
+
+SEQUENZA AGENTI OBBLIGATORIA:
+1. 📋 roadmap-project-manager (mark in_progress)
+2. 🔧 wp-backend-developer OR ⚛️ react-frontend-specialist (implement)
+3. ✅ qa-testing-specialist (MANDATORY quality gates)
+4. 📋 roadmap-project-manager (mark completed ONLY if QA passes)
 
 QUALITY GATES OBBLIGATORI (da CLAUDE.md):
 - Esegui script di verifica standards

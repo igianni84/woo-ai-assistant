@@ -85,7 +85,8 @@ class StandardsVerifier {
         
         foreach ($files as $file) {
             $content = file_get_contents($file);
-            preg_match_all('/class\s+([a-zA-Z_][a-zA-Z0-9_]*)/m', $content, $matches);
+            // More specific regex to match actual class declarations
+            preg_match_all('/(?:^|\s)class\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:extends|implements|\{)/m', $content, $matches);
             
             foreach ($matches[1] as $className) {
                 if (!preg_match('/^[A-Z][a-zA-Z0-9]*$/', $className)) {
@@ -133,9 +134,36 @@ class StandardsVerifier {
         foreach ($files as $file) {
             $content = file_get_contents($file);
             
-            // Check for common problematic variable patterns
-            if (preg_match('/\$[a-z]+_[a-z]+/', $content)) {
-                $this->addWarning("File $file may contain snake_case variables (should be camelCase)");
+            // Pattern to match snake_case variables but exclude valid WordPress/PHP patterns
+            preg_match_all('/\$([a-z]+_[a-z_]+[a-z])\b/', $content, $matches);
+            
+            foreach ($matches[1] as $varName) {
+                // Skip valid WordPress/database patterns
+                $skipPatterns = [
+                    '/^wp_/',           // WordPress globals like $wp_version
+                    '/^wpdb$/',         // $wpdb global
+                    '/.*_dir$/',        // Directory variables like upload_dir
+                    '/.*_url$/',        // URL variables
+                    '/.*_table.*/',     // Database table variables
+                    '/charset_collate/', // WordPress db charset
+                    '/.*_hooks?$/',     // Hook arrays
+                    '/.*_options?$/',   // Options arrays
+                    '/.*_stats?$/',     // Stats arrays
+                    '/.*_time$/',       // Time variables
+                    '/.*_count$/',      // Count variables
+                ];
+                
+                $shouldSkip = false;
+                foreach ($skipPatterns as $pattern) {
+                    if (preg_match($pattern, $varName)) {
+                        $shouldSkip = true;
+                        break;
+                    }
+                }
+                
+                if (!$shouldSkip) {
+                    $this->addWarning("Variable '\$$varName' in $file should use camelCase convention");
+                }
             }
         }
         

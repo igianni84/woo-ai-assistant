@@ -1,0 +1,43 @@
+{
+  "name": "Woo AI Assistant Assets",
+  "version": "1.0.0",
+  "description": "Asset manifest for the Woo AI Assistant plugin",
+  "css": {
+    "admin": "css/admin.css",
+    "widget": "css/widget.css",
+    "widget-min": "css/widget.min.css"
+  },
+  "js": {
+    "admin": "js/admin.js",
+    "widget-min": "js/widget.min.js"
+  },
+  "images": {
+    "icon": "images/icon.svg",
+    "avatar-default": "images/avatar-default.svg",
+    "chat-bubble": "images/chat-bubble.svg"
+  },
+  "fonts": {},
+  "icons": {},
+  "meta": {
+    "build_tool": "webpack",
+    "source_maps": false,
+    "minified": true,
+    "last_modified": "2025-08-23"
+  },
+  "dependencies": {
+    "frontend": {
+      "react": "^18.0.0",
+      "react-dom": "^18.0.0"
+    },
+    "admin": {
+      "jquery": "WordPress Core",
+      "chart.js": "^4.0.0"
+    }
+  },
+  "enqueue_handles": {
+    "admin_css": "woo-ai-assistant-admin",
+    "admin_js": "woo-ai-assistant-admin",
+    "widget_css": "woo-ai-assistant-widget",
+    "widget_js": "woo-ai-assistant-widget"
+  }
+}

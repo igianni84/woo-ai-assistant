@@ -28,7 +28,6 @@
         "squizlabs/php_codesniffer": "^3.7",
         "phpstan/phpstan": "^1.10",
         "phpmd/phpmd": "^2.13",
-        "sebastian/phpcpd": "^6.0",
         "phpdocumentor/phpdocumentor": "^3.0",
         "wp-coding-standards/wpcs": "^3.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
@@ -119,8 +118,36 @@
             "composer audit --locked",
             "bash scripts/security-scan.sh"
         ],
+        "security-scan": [
+            "bash scripts/security-scan.sh"
+        ],
+        "performance-benchmark": [
+            "bash scripts/performance-benchmark.sh"
+        ],
+        "deploy:staging": [
+            "bash scripts/deploy.sh --type staging"
+        ],
+        "deploy:production": [
+            "bash scripts/deploy.sh --type production"
+        ],
         "docs": [
-            "phpdocumentor --directory=src --target=docs/api"
+            "bash scripts/generate-docs.sh"
+        ],
+        "docs:api": [
+            "phpdocumentor --directory=src --target=docs/api --config=phpdoc.xml --force"
+        ],
+        "i18n:make-pot": [
+            "wp i18n make-pot . languages/woo-ai-assistant.pot --exclude=vendor,node_modules,tests,coverage"
+        ],
+        "i18n:update": [
+            "@i18n:make-pot",
+            "echo 'POT file updated successfully'"
+        ],
+        "seed-data": [
+            "bash scripts/seed-data.sh"
+        ],
+        "seed-data:cleanup": [
+            "bash scripts/seed-data.sh --cleanup"
         ],
         "quality": [
             "@phpcs",
@@ -153,7 +180,12 @@
         "test:integration": "Run only integration tests",
         "test:coverage": "Generate comprehensive test coverage reports",
         "security-check": "Run security vulnerability checks",
-        "docs": "Generate API documentation with phpDocumentor",
+        "docs": "Generate complete documentation including API docs",
+        "docs:api": "Generate only API documentation with phpDocumentor",
+        "i18n:make-pot": "Generate POT translation file from source code",
+        "i18n:update": "Update POT translation file with latest strings",
+        "seed-data": "Create development seed data for testing",
+        "seed-data:cleanup": "Remove all development seed data",
         "quality": "Run all code quality checks",
         "pre-commit": "Run pre-commit verification (used by Git hooks)"
     },

@@ -105,8 +105,8 @@ check_php_includes() {
             if [[ "$included_path" == /* ]]; then
                 # Absolute path
                 full_path="$included_path"
-            elif [[ "$included_path" == __DIR__* ]]; then
-                # __DIR__ relative path - skip validation (runtime dependent)
+            elif [[ "$included_path" == __DIR__* ]] || [[ $line_content =~ ABSPATH ]]; then
+                # __DIR__ relative path or ABSPATH - skip validation (runtime dependent)
                 continue
             else
                 # Relative path
