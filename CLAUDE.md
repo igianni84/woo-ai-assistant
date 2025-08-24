@@ -761,6 +761,51 @@ if (defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG) {
 
 **CRITICAL:** This section defines MANDATORY steps that must be completed before marking ANY task as completed.
 
+### 🚨 ABSOLUTE ENFORCEMENT RULES
+
+**🚫 TASK COMPLETION IS FORBIDDEN UNTIL ALL QUALITY GATES PASS**
+
+#### **Rule #1: Zero Tolerance Policy**
+- If **ANY** quality gate fails, task completion is **STRICTLY FORBIDDEN**
+- No exceptions, no partial completion, no "we'll fix it later"
+- Task remains "in_progress" until ALL gates pass
+
+#### **Rule #2: Mandatory Sequence**
+1. **ALWAYS** run `composer run verify-all` before any completion attempt
+2. **ALWAYS** check exit code - if non-zero, **STOP IMMEDIATELY**
+3. **ALWAYS** fix ALL errors before proceeding
+4. **NEVER** mark task as completed with failing quality gates
+
+#### **Rule #3: Quality Gates Verification Commands**
+```bash
+# THIS COMMAND MUST RETURN EXIT CODE 0 (success) BEFORE TASK COMPLETION
+composer run verify-all
+
+# IF THE ABOVE FAILS, RUN INDIVIDUAL CHECKS:
+composer run verify-paths        # Must pass
+composer run verify-standards   # Must pass  
+composer run phpcs              # Must pass
+composer run phpstan            # Must pass
+composer run test               # Must pass with >90% coverage
+```
+
+#### **Rule #4: Agent Responsibility**
+- **qa-testing-specialist agent**: MUST run quality gates and **REFUSE** to approve if any fail
+- **roadmap-project-manager agent**: MUST NOT mark completed until QA explicitly approves
+- **ALL agents**: MUST check quality gates before claiming task completion
+
+#### **Rule #5: Physical Enforcement Mechanism**
+A `.quality-gates-status` file is created to track quality gates status:
+- **GREEN** = All gates passed, task completion allowed
+- **RED** = Gates failed, task completion BLOCKED
+- **YELLOW** = Gates not run yet, task completion BLOCKED
+
+```bash
+# Only mark task completed if this file exists and contains "PASSED"
+cat .quality-gates-status
+# Must output: "QUALITY_GATES_STATUS=PASSED" for task completion
+```
+
 ### 🚨 Pre-Completion Requirements
 
 Before marking any task as completed, you **MUST**:
@@ -963,28 +1008,28 @@ class [ClassName]Test extends WP_UnitTestCase {
 
 ### 🛠 Automated Quality Gates Implementation
 
-Create these files to automate verification:
+The quality gates are now enforced by a physical blocking mechanism:
 
-#### composer.json scripts section:
-```json
-{
-    "scripts": {
-        "verify-all": [
-            "@verify-standards", 
-            "@verify-tests",
-            "@verify-paths"
-        ],
-        "verify-standards": "php scripts/verify-standards.php",
-        "verify-tests": "phpunit --coverage-html coverage/",
-        "verify-paths": "bash scripts/verify-paths.sh"
-    }
-}
-```
-
-#### Required before ANY task completion:
+#### Required Commands for Task Completion:
 ```bash
+# 🚨 MANDATORY: Run this before attempting ANY task completion
+composer run quality-gates-enforce
+
+# Check current completion status
+composer run quality-gates-check
+
+# Reset status (use only when necessary)  
+composer run quality-gates-reset
+
+# Traditional verify-all now runs the enforcer
 composer run verify-all
 ```
+
+#### Physical Status File:
+The system creates `.quality-gates-status` file:
+- **MUST contain "QUALITY_GATES_STATUS=PASSED" for task completion**
+- File is automatically managed by the enforcer
+- Task completion is **PHYSICALLY BLOCKED** without this file
 
 ### 🚨 Failure Protocol
 
@@ -996,6 +1041,49 @@ composer run verify-all
 5. **Only then** mark task as completed
 
 **Remember: A task is NOT completed until ALL quality gates pass.**
+
+### 🤖 AGENT-SPECIFIC ENFORCEMENT INSTRUCTIONS
+
+#### **For qa-testing-specialist Agent:**
+```bash
+# MANDATORY: Always run this command first
+composer run quality-gates-enforce
+
+# If command fails (non-zero exit code):
+# 1. Report ALL failures to user
+# 2. REFUSE to approve task completion
+# 3. List specific steps to fix failures
+# 4. Do NOT proceed until ALL gates pass
+
+# If command succeeds:
+# 1. Verify .quality-gates-status contains "PASSED"
+# 2. Only then approve task completion
+```
+
+#### **For roadmap-project-manager Agent:**
+```bash
+# BEFORE marking any task as completed:
+composer run quality-gates-check
+
+# Only mark completed if:
+# 1. Command returns exit code 0
+# 2. qa-testing-specialist has explicitly approved
+# 3. .quality-gates-status file exists and shows "PASSED"
+```
+
+#### **For ALL Development Agents:**
+- **NEVER** claim task completion without QA verification
+- **ALWAYS** run `composer run quality-gates-check` before completion claims
+- **STOP** immediately if quality gates fail
+- **FIX** all failures before proceeding
+
+### 🎯 SUMMARY OF NEW ENFORCEMENT SYSTEM
+
+✅ **Physical blocking mechanism** prevents completion with failed gates  
+✅ **Clear status file** shows exact gate status  
+✅ **Agent-specific instructions** define responsibility  
+✅ **Zero tolerance policy** for quality gate failures  
+✅ **Automatic verification** of all standards and tests
 
 ## 🔄 Git Workflow
 

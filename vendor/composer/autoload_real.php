@@ -32,9 +32,28 @@ class ComposerAutoloaderInita9fe35cf75b70f424be9247d0f5b5c5b
         call_user_func(\Composer\Autoload\ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b::getInitializer($loader));
 
         $loader->setClassMapAuthoritative(true);
-        $loader->setApcuPrefix('aISlZCYS2SrP8U0lO3k5V');
+        $loader->setApcuPrefix('B7UTDRC+D+pErzC1PWNLK');
         $loader->register(true);
 
+        $includeFiles = \Composer\Autoload\ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b::$files;
+        foreach ($includeFiles as $fileIdentifier => $file) {
+            composerRequirea9fe35cf75b70f424be9247d0f5b5c5b($fileIdentifier, $file);
+        }
+
         return $loader;
+    }
+}
+
+/**
+ * @param string $fileIdentifier
+ * @param string $file
+ * @return void
+ */
+function composerRequirea9fe35cf75b70f424be9247d0f5b5c5b($fileIdentifier, $file)
+{
+    if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
+        $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
+
+        require $file;
     }
 }

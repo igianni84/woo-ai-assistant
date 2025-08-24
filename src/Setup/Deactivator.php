@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Deactivator Class
  *
@@ -23,15 +24,15 @@ if (!defined('ABSPATH')) {
 
 /**
  * Class Deactivator
- * 
+ *
  * Handles all tasks that need to be performed when the plugin is deactivated.
  * This includes cleanup of temporary data, clearing caches, and stopping
  * scheduled events.
- * 
+ *
  * @since 1.0.0
  */
-class Deactivator {
-
+class Deactivator
+{
     /**
      * Plugin deactivation handler
      *
@@ -41,7 +42,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    public static function deactivate(): void {
+    public static function deactivate(): void
+    {
         try {
             Utils::logDebug('Starting plugin deactivation process');
 
@@ -64,7 +66,6 @@ class Deactivator {
             update_option('woo_ai_assistant_deactivated_at', time());
 
             Utils::logDebug('Plugin deactivation completed successfully');
-
         } catch (\Exception $e) {
             Utils::logDebug('Plugin deactivation error: ' . $e->getMessage(), 'error');
         }
@@ -76,7 +77,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    private static function clearScheduledEvents(): void {
+    private static function clearScheduledEvents(): void
+    {
         // List of all cron hooks used by the plugin
         $cron_hooks = [
             'woo_ai_assistant_daily_cleanup',
@@ -89,7 +91,7 @@ class Deactivator {
         foreach ($cron_hooks as $hook) {
             // Get all scheduled events for this hook
             $scheduled_events = wp_get_scheduled_event($hook);
-            
+
             if ($scheduled_events) {
                 // Clear all instances of this scheduled event
                 wp_clear_scheduled_hook($hook);
@@ -106,7 +108,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    private static function clearTemporaryData(): void {
+    private static function clearTemporaryData(): void
+    {
         // Clear WordPress object cache
         if (function_exists('wp_cache_flush')) {
             wp_cache_flush();
@@ -115,14 +118,14 @@ class Deactivator {
         // Clear plugin-specific cache directory
         $upload_dir = wp_upload_dir();
         $cache_dir = $upload_dir['basedir'] . '/woo-ai-assistant/cache';
-        
+
         if (is_dir($cache_dir)) {
             self::recursiveDelete($cache_dir, false); // Delete contents but keep directory
         }
 
         // Clear temporary embeddings and processing files
         $temp_dir = $upload_dir['basedir'] . '/woo-ai-assistant/temp';
-        
+
         if (is_dir($temp_dir)) {
             self::recursiveDelete($temp_dir, false);
         }
@@ -136,7 +139,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    private static function updateActiveConversations(): void {
+    private static function updateActiveConversations(): void
+    {
         global $wpdb;
 
         $table_conversations = $wpdb->prefix . 'woo_ai_conversations';
@@ -166,7 +170,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    private static function cleanupTransients(): void {
+    private static function cleanupTransients(): void
+    {
         global $wpdb;
 
         // Delete all transients that start with our plugin prefix
@@ -198,16 +203,17 @@ class Deactivator {
      * @param bool $deleteDir Whether to delete the directory itself
      * @return bool True if successful
      */
-    private static function recursiveDelete(string $dir, bool $deleteDir = true): bool {
+    private static function recursiveDelete(string $dir, bool $deleteDir = true): bool
+    {
         if (!is_dir($dir)) {
             return false;
         }
 
         $files = array_diff(scandir($dir), ['.', '..']);
-        
+
         foreach ($files as $file) {
             $path = $dir . DIRECTORY_SEPARATOR . $file;
-            
+
             if (is_dir($path)) {
                 self::recursiveDelete($path);
             } else {
@@ -224,7 +230,8 @@ class Deactivator {
      * @since 1.0.0
      * @return int|false Deactivation timestamp or false if not found
      */
-    public static function getDeactivationTime() {
+    public static function getDeactivationTime()
+    {
         return get_option('woo_ai_assistant_deactivated_at', false);
     }
 
@@ -235,9 +242,10 @@ class Deactivator {
      * @param int $seconds Seconds to consider as "recent"
      * @return bool True if recently deactivated
      */
-    public static function isRecentlyDeactivated(int $seconds = 300): bool {
+    public static function isRecentlyDeactivated(int $seconds = 300): bool
+    {
         $deactivation_time = self::getDeactivationTime();
-        
+
         if (false === $deactivation_time) {
             return false;
         }
@@ -251,7 +259,8 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    private static function cleanupUserSessions(): void {
+    private static function cleanupUserSessions(): void
+    {
         // Remove any active user sessions related to the chatbot
         global $wpdb;
 
@@ -280,7 +289,8 @@ class Deactivator {
      * @param string $reason Reason for deactivation
      * @return void
      */
-    public static function logDeactivationReason(string $reason = ''): void {
+    public static function logDeactivationReason(string $reason = ''): void
+    {
         if (!empty($reason)) {
             update_option('woo_ai_assistant_deactivation_reason', sanitize_text_field($reason));
             Utils::logDebug("Deactivation reason logged: {$reason}");
@@ -295,10 +305,11 @@ class Deactivator {
      * @since 1.0.0
      * @return void
      */
-    public static function prepareForReactivation(): void {
+    public static function prepareForReactivation(): void
+    {
         // Set a flag to indicate the plugin is being prepared for reactivation
         update_option('woo_ai_assistant_reactivation_prepared', time());
-        
+
         // Clear any error flags
         delete_option('woo_ai_assistant_activation_error');
         delete_option('woo_ai_assistant_fatal_error');

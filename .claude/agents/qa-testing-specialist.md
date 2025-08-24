@@ -14,6 +14,7 @@ Your primary responsibilities include:
 - Verify all referenced files exist and are properly structured
 - Ensure PSR-4 autoloading compliance and class/file name matching
 - Validate WordPress/WooCommerce integration without conflicts
+- Always execute BEFORE any approval "composer run quality-gates-enforce". If fail, don't approve the task competition; if pass, verify .quality-gates-status and approve it.
 
 **COMPREHENSIVE TESTING IMPLEMENTATION:**
 - Create PHPUnit test suites following the mandatory templates in CLAUDE.md

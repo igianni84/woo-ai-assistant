@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Activator Class
  *
@@ -23,13 +24,21 @@ if (!defined('ABSPATH')) {
 
 /**
  * Class Activator
- * 
+ *
  * Handles all tasks that need to be performed when the plugin is activated.
  * This includes database setup, default options, and initial configuration.
- * 
+ *
  * @since 1.0.0
  */
-class Activator {
+class Activator
+{
+    /**
+     * Current database version
+     *
+     * @since 1.0.0
+     * @var string
+     */
+    const DATABASE_VERSION = '1.0.0';
 
     /**
      * Plugin activation handler
@@ -41,15 +50,16 @@ class Activator {
      * @return void
      * @throws \Exception If activation fails
      */
-    public static function activate(): void {
+    public static function activate(): void
+    {
         try {
             Utils::logDebug('Starting plugin activation process');
 
             // Check system requirements
             self::checkSystemRequirements();
 
-            // Create database tables
-            self::createDatabaseTables();
+            // Handle database creation or upgrade
+            self::handleDatabaseSetup();
 
             // Set default options
             self::setDefaultOptions();
@@ -60,15 +70,18 @@ class Activator {
             // Create necessary directories
             self::createDirectories();
 
-            // Set activation timestamp
+            // Setup cron jobs
+            self::setupCronJobs();
+
+            // Set activation timestamp and version
             update_option('woo_ai_assistant_activated_at', time());
             update_option('woo_ai_assistant_version', WOO_AI_ASSISTANT_VERSION);
+            update_option('woo_ai_assistant_db_version', self::DATABASE_VERSION);
 
             // Flush rewrite rules
             flush_rewrite_rules();
 
             Utils::logDebug('Plugin activation completed successfully');
-
         } catch (\Exception $e) {
             Utils::logDebug('Plugin activation failed: ' . $e->getMessage(), 'error');
             throw $e;
@@ -82,7 +95,8 @@ class Activator {
      * @return void
      * @throws \Exception If requirements are not met
      */
-    private static function checkSystemRequirements(): void {
+    private static function checkSystemRequirements(): void
+    {
         // Check PHP version
         if (version_compare(PHP_VERSION, '8.2', '<')) {
             throw new \Exception(
@@ -123,6 +137,30 @@ class Activator {
     }
 
     /**
+     * Handle database setup and upgrades
+     *
+     * Determines whether to create tables or upgrade existing ones
+     * based on current database version.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private static function handleDatabaseSetup(): void
+    {
+        $currentDbVersion = get_option('woo_ai_assistant_db_version', '0.0.0');
+
+        if (version_compare($currentDbVersion, self::DATABASE_VERSION, '<')) {
+            Utils::logDebug("Database upgrade needed: {$currentDbVersion} -> " . self::DATABASE_VERSION);
+            self::createDatabaseTables();
+            self::upgradeDatabaseSchema($currentDbVersion);
+            update_option('woo_ai_assistant_db_version', self::DATABASE_VERSION);
+            Utils::logDebug('Database upgrade completed');
+        } else {
+            Utils::logDebug('Database schema is up to date');
+        }
+    }
+
+    /**
      * Create database tables
      *
      * Creates all necessary database tables for the plugin.
@@ -131,16 +169,17 @@ class Activator {
      * @since 1.0.0
      * @return void
      */
-    private static function createDatabaseTables(): void {
+    private static function createDatabaseTables(): void
+    {
         global $wpdb;
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
 
         // Conversations table
-        $table_conversations = $wpdb->prefix . 'woo_ai_conversations';
-        $sql_conversations = "CREATE TABLE $table_conversations (
+        $tableConversations = $wpdb->prefix . 'woo_ai_conversations';
+        $sqlConversations = "CREATE TABLE $tableConversations (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             conversation_id varchar(255) NOT NULL,
             user_id bigint(20) unsigned DEFAULT NULL,
@@ -159,11 +198,11 @@ class Activator {
             KEY session_id (session_id),
             KEY status (status),
             KEY started_at (started_at)
-        ) $charset_collate;";
+        ) $charsetCollate;";
 
         // Messages table
-        $table_messages = $wpdb->prefix . 'woo_ai_messages';
-        $sql_messages = "CREATE TABLE $table_messages (
+        $tableMessages = $wpdb->prefix . 'woo_ai_messages';
+        $sqlMessages = "CREATE TABLE $tableMessages (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             conversation_id varchar(255) NOT NULL,
             message_type enum('user','assistant','system') NOT NULL,
@@ -177,12 +216,12 @@ class Activator {
             KEY conversation_id (conversation_id),
             KEY message_type (message_type),
             KEY created_at (created_at),
-            FOREIGN KEY (conversation_id) REFERENCES $table_conversations(conversation_id) ON DELETE CASCADE
-        ) $charset_collate;";
+            FOREIGN KEY (conversation_id) REFERENCES $tableConversations(conversation_id) ON DELETE CASCADE
+        ) $charsetCollate;";
 
         // Knowledge base table
-        $table_kb = $wpdb->prefix . 'woo_ai_knowledge_base';
-        $sql_kb = "CREATE TABLE $table_kb (
+        $tableKb = $wpdb->prefix . 'woo_ai_knowledge_base';
+        $sqlKb = "CREATE TABLE $tableKb (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             source_type varchar(50) NOT NULL,
             source_id bigint(20) unsigned DEFAULT NULL,
@@ -201,11 +240,11 @@ class Activator {
             KEY hash (hash),
             KEY indexed_at (indexed_at),
             FULLTEXT KEY content_search (title, content, chunk_content)
-        ) $charset_collate;";
+        ) $charsetCollate;";
 
         // Usage statistics table
-        $table_stats = $wpdb->prefix . 'woo_ai_usage_stats';
-        $sql_stats = "CREATE TABLE $table_stats (
+        $tableStats = $wpdb->prefix . 'woo_ai_usage_stats';
+        $sqlStats = "CREATE TABLE $tableStats (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             date date NOT NULL,
             stat_type varchar(50) NOT NULL,
@@ -215,11 +254,11 @@ class Activator {
             UNIQUE KEY date_type (date, stat_type),
             KEY date (date),
             KEY stat_type (stat_type)
-        ) $charset_collate;";
+        ) $charsetCollate;";
 
         // Failed requests table (for debugging and monitoring)
-        $table_failed = $wpdb->prefix . 'woo_ai_failed_requests';
-        $sql_failed = "CREATE TABLE $table_failed (
+        $tableFailed = $wpdb->prefix . 'woo_ai_failed_requests';
+        $sqlFailed = "CREATE TABLE $tableFailed (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             request_type varchar(50) NOT NULL,
             request_data longtext DEFAULT NULL,
@@ -232,11 +271,11 @@ class Activator {
             KEY request_type (request_type),
             KEY failed_at (failed_at),
             KEY resolved_at (resolved_at)
-        ) $charset_collate;";
+        ) $charsetCollate;";
 
         // Agent actions table (for advanced features)
-        $table_actions = $wpdb->prefix . 'woo_ai_agent_actions';
-        $sql_actions = "CREATE TABLE $table_actions (
+        $tableActions = $wpdb->prefix . 'woo_ai_agent_actions';
+        $sqlActions = "CREATE TABLE $tableActions (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             conversation_id varchar(255) NOT NULL,
             action_type varchar(50) NOT NULL,
@@ -250,17 +289,103 @@ class Activator {
             KEY action_type (action_type),
             KEY status (status),
             KEY executed_at (executed_at)
-        ) $charset_collate;";
+        ) $charsetCollate;";
 
-        // Execute table creation
-        dbDelta($sql_conversations);
-        dbDelta($sql_messages);
-        dbDelta($sql_kb);
-        dbDelta($sql_stats);
-        dbDelta($sql_failed);
-        dbDelta($sql_actions);
+        // Execute table creation with error handling
+        try {
+            $results = [];
+            $results[] = dbDelta($sqlConversations);
+            $results[] = dbDelta($sqlMessages);
+            $results[] = dbDelta($sqlKb);
+            $results[] = dbDelta($sqlStats);
+            $results[] = dbDelta($sqlFailed);
+            $results[] = dbDelta($sqlActions);
 
-        Utils::logDebug('Database tables created successfully');
+            // Verify tables were created
+            self::verifyTablesExist();
+
+            // Log successful table creation
+            Utils::logDebug('Database tables created successfully');
+
+            // Log detailed results if debug enabled
+            if (defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG) {
+                Utils::logDebug('dbDelta results: ' . print_r($results, true));
+            }
+        } catch (\Exception $e) {
+            Utils::logDebug('Database table creation failed: ' . $e->getMessage(), 'error');
+            throw new \Exception('Failed to create database tables: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Upgrade database schema between versions
+     *
+     * Handles incremental upgrades from older database versions.
+     *
+     * @since 1.0.0
+     * @param string $fromVersion The version being upgraded from
+     * @return void
+     */
+    private static function upgradeDatabaseSchema(string $fromVersion): void
+    {
+        global $wpdb;
+
+        Utils::logDebug("Upgrading database schema from version {$fromVersion}");
+
+        // Future version upgrades will be handled here
+        // Example:
+        // if (version_compare($fromVersion, '1.1.0', '<')) {
+        //     // Upgrade logic for version 1.1.0
+        // }
+
+        // For now, just log that no upgrades are needed
+        if ($fromVersion === '0.0.0') {
+            Utils::logDebug('Fresh installation - no schema upgrades needed');
+        } else {
+            Utils::logDebug('No schema upgrades required for this version');
+        }
+    }
+
+    /**
+     * Verify that all required tables exist
+     *
+     * @since 1.0.0
+     * @return void
+     * @throws \Exception If any required table is missing
+     */
+    private static function verifyTablesExist(): void
+    {
+        global $wpdb;
+
+        $requiredTables = [
+            'woo_ai_conversations',
+            'woo_ai_messages',
+            'woo_ai_knowledge_base',
+            'woo_ai_usage_stats',
+            'woo_ai_failed_requests',
+            'woo_ai_agent_actions'
+        ];
+
+        $missingTables = [];
+
+        foreach ($requiredTables as $tableName) {
+            $fullTableName = $wpdb->prefix . $tableName;
+            $tableExists = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
+                DB_NAME,
+                $fullTableName
+            ));
+
+            if (!$tableExists) {
+                $missingTables[] = $fullTableName;
+            }
+        }
+
+        if (!empty($missingTables)) {
+            throw new \Exception('Failed to create required tables: ' . implode(', ', $missingTables));
+        }
+
+        Utils::logDebug('All required database tables verified');
     }
 
     /**
@@ -269,8 +394,9 @@ class Activator {
      * @since 1.0.0
      * @return void
      */
-    private static function setDefaultOptions(): void {
-        $default_options = [
+    private static function setDefaultOptions(): void
+    {
+        $defaultOptions = [
             // General settings
             'woo_ai_assistant_enabled' => 'yes',
             'woo_ai_assistant_widget_position' => 'bottom-right',
@@ -299,13 +425,23 @@ class Activator {
             'woo_ai_assistant_cart_actions' => 'no',
 
             // Advanced settings
-            'woo_ai_assistant_debug_mode' => WOO_AI_ASSISTANT_DEBUG ? 'yes' : 'no',
+            'woo_ai_assistant_debug_mode' => defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG ? 'yes' : 'no',
             'woo_ai_assistant_cache_ttl' => 3600,
             'woo_ai_assistant_conversation_timeout' => 1800,
+
+            // Database and performance settings
+            'woo_ai_assistant_cleanup_frequency' => 'weekly',
+            'woo_ai_assistant_max_conversation_age' => 90, // days
+            'woo_ai_assistant_max_failed_requests' => 1000,
+
+            // Security settings
+            'woo_ai_assistant_rate_limit_per_hour' => 100,
+            'woo_ai_assistant_max_message_length' => 2000,
+            'woo_ai_assistant_allowed_user_roles' => 'all'
         ];
 
-        foreach ($default_options as $option_name => $default_value) {
-            add_option($option_name, $default_value);
+        foreach ($defaultOptions as $optionName => $defaultValue) {
+            add_option($optionName, $defaultValue);
         }
 
         Utils::logDebug('Default options set successfully');
@@ -317,22 +453,23 @@ class Activator {
      * @since 1.0.0
      * @return void
      */
-    private static function setupCapabilities(): void {
+    private static function setupCapabilities(): void
+    {
         // Get administrator role
-        $admin_role = get_role('administrator');
-        
-        if ($admin_role) {
+        $adminRole = get_role('administrator');
+
+        if ($adminRole) {
             // Add custom capabilities
-            $admin_role->add_cap('manage_woo_ai_assistant');
-            $admin_role->add_cap('view_woo_ai_conversations');
-            $admin_role->add_cap('export_woo_ai_data');
+            $adminRole->add_cap('manage_woo_ai_assistant');
+            $adminRole->add_cap('view_woo_ai_conversations');
+            $adminRole->add_cap('export_woo_ai_data');
         }
 
         // Get shop manager role
-        $shop_manager_role = get_role('shop_manager');
-        
-        if ($shop_manager_role) {
-            $shop_manager_role->add_cap('view_woo_ai_conversations');
+        $shopManagerRole = get_role('shop_manager');
+
+        if ($shopManagerRole) {
+            $shopManagerRole->add_cap('view_woo_ai_conversations');
         }
 
         Utils::logDebug('User capabilities set up successfully');
@@ -344,32 +481,70 @@ class Activator {
      * @since 1.0.0
      * @return void
      */
-    private static function createDirectories(): void {
+    private static function createDirectories(): void
+    {
         $upload_dir = wp_upload_dir();
-        $plugin_upload_dir = $upload_dir['basedir'] . '/woo-ai-assistant';
+        $pluginUploadDir = $upload_dir['basedir'] . '/woo-ai-assistant';
 
         // Create main upload directory
-        if (!file_exists($plugin_upload_dir)) {
-            wp_mkdir_p($plugin_upload_dir);
+        if (!file_exists($pluginUploadDir)) {
+            wp_mkdir_p($pluginUploadDir);
         }
 
         // Create logs directory
-        $logs_dir = $plugin_upload_dir . '/logs';
-        if (!file_exists($logs_dir)) {
-            wp_mkdir_p($logs_dir);
+        $logsDir = $pluginUploadDir . '/logs';
+        if (!file_exists($logsDir)) {
+            wp_mkdir_p($logsDir);
         }
 
         // Create cache directory
-        $cache_dir = $plugin_upload_dir . '/cache';
-        if (!file_exists($cache_dir)) {
-            wp_mkdir_p($cache_dir);
+        $cacheDir = $pluginUploadDir . '/cache';
+        if (!file_exists($cacheDir)) {
+            wp_mkdir_p($cacheDir);
         }
 
         // Create .htaccess file to protect directories
-        $htaccess_content = "Order deny,allow\nDeny from all\n";
-        file_put_contents($plugin_upload_dir . '/.htaccess', $htaccess_content);
+        $htaccessContent = "Order deny,allow\nDeny from all\n";
+        file_put_contents($pluginUploadDir . '/.htaccess', $htaccessContent);
 
         Utils::logDebug('Plugin directories created successfully');
+    }
+
+    /**
+     * Setup scheduled cron jobs
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private static function setupCronJobs(): void
+    {
+        // Daily cleanup job
+        if (!wp_next_scheduled('woo_ai_assistant_daily_cleanup')) {
+            wp_schedule_event(time(), 'daily', 'woo_ai_assistant_daily_cleanup');
+        }
+
+        // Weekly statistics compilation
+        if (!wp_next_scheduled('woo_ai_assistant_weekly_stats')) {
+            wp_schedule_event(time(), 'weekly', 'woo_ai_assistant_weekly_stats');
+        }
+
+        // Knowledge base reindexing (monthly)
+        if (!wp_next_scheduled('woo_ai_assistant_kb_reindex')) {
+            wp_schedule_event(time(), 'monthly', 'woo_ai_assistant_kb_reindex');
+        }
+
+        // Usage statistics reset (monthly)
+        if (!wp_next_scheduled('woo_ai_assistant_usage_reset')) {
+            $nextMonth = strtotime('first day of next month 00:00:00');
+            wp_schedule_event($nextMonth, 'monthly', 'woo_ai_assistant_usage_reset');
+        }
+
+        // Health check (hourly)
+        if (!wp_next_scheduled('woo_ai_assistant_health_check')) {
+            wp_schedule_event(time(), 'hourly', 'woo_ai_assistant_health_check');
+        }
+
+        Utils::logDebug('Cron jobs scheduled successfully');
     }
 
     /**
@@ -378,7 +553,8 @@ class Activator {
      * @since 1.0.0
      * @return int|false Activation timestamp or false if not found
      */
-    public static function getActivationTime() {
+    public static function getActivationTime()
+    {
         return get_option('woo_ai_assistant_activated_at', false);
     }
 
@@ -389,13 +565,93 @@ class Activator {
      * @param int $seconds Seconds to consider as "recent"
      * @return bool True if recently activated
      */
-    public static function isRecentlyActivated(int $seconds = 300): bool {
+    public static function isRecentlyActivated(int $seconds = 300): bool
+    {
         $activation_time = self::getActivationTime();
-        
+
         if (false === $activation_time) {
             return false;
         }
 
         return (time() - $activation_time) <= $seconds;
+    }
+
+    /**
+     * Get current database version
+     *
+     * @since 1.0.0
+     * @return string Current database version
+     */
+    public static function getDatabaseVersion(): string
+    {
+        return get_option('woo_ai_assistant_db_version', '0.0.0');
+    }
+
+    /**
+     * Check if database needs upgrading
+     *
+     * @since 1.0.0
+     * @return bool True if database upgrade is needed
+     */
+    public static function isDatabaseUpgradeNeeded(): bool
+    {
+        $currentVersion = self::getDatabaseVersion();
+        return version_compare($currentVersion, self::DATABASE_VERSION, '<');
+    }
+
+    /**
+     * Get list of all plugin database tables
+     *
+     * @since 1.0.0
+     * @return array Array of table names (without prefix)
+     */
+    public static function getDatabaseTables(): array
+    {
+        return [
+            'woo_ai_conversations',
+            'woo_ai_messages',
+            'woo_ai_knowledge_base',
+            'woo_ai_usage_stats',
+            'woo_ai_failed_requests',
+            'woo_ai_agent_actions'
+        ];
+    }
+
+    /**
+     * Get database statistics
+     *
+     * @since 1.0.0
+     * @return array Database statistics including table sizes
+     */
+    public static function getDatabaseStats(): array
+    {
+        global $wpdb;
+
+        $stats = [];
+        $tables = self::getDatabaseTables();
+
+        foreach ($tables as $tableName) {
+            $fullTableName = $wpdb->prefix . $tableName;
+
+            $tableStatus = $wpdb->get_row($wpdb->prepare(
+                "SHOW TABLE STATUS WHERE Name = %s",
+                $fullTableName
+            ));
+
+            if ($tableStatus) {
+                $stats[$tableName] = [
+                    'rows' => $tableStatus->Rows ?? 0,
+                    'data_length' => $tableStatus->Data_length ?? 0,
+                    'index_length' => $tableStatus->Index_length ?? 0,
+                    'auto_increment' => $tableStatus->Auto_increment ?? null,
+                    'engine' => $tableStatus->Engine ?? 'Unknown',
+                    'collation' => $tableStatus->Collation ?? 'Unknown'
+                ];
+            } else {
+                $stats[$tableName] = ['status' => 'missing'];
+            }
+        }
+
+        return $stats;
     }
 }

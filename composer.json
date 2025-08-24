@@ -68,12 +68,7 @@
             "bash scripts/setup-git-hooks.sh"
         ],
         "verify-all": [
-            "@verify-paths",
-            "@verify-standards", 
-            "@phpcs",
-            "@phpstan",
-            "@test",
-            "@security-check"
+            "@quality-gates-enforce"
         ],
         "verify-paths": [
             "bash scripts/verify-paths.sh"
@@ -83,6 +78,15 @@
         ],
         "mandatory-verification": [
             "bash scripts/mandatory-verification.sh"
+        ],
+        "quality-gates-enforce": [
+            "bash scripts/quality-gates-enforcer.sh run"
+        ],
+        "quality-gates-check": [
+            "bash scripts/quality-gates-enforcer.sh check"
+        ],
+        "quality-gates-reset": [
+            "bash scripts/quality-gates-enforcer.sh reset"
         ],
         "phpcs": [
             "phpcs --standard=WordPress --extensions=php --ignore=vendor/,node_modules/,assets/ ."

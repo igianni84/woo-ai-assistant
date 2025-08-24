@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Singleton Trait
  *
@@ -21,14 +22,14 @@ if (!defined('ABSPATH')) {
 
 /**
  * Trait Singleton
- * 
+ *
  * Implements the singleton pattern to ensure only one instance of a class
  * can be created and provides global access to that instance.
- * 
+ *
  * @since 1.0.0
  */
-trait Singleton {
-
+trait Singleton
+{
     /**
      * Instance of the class
      *
@@ -41,11 +42,12 @@ trait Singleton {
      * Get singleton instance
      *
      * Creates a new instance if one doesn't exist, or returns the existing instance.
-     * 
+     *
      * @since 1.0.0
      * @return static The singleton instance of the class
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (null === static::$instance) {
             static::$instance = new static();
         }
@@ -58,10 +60,11 @@ trait Singleton {
      *
      * Classes using this trait cannot be instantiated directly.
      * Use getInstance() method instead.
-     * 
+     *
      * @since 1.0.0
      */
-    private function __construct() {
+    private function __construct()
+    {
         // Override this method in the class that uses this trait
         // to add initialization logic
     }
@@ -73,7 +76,8 @@ trait Singleton {
      * @return void
      * @throws Exception When trying to clone the singleton
      */
-    private function __clone() {
+    private function __clone()
+    {
         throw new \Exception('Cannot clone singleton instance');
     }
 
@@ -84,7 +88,8 @@ trait Singleton {
      * @return void
      * @throws Exception When trying to unserialize the singleton
      */
-    public function __wakeup() {
+    public function __wakeup()
+    {
         throw new \Exception('Cannot unserialize singleton instance');
     }
 
@@ -94,7 +99,8 @@ trait Singleton {
      * @since 1.0.0
      * @return bool True if instance exists, false otherwise
      */
-    public static function hasInstance(): bool {
+    public static function hasInstance(): bool
+    {
         return null !== static::$instance;
     }
 
@@ -103,11 +109,12 @@ trait Singleton {
      *
      * This method should be used carefully and only when you need to
      * reset the singleton instance (e.g., during testing).
-     * 
+     *
      * @since 1.0.0
      * @return void
      */
-    public static function destroyInstance(): void {
+    public static function destroyInstance(): void
+    {
         static::$instance = null;
     }
 }

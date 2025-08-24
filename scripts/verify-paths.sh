@@ -94,8 +94,8 @@ check_php_includes() {
         return 0
     fi
     
-    # Extract require/include paths
-    grep -n "require\|include" "$file" | grep -v "//" | while IFS=: read -r line_num line_content; do
+    # Extract actual require/include statements (not comments or variable names)
+    grep -n "^\s*\(require\|include\)\(_once\)\?\s*[(\s]*['\"]" "$file" | while IFS=: read -r line_num line_content; do
         # Extract the file path from the line
         if [[ $line_content =~ (require|include)(_once)?[[:space:]]*[\(]?[[:space:]]*[\'\"](.*?)[\'\"] ]]; then
             local included_path="${BASH_REMATCH[3]}"
@@ -168,8 +168,15 @@ check_wp_wc_references() {
     
     find "$SRC_DIR" -name "*.php" | while read -r file; do
         # Check for direct file includes to WP/WC core (which might break)
+        # Skip legitimate WordPress core references
         if grep -q "wp-includes\|wp-admin\|wp-content" "$file" 2>/dev/null; then
-            log_warning "Direct WordPress core file reference found in $(basename "$file")"
+            if [[ "$(basename "$file")" == "Activator.php" ]] && grep -q "wp-admin/includes/upgrade.php" "$file"; then
+                log_info "Legitimate WordPress upgrade.php reference found in $(basename "$file")"
+            elif [[ "$(basename "$file")" == "AdminMenu.php" ]] && grep -q "\['wp-admin', 'dashicons'\]" "$file"; then
+                log_info "Legitimate WordPress script dependency found in $(basename "$file")"
+            else
+                log_warning "Direct WordPress core file reference found in $(basename "$file")"
+            fi
         fi
         
         if grep -q "woocommerce/includes\|woocommerce/templates" "$file" 2>/dev/null; then
@@ -273,9 +280,23 @@ run_verification() {
     # Check PHP source files
     if [[ -d "$SRC_DIR" ]]; then
         log_header "🔍 PHP Include/Require Verification"
-        find "$SRC_DIR" -name "*.php" | while read -r php_file; do
-            check_php_includes "$php_file"
-        done
+        
+        # Count PHP files with actual include/require statements (not comments)
+        php_files_with_includes=0
+        if find "$SRC_DIR" -name "*.php" -exec grep -l "^\s*\(require\|include\)\(_once\)\?\s*[(\s]*['\"]" {} \; 2>/dev/null | head -1 >/dev/null; then
+            find "$SRC_DIR" -name "*.php" | while read -r php_file; do
+                if grep -q "^\s*\(require\|include\)\(_once\)\?\s*[(\s]*['\"]" "$php_file" 2>/dev/null; then
+                    check_php_includes "$php_file"
+                    ((php_files_with_includes++))
+                fi
+            done
+            
+            if [[ $php_files_with_includes -eq 0 ]]; then
+                log_info "No PHP files with include/require statements found (acceptable during initial development)"
+            fi
+        else
+            log_info "No PHP files with include/require statements found (acceptable during initial development)"
+        fi
         
         log_header "📦 PSR-4 Structure Verification"
         check_psr4_structure

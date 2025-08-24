@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main Plugin Class
  *
@@ -16,6 +17,8 @@ namespace WooAiAssistant;
 
 use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\Common\Utils;
+use WooAiAssistant\Admin\AdminMenu;
+use WooAiAssistant\RestApi\RestController;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -24,15 +27,15 @@ if (!defined('ABSPATH')) {
 
 /**
  * Class Main
- * 
+ *
  * The main plugin class that handles initialization and coordination of all
  * plugin components. Uses the singleton pattern to ensure only one instance
  * exists throughout the application lifecycle.
- * 
+ *
  * @since 1.0.0
  */
-class Main {
-
+class Main
+{
     use Singleton;
 
     /**
@@ -91,7 +94,8 @@ class Main {
      *
      * @since 1.0.0
      */
-    private function __construct() {
+    private function __construct()
+    {
         $this->version = WOO_AI_ASSISTANT_VERSION;
         $this->setupHooks();
     }
@@ -102,7 +106,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    private function setupHooks(): void {
+    private function setupHooks(): void
+    {
         // Initialize plugin on WordPress init
         add_action('init', [$this, 'init'], 0);
 
@@ -137,7 +142,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function init(): void {
+    public function init(): void
+    {
         // Prevent multiple initializations
         if ($this->initialized) {
             return;
@@ -175,7 +181,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function loadTextdomain(): void {
+    public function loadTextdomain(): void
+    {
         load_plugin_textdomain(
             'woo-ai-assistant',
             false,
@@ -189,7 +196,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function adminInit(): void {
+    public function adminInit(): void
+    {
         // Admin-specific initialization will be handled by AdminMenu component
         Utils::logDebug('Admin initialization hook fired');
     }
@@ -200,7 +208,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function enqueueScripts(): void {
+    public function enqueueScripts(): void
+    {
         // Frontend scripts will be handled by WidgetLoader component
         Utils::logDebug('Frontend scripts enqueue hook fired');
     }
@@ -211,10 +220,11 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function handleAjax(): void {
+    public function handleAjax(): void
+    {
         // AJAX handling will be delegated to appropriate components
         Utils::logDebug('AJAX request received');
-        
+
         // For now, return a simple response
         wp_send_json_error('AJAX handler not implemented yet');
     }
@@ -226,7 +236,8 @@ class Main {
      * @param string $plugin Path to the plugin file
      * @return void
      */
-    public function onPluginActivated(string $plugin): void {
+    public function onPluginActivated(string $plugin): void
+    {
         if ($plugin === plugin_basename(WOO_AI_ASSISTANT_PLUGIN_FILE)) {
             Utils::logDebug('Woo AI Assistant plugin activated');
         }
@@ -239,7 +250,8 @@ class Main {
      * @param string $plugin Path to the plugin file
      * @return void
      */
-    public function onPluginDeactivated(string $plugin): void {
+    public function onPluginDeactivated(string $plugin): void
+    {
         if ($plugin === plugin_basename(WOO_AI_ASSISTANT_PLUGIN_FILE)) {
             Utils::logDebug('Woo AI Assistant plugin deactivated');
         }
@@ -251,7 +263,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function onWooCommerceLoaded(): void {
+    public function onWooCommerceLoaded(): void
+    {
         Utils::logDebug('WooCommerce loaded - ready for integration');
     }
 
@@ -261,7 +274,8 @@ class Main {
      * @since 1.0.0
      * @return bool True if all requirements are met
      */
-    private function checkSystemRequirements(): bool {
+    private function checkSystemRequirements(): bool
+    {
         // Check WordPress version
         if (version_compare(get_bloginfo('version'), $this->minWpVersion, '<')) {
             add_action('admin_notices', [$this, 'wpVersionNotice']);
@@ -295,10 +309,22 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    private function loadComponents(): void {
-        // Components will be loaded here as they are implemented
-        // For now, just log that we're ready to load components
-        Utils::logDebug('Ready to load plugin components');
+    private function loadComponents(): void
+    {
+        // Load core components (available in both admin and frontend)
+        $this->loadCoreComponents();
+
+        // Load admin components if in admin area
+        if (is_admin()) {
+            $this->loadAdminComponents();
+        }
+
+        // Load frontend components if not in admin
+        if (!is_admin()) {
+            $this->loadFrontendComponents();
+        }
+
+        Utils::logDebug('Plugin components loaded');
 
         /**
          * Components loaded action
@@ -312,12 +338,84 @@ class Main {
     }
 
     /**
+     * Load core components (available in both admin and frontend)
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadCoreComponents(): void
+    {
+        // Load REST API Controller (needed for both admin and frontend)
+        if (!class_exists('WooAiAssistant\RestApi\RestController')) {
+            Utils::logError('RestController class not found - autoloader may not be initialized properly');
+            return;
+        }
+
+        $restController = RestController::getInstance();
+        $this->registerComponent('rest_controller', $restController);
+
+        Utils::logDebug('Core components loaded');
+
+        /**
+         * Core components loaded action
+         *
+         * @since 1.0.0
+         * @param Main $instance The main plugin instance
+         */
+        do_action('woo_ai_assistant_core_components_loaded', $this);
+    }
+
+    /**
+     * Load admin-specific components
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadAdminComponents(): void
+    {
+        // Load AdminMenu component
+        $adminMenu = AdminMenu::getInstance();
+        $this->registerComponent('admin_menu', $adminMenu);
+
+        Utils::logDebug('Admin components loaded');
+
+        /**
+         * Admin components loaded action
+         *
+         * @since 1.0.0
+         * @param Main $instance The main plugin instance
+         */
+        do_action('woo_ai_assistant_admin_components_loaded', $this);
+    }
+
+    /**
+     * Load frontend-specific components
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadFrontendComponents(): void
+    {
+        // Frontend components will be loaded here as they are implemented
+        Utils::logDebug('Frontend components ready to load');
+
+        /**
+         * Frontend components loaded action
+         *
+         * @since 1.0.0
+         * @param Main $instance The main plugin instance
+         */
+        do_action('woo_ai_assistant_frontend_components_loaded', $this);
+    }
+
+    /**
      * WordPress version notice
      *
      * @since 1.0.0
      * @return void
      */
-    public function wpVersionNotice(): void {
+    public function wpVersionNotice(): void
+    {
         $message = sprintf(
             /* translators: 1: Required WordPress version, 2: Current WordPress version */
             esc_html__('Woo AI Assistant requires WordPress version %1$s or higher. You are running version %2$s. Please upgrade WordPress.', 'woo-ai-assistant'),
@@ -334,7 +432,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function phpVersionNotice(): void {
+    public function phpVersionNotice(): void
+    {
         $message = sprintf(
             /* translators: 1: Required PHP version, 2: Current PHP version */
             esc_html__('Woo AI Assistant requires PHP version %1$s or higher. You are running version %2$s. Please upgrade PHP.', 'woo-ai-assistant'),
@@ -351,7 +450,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function woocommerceNotice(): void {
+    public function woocommerceNotice(): void
+    {
         $message = esc_html__('Woo AI Assistant requires WooCommerce to be installed and active. Please install and activate WooCommerce.', 'woo-ai-assistant');
         $this->displayNotice($message, 'error');
     }
@@ -362,7 +462,8 @@ class Main {
      * @since 1.0.0
      * @return void
      */
-    public function wcVersionNotice(): void {
+    public function wcVersionNotice(): void
+    {
         $message = sprintf(
             /* translators: 1: Required WooCommerce version, 2: Current WooCommerce version */
             esc_html__('Woo AI Assistant requires WooCommerce version %1$s or higher. You are running version %2$s. Please upgrade WooCommerce.', 'woo-ai-assistant'),
@@ -381,7 +482,8 @@ class Main {
      * @param string $type Notice type (success, info, warning, error)
      * @return void
      */
-    private function displayNotice(string $message, string $type = 'info'): void {
+    private function displayNotice(string $message, string $type = 'info'): void
+    {
         printf(
             '<div class="notice notice-%s is-dismissible"><p><strong>%s:</strong> %s</p></div>',
             esc_attr($type),
@@ -396,7 +498,8 @@ class Main {
      * @since 1.0.0
      * @return string Plugin version
      */
-    public function getVersion(): string {
+    public function getVersion(): string
+    {
         return $this->version;
     }
 
@@ -406,7 +509,8 @@ class Main {
      * @since 1.0.0
      * @return bool True if initialized
      */
-    public function isInitialized(): bool {
+    public function isInitialized(): bool
+    {
         return $this->initialized;
     }
 
@@ -417,7 +521,8 @@ class Main {
      * @param string $componentName Component name
      * @return mixed|null Component instance or null if not found
      */
-    public function getComponent(string $componentName) {
+    public function getComponent(string $componentName)
+    {
         return $this->components[$componentName] ?? null;
     }
 
@@ -429,7 +534,8 @@ class Main {
      * @param mixed $instance Component instance
      * @return void
      */
-    public function registerComponent(string $name, $instance): void {
+    public function registerComponent(string $name, $instance): void
+    {
         $this->components[$name] = $instance;
         Utils::logDebug("Component '{$name}' registered");
     }
@@ -440,7 +546,8 @@ class Main {
      * @since 1.0.0
      * @return array Array of registered components
      */
-    public function getComponents(): array {
+    public function getComponents(): array
+    {
         return $this->components;
     }
 }
