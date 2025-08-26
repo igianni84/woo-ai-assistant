@@ -2,6 +2,7 @@
  * useChat Hook
  * 
  * Custom React hook for managing chat functionality and state
+ * with full integration to the new ApiService layer.
  * 
  * @package WooAiAssistant
  * @subpackage Hooks
@@ -10,10 +11,22 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useApi } from '../services/ApiService';
 
+/**
+ * Custom hook for managing chat functionality and state
+ * 
+ * @param {Object} options - Hook options
+ * @param {string} options.apiEndpoint - API endpoint URL (deprecated, now uses ApiService)
+ * @param {string} options.nonce - WordPress nonce (deprecated, now handled by ApiService)
+ * @param {number} options.userId - User ID
+ * @param {Object} options.pageContext - Current page context
+ * @param {Function} options.onError - Error callback function
+ * @returns {Object} Chat state and functions
+ */
 export const useChat = ({ 
-  apiEndpoint, 
-  nonce, 
+  apiEndpoint, // Deprecated but kept for compatibility
+  nonce, // Deprecated but kept for compatibility
   userId, 
   pageContext, 
   onError 
@@ -22,21 +35,27 @@ export const useChat = ({
   const [isTyping, setIsTyping] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [conversationId, setConversationId] = useState(null);
+  
+  // Get the API service from context
+  const apiService = useApi();
 
-  // Initialize connection
+  // Initialize connection using ApiService
   useEffect(() => {
     const initializeChat = async () => {
       try {
         setConnectionStatus('connecting');
         
-        // Simulate connection initialization
-        // This will be replaced with actual API calls in later tasks
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Test API connectivity
+        const isConnected = await apiService.testConnection();
         
-        setConnectionStatus('connected');
-        
-        // Generate a mock conversation ID
-        setConversationId(`conv_${Date.now()}_${userId}`);
+        if (isConnected) {
+          setConnectionStatus('connected');
+          
+          // Generate a conversation ID
+          setConversationId(`conv_${Date.now()}_${userId}`);
+        } else {
+          throw new Error('API connectivity test failed');
+        }
         
       } catch (error) {
         setConnectionStatus('error');
@@ -50,19 +69,21 @@ export const useChat = ({
       }
     };
 
-    initializeChat();
-  }, [apiEndpoint, nonce, userId, onError]);
+    if (apiService) {
+      initializeChat();
+    }
+  }, [apiService, userId, onError]);
 
-  // Send message function
+  // Send message function using ApiService
   const sendMessage = useCallback(async (messageText) => {
-    if (!messageText.trim() || !conversationId) {
+    if (!messageText.trim() || !conversationId || !apiService) {
       return;
     }
 
     const userMessage = {
       id: `msg_${Date.now()}`,
-      text: messageText.trim(),
-      sender: 'user',
+      content: messageText.trim(),
+      type: 'user',
       timestamp: new Date().toISOString(),
     };
 
@@ -71,15 +92,27 @@ export const useChat = ({
     setIsTyping(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use ApiService to send message
+      const response = await apiService.sendMessage(
+        messageText, 
+        conversationId, 
+        pageContext
+      );
       
-      // Mock AI response
+      // Update conversation ID if provided by server
+      if (response.conversationId && response.conversationId !== conversationId) {
+        setConversationId(response.conversationId);
+      }
+      
+      // Create AI response message
       const aiResponse = {
         id: `msg_${Date.now() + 1}`,
-        text: `Thank you for your message: "${messageText}". This is a placeholder response. The actual AI integration will be implemented in later tasks.`,
-        sender: 'assistant',
-        timestamp: new Date().toISOString(),
+        content: response.response,
+        type: 'bot',
+        timestamp: response.timestamp || new Date().toISOString(),
+        confidence: response.confidence,
+        sources: response.sources,
+        metadata: response.metadata
       };
 
       setConversation(prev => [...prev, aiResponse]);
@@ -88,15 +121,112 @@ export const useChat = ({
     } catch (error) {
       setIsTyping(false);
       
-      if (onError) {
-        onError({
-          message: 'Failed to send message',
-          type: 'send_error',
-          critical: false,
-        });
+      // Error is already handled by ApiService onError callback
+      // But we also update connection status if it's a critical error
+      if (error.type === 'auth_error' || error.type === 'server_error') {
+        setConnectionStatus('error');
       }
     }
-  }, [conversationId, onError]);
+  }, [conversationId, apiService, pageContext]);
+
+  // Send streaming message function using ApiService
+  const sendStreamingMessage = useCallback(async (messageText, onChunk) => {
+    if (!messageText.trim() || !conversationId || !apiService) {
+      return;
+    }
+
+    const userMessage = {
+      id: `msg_${Date.now()}`,
+      content: messageText.trim(),
+      type: 'user',
+      timestamp: new Date().toISOString(),
+    };
+
+    // Add user message to conversation
+    setConversation(prev => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      // Use ApiService streaming
+      const response = await apiService.sendStreamingMessage(
+        messageText, 
+        conversationId, 
+        onChunk,
+        pageContext
+      );
+      
+      // Update conversation ID if provided by server
+      if (response.conversationId && response.conversationId !== conversationId) {
+        setConversationId(response.conversationId);
+      }
+      
+      // Create AI response message
+      const aiResponse = {
+        id: `msg_${Date.now() + 1}`,
+        content: response.response,
+        type: 'bot',
+        timestamp: response.timestamp || new Date().toISOString(),
+        confidence: response.confidence,
+        sources: response.sources,
+        metadata: response.metadata
+      };
+
+      setConversation(prev => [...prev, aiResponse]);
+      setIsTyping(false);
+
+      return response;
+
+    } catch (error) {
+      setIsTyping(false);
+      
+      // Error is already handled by ApiService onError callback
+      if (error.type === 'auth_error' || error.type === 'server_error') {
+        setConnectionStatus('error');
+      }
+      
+      throw error;
+    }
+  }, [conversationId, apiService, pageContext]);
+
+  // Execute action function using ApiService
+  const executeAction = useCallback(async (actionType, actionData) => {
+    if (!conversationId || !apiService) {
+      throw new Error('Chat not initialized');
+    }
+
+    try {
+      const response = await apiService.executeAction(
+        actionType,
+        actionData,
+        conversationId
+      );
+      
+      return response;
+
+    } catch (error) {
+      throw error;
+    }
+  }, [conversationId, apiService]);
+
+  // Submit rating function using ApiService
+  const submitRating = useCallback(async (rating, feedback = '') => {
+    if (!conversationId || !apiService) {
+      throw new Error('Chat not initialized');
+    }
+
+    try {
+      const response = await apiService.submitRating(
+        conversationId,
+        rating,
+        feedback
+      );
+      
+      return response;
+
+    } catch (error) {
+      throw error;
+    }
+  }, [conversationId, apiService]);
 
   // Clear conversation function
   const clearConversation = useCallback(() => {
@@ -104,14 +234,23 @@ export const useChat = ({
     setConversationId(`conv_${Date.now()}_${userId}`);
   }, [userId]);
 
-  // Reconnect function
+  // Reconnect function using ApiService
   const reconnect = useCallback(async () => {
+    if (!apiService) {
+      return;
+    }
+
     setConnectionStatus('connecting');
     
     try {
-      // Simulate reconnection
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setConnectionStatus('connected');
+      // Test connection using ApiService
+      const isConnected = await apiService.testConnection();
+      
+      if (isConnected) {
+        setConnectionStatus('connected');
+      } else {
+        throw new Error('Reconnection failed');
+      }
     } catch (error) {
       setConnectionStatus('error');
       if (onError) {
@@ -122,7 +261,16 @@ export const useChat = ({
         });
       }
     }
-  }, [onError]);
+  }, [apiService, onError]);
+
+  // Cancel all requests when unmounting
+  useEffect(() => {
+    return () => {
+      if (apiService) {
+        apiService.cancelAllRequests();
+      }
+    };
+  }, [apiService]);
 
   return {
     conversation,
@@ -130,6 +278,9 @@ export const useChat = ({
     connectionStatus,
     conversationId,
     sendMessage,
+    sendStreamingMessage,
+    executeAction,
+    submitRating,
     clearConversation,
     reconnect,
   };

@@ -163,6 +163,16 @@ global.fetch = jest.fn(() =>
 global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
 global.URL.revokeObjectURL = jest.fn();
 
+// Mock DOM methods that are not implemented in JSDOM
+Element.prototype.scrollIntoView = jest.fn();
+Element.prototype.scroll = jest.fn();
+Element.prototype.scrollTo = jest.fn();
+
+// Mock HTMLElement methods
+HTMLElement.prototype.scrollIntoView = jest.fn();
+HTMLElement.prototype.focus = jest.fn();
+HTMLElement.prototype.blur = jest.fn();
+
 // Enhanced console methods for better test debugging
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
@@ -264,7 +274,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  // Clean up any remaining timers
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  // Clean up timers only if fake timers are active
+  try {
+    if (jest.isMockFunction(setTimeout)) {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    }
+  } catch (e) {
+    // Ignore timer cleanup errors
+  }
 });

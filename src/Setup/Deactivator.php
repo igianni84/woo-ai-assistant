@@ -90,9 +90,9 @@ class Deactivator
 
         foreach ($cron_hooks as $hook) {
             // Get all scheduled events for this hook
-            $scheduled_events = wp_get_scheduled_event($hook);
+            $scheduledEvents = wp_get_scheduled_event($hook);
 
-            if ($scheduled_events) {
+            if ($scheduledEvents) {
                 // Clear all instances of this scheduled event
                 wp_clear_scheduled_hook($hook);
                 Utils::logDebug("Cleared scheduled event: {$hook}");
@@ -143,11 +143,11 @@ class Deactivator
     {
         global $wpdb;
 
-        $table_conversations = $wpdb->prefix . 'woo_ai_conversations';
+        $tableConversations = $wpdb->prefix . 'woo_ai_conversations';
 
         // Update all active conversations to paused status
         $updated = $wpdb->update(
-            $table_conversations,
+            $tableConversations,
             [
                 'status' => 'paused',
                 'updated_at' => current_time('mysql'),
@@ -175,7 +175,7 @@ class Deactivator
         global $wpdb;
 
         // Delete all transients that start with our plugin prefix
-        $plugin_transients = $wpdb->get_results(
+        $pluginTransients = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT option_name FROM {$wpdb->options} 
                 WHERE option_name LIKE %s 
@@ -186,7 +186,7 @@ class Deactivator
         );
 
         $deleted_count = 0;
-        foreach ($plugin_transients as $transient) {
+        foreach ($pluginTransients as $transient) {
             if (delete_option($transient->option_name)) {
                 $deleted_count++;
             }
@@ -264,12 +264,12 @@ class Deactivator
         // Remove any active user sessions related to the chatbot
         global $wpdb;
 
-        $table_conversations = $wpdb->prefix . 'woo_ai_conversations';
+        $tableConversations = $wpdb->prefix . 'woo_ai_conversations';
 
         // Update conversation metadata to indicate plugin was deactivated
         $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$table_conversations} 
+                "UPDATE {$tableConversations} 
                 SET context = JSON_SET(
                     COALESCE(context, '{}'), 
                     '$.plugin_deactivated_at', %s

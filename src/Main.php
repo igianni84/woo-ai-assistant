@@ -19,6 +19,14 @@ use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Admin\AdminMenu;
 use WooAiAssistant\RestApi\RestController;
+use WooAiAssistant\Api\IntermediateServerClient;
+use WooAiAssistant\Api\LicenseManager;
+use WooAiAssistant\KnowledgeBase\Scanner;
+use WooAiAssistant\KnowledgeBase\Indexer;
+use WooAiAssistant\KnowledgeBase\VectorManager;
+use WooAiAssistant\KnowledgeBase\AIManager;
+use WooAiAssistant\KnowledgeBase\CronManager;
+use WooAiAssistant\KnowledgeBase\HealthMonitor;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -85,6 +93,22 @@ class Main
      * @var array
      */
     private array $components = [];
+
+    /**
+     * Knowledge Base initialization status
+     *
+     * @since 1.0.0
+     * @var bool
+     */
+    private bool $kbInitialized = false;
+
+    /**
+     * Knowledge Base health status
+     *
+     * @since 1.0.0
+     * @var array
+     */
+    private array $kbHealthStatus = [];
 
     /**
      * Constructor
@@ -158,6 +182,9 @@ class Main
 
         // Load core components
         $this->loadComponents();
+
+        // Initialize Knowledge Base system
+        $this->initializeKnowledgeBase();
 
         // Mark as initialized
         $this->initialized = true;
@@ -354,6 +381,27 @@ class Main
         $restController = RestController::getInstance();
         $this->registerComponent('rest_controller', $restController);
 
+        // Load Intermediate Server Client for API communication
+        if (class_exists('WooAiAssistant\Api\IntermediateServerClient')) {
+            $serverClient = IntermediateServerClient::getInstance();
+            $this->registerComponent('server_client', $serverClient);
+            Utils::logDebug('Intermediate Server Client loaded');
+        } else {
+            Utils::logError('IntermediateServerClient class not found');
+        }
+
+        // Load License Manager for plan management and usage tracking
+        if (class_exists('WooAiAssistant\Api\LicenseManager')) {
+            $licenseManager = LicenseManager::getInstance();
+            $this->registerComponent('license_manager', $licenseManager);
+            Utils::logDebug('License Manager loaded');
+        } else {
+            Utils::logError('LicenseManager class not found');
+        }
+
+        // Load Knowledge Base components
+        $this->loadKnowledgeBaseComponents();
+
         Utils::logDebug('Core components loaded');
 
         /**
@@ -549,5 +597,450 @@ class Main
     public function getComponents(): array
     {
         return $this->components;
+    }
+
+    /**
+     * Load Knowledge Base components
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadKnowledgeBaseComponents(): void
+    {
+        try {
+            // Initialize Scanner
+            if (class_exists('WooAiAssistant\KnowledgeBase\Scanner')) {
+                $scanner = Scanner::getInstance();
+                $this->registerComponent('kb_scanner', $scanner);
+                Utils::logDebug('Knowledge Base Scanner loaded');
+            } else {
+                Utils::logError('Scanner class not found');
+                return;
+            }
+
+            // Initialize Indexer
+            if (class_exists('WooAiAssistant\KnowledgeBase\Indexer')) {
+                $indexer = Indexer::getInstance();
+                $this->registerComponent('kb_indexer', $indexer);
+                Utils::logDebug('Knowledge Base Indexer loaded');
+            } else {
+                Utils::logError('Indexer class not found');
+                return;
+            }
+
+            // Initialize VectorManager
+            if (class_exists('WooAiAssistant\KnowledgeBase\VectorManager')) {
+                $vectorManager = VectorManager::getInstance();
+                $this->registerComponent('kb_vector_manager', $vectorManager);
+                Utils::logDebug('Knowledge Base VectorManager loaded');
+            } else {
+                Utils::logError('VectorManager class not found');
+                return;
+            }
+
+            // Initialize AIManager
+            if (class_exists('WooAiAssistant\KnowledgeBase\AIManager')) {
+                $aiManager = AIManager::getInstance();
+                $this->registerComponent('kb_ai_manager', $aiManager);
+                Utils::logDebug('Knowledge Base AIManager loaded');
+            } else {
+                Utils::logError('AIManager class not found');
+                return;
+            }
+
+            // Initialize CronManager
+            if (class_exists('WooAiAssistant\KnowledgeBase\CronManager')) {
+                $cronManager = CronManager::getInstance();
+                $this->registerComponent('kb_cron_manager', $cronManager);
+                Utils::logDebug('Knowledge Base CronManager loaded');
+            } else {
+                Utils::logError('CronManager class not found');
+            }
+
+            // Initialize HealthMonitor
+            if (class_exists('WooAiAssistant\KnowledgeBase\HealthMonitor')) {
+                $healthMonitor = HealthMonitor::getInstance();
+                $this->registerComponent('kb_health_monitor', $healthMonitor);
+                Utils::logDebug('Knowledge Base HealthMonitor loaded');
+            } else {
+                Utils::logError('HealthMonitor class not found');
+            }
+
+            Utils::logDebug('All Knowledge Base components loaded successfully');
+
+            /**
+             * Knowledge Base components loaded action
+             *
+             * Fired after all KB components have been loaded.
+             *
+             * @since 1.0.0
+             * @param Main $instance The main plugin instance
+             */
+            do_action('woo_ai_assistant_kb_components_loaded', $this);
+        } catch (Exception $e) {
+            Utils::logError('Failed to load Knowledge Base components: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Initialize Knowledge Base system
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function initializeKnowledgeBase(): void
+    {
+        if ($this->kbInitialized) {
+            return;
+        }
+
+        try {
+            Utils::logDebug('Initializing Knowledge Base system');
+
+            // Run KB health check
+            $this->performKnowledgeBaseHealthCheck();
+
+            // Setup KB hooks
+            $this->setupKnowledgeBaseHooks();
+
+            // Auto-index on first activation if needed
+            $this->maybeAutoIndex();
+
+            $this->kbInitialized = true;
+
+            /**
+             * Knowledge Base initialized action
+             *
+             * Fired after the KB system has been fully initialized.
+             *
+             * @since 1.0.0
+             * @param Main $instance The main plugin instance
+             */
+            do_action('woo_ai_assistant_kb_initialized', $this);
+
+            Utils::logDebug('Knowledge Base system initialized successfully');
+        } catch (Exception $e) {
+            Utils::logError('Failed to initialize Knowledge Base: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Setup Knowledge Base WordPress hooks
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function setupKnowledgeBaseHooks(): void
+    {
+        // Product update hooks
+        add_action('woocommerce_update_product', [$this, 'onProductUpdated'], 10, 1);
+        add_action('woocommerce_new_product', [$this, 'onProductCreated'], 10, 1);
+        add_action('woocommerce_delete_product', [$this, 'onProductDeleted'], 10, 1);
+
+        // Page/Post update hooks
+        add_action('save_post', [$this, 'onPostSaved'], 10, 3);
+        add_action('before_delete_post', [$this, 'onPostDeleted'], 10, 1);
+
+        // WooCommerce settings hooks
+        add_action('woocommerce_settings_saved', [$this, 'onWooSettingsUpdated'], 10);
+
+        // KB maintenance hooks
+        add_action('woo_ai_assistant_daily_maintenance', [$this, 'performDailyMaintenance']);
+
+        Utils::logDebug('Knowledge Base hooks registered');
+    }
+
+    /**
+     * Perform Knowledge Base health check
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function performKnowledgeBaseHealthCheck(): void
+    {
+        $this->kbHealthStatus = [
+            'status' => 'healthy',
+            'last_check' => current_time('mysql'),
+            'components' => [],
+            'issues' => []
+        ];
+
+        // Check Scanner component
+        $scanner = $this->getComponent('kb_scanner');
+        if ($scanner) {
+            $this->kbHealthStatus['components']['scanner'] = 'loaded';
+        } else {
+            $this->kbHealthStatus['components']['scanner'] = 'failed';
+            $this->kbHealthStatus['issues'][] = 'Scanner component not loaded';
+            $this->kbHealthStatus['status'] = 'degraded';
+        }
+
+        // Check Indexer component
+        $indexer = $this->getComponent('kb_indexer');
+        if ($indexer) {
+            $this->kbHealthStatus['components']['indexer'] = 'loaded';
+        } else {
+            $this->kbHealthStatus['components']['indexer'] = 'failed';
+            $this->kbHealthStatus['issues'][] = 'Indexer component not loaded';
+            $this->kbHealthStatus['status'] = 'degraded';
+        }
+
+        // Check VectorManager component
+        $vectorManager = $this->getComponent('kb_vector_manager');
+        if ($vectorManager) {
+            $this->kbHealthStatus['components']['vector_manager'] = 'loaded';
+        } else {
+            $this->kbHealthStatus['components']['vector_manager'] = 'failed';
+            $this->kbHealthStatus['issues'][] = 'VectorManager component not loaded';
+            $this->kbHealthStatus['status'] = 'degraded';
+        }
+
+        // Check AIManager component
+        $aiManager = $this->getComponent('kb_ai_manager');
+        if ($aiManager) {
+            $this->kbHealthStatus['components']['ai_manager'] = 'loaded';
+        } else {
+            $this->kbHealthStatus['components']['ai_manager'] = 'failed';
+            $this->kbHealthStatus['issues'][] = 'AIManager component not loaded';
+            $this->kbHealthStatus['status'] = 'critical';
+        }
+
+        // Update health status option
+        update_option('woo_ai_assistant_kb_health', $this->kbHealthStatus);
+
+        Utils::logDebug('Knowledge Base health check completed', $this->kbHealthStatus);
+    }
+
+    /**
+     * Auto-index content on first activation
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function maybeAutoIndex(): void
+    {
+        $needsIndexing = get_option('woo_ai_assistant_needs_initial_index', true);
+
+        if ($needsIndexing && Utils::isWooCommerceActive()) {
+            Utils::logDebug('Scheduling initial Knowledge Base indexing');
+
+            // Schedule background indexing
+            if (!wp_next_scheduled('woo_ai_assistant_initial_index')) {
+                wp_schedule_single_event(time() + 60, 'woo_ai_assistant_initial_index');
+            }
+
+            update_option('woo_ai_assistant_needs_initial_index', false);
+        }
+    }
+
+    /**
+     * Handle product updated event
+     *
+     * @since 1.0.0
+     * @param int|\WC_Product $product Product ID or object
+     * @return void
+     */
+    public function onProductUpdated($product): void
+    {
+        try {
+            $scanner = $this->getComponent('kb_scanner');
+            if ($scanner && method_exists($scanner, 'onProductUpdated')) {
+                $scanner->onProductUpdated($product);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error handling product update: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle product created event
+     *
+     * @since 1.0.0
+     * @param int $productId Product ID
+     * @return void
+     */
+    public function onProductCreated(int $productId): void
+    {
+        $this->onProductUpdated($productId);
+    }
+
+    /**
+     * Handle product deleted event
+     *
+     * @since 1.0.0
+     * @param int $productId Product ID
+     * @return void
+     */
+    public function onProductDeleted(int $productId): void
+    {
+        try {
+            $indexer = $this->getComponent('kb_indexer');
+            if ($indexer && method_exists($indexer, 'removeContent')) {
+                $indexer->removeContent('product', $productId);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error handling product deletion: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle post saved event
+     *
+     * @since 1.0.0
+     * @param int $postId Post ID
+     * @param \WP_Post $post Post object
+     * @param bool $update Whether this is an update
+     * @return void
+     */
+    public function onPostSaved(int $postId, \WP_Post $post, bool $update): void
+    {
+        try {
+            $scanner = $this->getComponent('kb_scanner');
+            if ($scanner && method_exists($scanner, 'onPostSaved')) {
+                $scanner->onPostSaved($postId, $post, $update);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error handling post save: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle post deleted event
+     *
+     * @since 1.0.0
+     * @param int $postId Post ID
+     * @return void
+     */
+    public function onPostDeleted(int $postId): void
+    {
+        try {
+            $indexer = $this->getComponent('kb_indexer');
+            if ($indexer && method_exists($indexer, 'removeContent')) {
+                $indexer->removeContent('post', $postId);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error handling post deletion: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle WooCommerce settings updated event
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function onWooSettingsUpdated(): void
+    {
+        try {
+            $scanner = $this->getComponent('kb_scanner');
+            if ($scanner && method_exists($scanner, 'clearCache')) {
+                $scanner->clearCache('woo_settings');
+            }
+
+            // Schedule re-indexing of settings
+            if (!wp_next_scheduled('woo_ai_assistant_reindex_settings')) {
+                wp_schedule_single_event(time() + 300, 'woo_ai_assistant_reindex_settings');
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error handling WooCommerce settings update: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Perform daily maintenance tasks
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function performDailyMaintenance(): void
+    {
+        try {
+            Utils::logDebug('Starting daily KB maintenance');
+
+            // Perform health check
+            $this->performKnowledgeBaseHealthCheck();
+
+            // Clean up old conversation data
+            $this->cleanupOldConversations();
+
+            // Update usage statistics
+            $this->updateUsageStatistics();
+
+            Utils::logDebug('Daily KB maintenance completed');
+        } catch (Exception $e) {
+            Utils::logError('Error during daily maintenance: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clean up old conversations
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function cleanupOldConversations(): void
+    {
+        global $wpdb;
+
+        $retentionDays = apply_filters('woo_ai_assistant_conversation_retention_days', 30);
+        $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
+
+        $tableName = $wpdb->prefix . 'woo_ai_conversations';
+
+        $deleted = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$tableName} WHERE created_at < %s AND status = 'completed'",
+            $cutoffDate
+        ));
+
+        if ($deleted !== false && $deleted > 0) {
+            Utils::logDebug("Cleaned up {$deleted} old conversations");
+        }
+    }
+
+    /**
+     * Update usage statistics
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function updateUsageStatistics(): void
+    {
+        global $wpdb;
+
+        $stats = [
+            'total_conversations' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}woo_ai_conversations"),
+            'total_messages' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}woo_ai_messages"),
+            'kb_entries' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}woo_ai_knowledge_base"),
+            'last_updated' => current_time('mysql')
+        ];
+
+        update_option('woo_ai_assistant_usage_stats', $stats);
+    }
+
+    /**
+     * Get Knowledge Base health status
+     *
+     * @since 1.0.0
+     * @return array Health status array
+     */
+    public function getKnowledgeBaseHealth(): array
+    {
+        return $this->kbHealthStatus ?: get_option('woo_ai_assistant_kb_health', [
+            'status' => 'unknown',
+            'last_check' => null,
+            'components' => [],
+            'issues' => ['Health check not performed yet']
+        ]);
+    }
+
+    /**
+     * Check if Knowledge Base is initialized
+     *
+     * @since 1.0.0
+     * @return bool True if initialized
+     */
+    public function isKnowledgeBaseInitialized(): bool
+    {
+        return $this->kbInitialized;
     }
 }

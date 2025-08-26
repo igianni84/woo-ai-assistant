@@ -13,7 +13,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import ChatWidget from './components/ChatWidget';
+import ChatWindow from './components/ChatWindow';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ApiProvider } from './services/ApiService';
 import { useChat } from './hooks/useChat';
@@ -99,7 +99,7 @@ const App = ({ widgetId, config }) => {
   // Log widget lifecycle in debug mode
   useEffect(() => {
     if (config.isDebug) {
-      console.log('Woo AI Assistant Widget App mounted:', {
+      console.info('Woo AI Assistant Widget App mounted:', {
         widgetId,
         config,
         isVisible,
@@ -165,7 +165,7 @@ const App = ({ widgetId, config }) => {
             '--widget-border-radius': config.borderRadius || '8px',
           }}
         >
-          <ChatWidget
+          <ChatWindow
             isVisible={isVisible}
             onToggleVisibility={handleToggleVisibility}
             onClose={handleClose}

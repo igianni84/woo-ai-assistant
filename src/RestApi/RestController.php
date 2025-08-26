@@ -114,6 +114,9 @@ class RestController
         // System endpoints
         $this->registerSystemRoutes();
 
+        // Test endpoints (for development and integration testing)
+        $this->registerTestRoutes();
+
         /**
          * REST routes registered action
          *
@@ -136,7 +139,7 @@ class RestController
     private function registerFrontendRoutes(): void
     {
         // Chat endpoint - Handle chat messages
-        register_rest_route($this->namespace, '/chat', [
+        \register_rest_route($this->namespace, '/chat', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$this, 'handleChat'],
             'permission_callback' => [$this, 'checkFrontendPermissions'],
@@ -170,7 +173,7 @@ class RestController
         ]);
 
         // Action endpoint - Execute agentic actions
-        register_rest_route($this->namespace, '/action', [
+        \register_rest_route($this->namespace, '/action', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$this, 'handleAction'],
             'permission_callback' => [$this, 'checkFrontendPermissions'],
@@ -203,7 +206,7 @@ class RestController
         ]);
 
         // Rating endpoint - Collect conversation ratings
-        register_rest_route($this->namespace, '/rating', [
+        \register_rest_route($this->namespace, '/rating', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$this, 'handleRating'],
             'permission_callback' => [$this, 'checkFrontendPermissions'],
@@ -237,7 +240,7 @@ class RestController
         ]);
 
         // Config endpoint - Provide widget configuration
-        register_rest_route($this->namespace, '/config', [
+        \register_rest_route($this->namespace, '/config', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'getWidgetConfig'],
             'permission_callback' => [$this, 'checkPublicPermissions'],
@@ -263,14 +266,14 @@ class RestController
     private function registerAdminRoutes(): void
     {
         // Dashboard data endpoint
-        register_rest_route($this->namespace, '/admin/dashboard', [
+        \register_rest_route($this->namespace, '/admin/dashboard', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'getDashboardData'],
             'permission_callback' => [$this, 'checkAdminPermissions']
         ]);
 
         // Conversations endpoint
-        register_rest_route($this->namespace, '/admin/conversations', [
+        \register_rest_route($this->namespace, '/admin/conversations', [
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getConversations'],
@@ -311,7 +314,7 @@ class RestController
         ]);
 
         // Settings endpoints
-        register_rest_route($this->namespace, '/admin/settings', [
+        \register_rest_route($this->namespace, '/admin/settings', [
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getSettings'],
@@ -332,11 +335,14 @@ class RestController
         ]);
 
         // Knowledge base health endpoint
-        register_rest_route($this->namespace, '/admin/kb-health', [
+        \register_rest_route($this->namespace, '/admin/kb-health', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'getKnowledgeBaseHealth'],
             'permission_callback' => [$this, 'checkAdminPermissions']
         ]);
+
+        // License management endpoints
+        $this->registerLicenseRoutes();
 
         Utils::logDebug('Admin REST API routes registered');
     }
@@ -350,20 +356,137 @@ class RestController
     private function registerSystemRoutes(): void
     {
         // Health check endpoint
-        register_rest_route($this->namespace, '/health', [
+        \register_rest_route($this->namespace, '/health', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'healthCheck'],
             'permission_callback' => [$this, 'checkPublicPermissions']
         ]);
 
         // Version info endpoint
-        register_rest_route($this->namespace, '/version', [
+        \register_rest_route($this->namespace, '/version', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'getVersionInfo'],
             'permission_callback' => [$this, 'checkPublicPermissions']
         ]);
 
         Utils::logDebug('System REST API routes registered');
+    }
+
+    /**
+     * Register test endpoints for KB functionality
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function registerTestRoutes(): void
+    {
+        // Test Scanner functionality
+        \register_rest_route($this->namespace, '/test/scan', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'testScanner'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'content_type' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'products',
+                    'enum' => ['products', 'pages', 'posts', 'woo_settings', 'categories'],
+                    'description' => 'Type of content to scan'
+                ],
+                'limit' => [
+                    'required' => false,
+                    'type' => 'integer',
+                    'default' => 10,
+                    'minimum' => 1,
+                    'maximum' => 100,
+                    'description' => 'Number of items to scan'
+                ]
+            ]
+        ]);
+
+        // Test Indexer functionality
+        \register_rest_route($this->namespace, '/test/index', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'testIndexer'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'sample_content' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'This is sample content for testing the indexer functionality. It should be chunked and stored properly.',
+                    'description' => 'Sample content to index'
+                ],
+                'chunk_size' => [
+                    'required' => false,
+                    'type' => 'integer',
+                    'default' => 500,
+                    'minimum' => 100,
+                    'maximum' => 2000,
+                    'description' => 'Chunk size for processing'
+                ]
+            ]
+        ]);
+
+        // Test VectorManager functionality
+        \register_rest_route($this->namespace, '/test/vector', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'testVectorManager'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'query' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'shipping cost information',
+                    'description' => 'Query for similarity search'
+                ],
+                'top_k' => [
+                    'required' => false,
+                    'type' => 'integer',
+                    'default' => 5,
+                    'minimum' => 1,
+                    'maximum' => 20,
+                    'description' => 'Number of results to return'
+                ]
+            ]
+        ]);
+
+        // Test AIManager functionality
+        \register_rest_route($this->namespace, '/test/ai', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'testAIManager'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'query' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'What are your shipping options?',
+                    'description' => 'Query for AI response generation'
+                ],
+                'use_rag' => [
+                    'required' => false,
+                    'type' => 'boolean',
+                    'default' => true,
+                    'description' => 'Whether to use RAG for context'
+                ]
+            ]
+        ]);
+
+        // Test full KB pipeline
+        \register_rest_route($this->namespace, '/test/full-pipeline', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'testFullPipeline'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'query' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'Tell me about your return policy',
+                    'description' => 'Query for full pipeline test'
+                ]
+            ]
+        ]);
+
+        Utils::logDebug('Test REST API routes registered');
     }
 
     /**
@@ -668,16 +791,33 @@ class RestController
      */
     public function getKnowledgeBaseHealth(WP_REST_Request $request): WP_REST_Response
     {
-        // TODO: Implement actual KB health check in Phase 2
-        $health = [
-            'score' => 85,
-            'total_entries' => 0,
-            'last_updated' => current_time('mysql'),
-            'issues' => [],
-            'suggestions' => []
-        ];
+        try {
+            $main = \WooAiAssistant\Main::getInstance();
+            $health = $main->getKnowledgeBaseHealth();
 
-        return $this->createSuccessResponse($health);
+            // Add additional health metrics
+            global $wpdb;
+
+            $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
+            $conversationsTable = $wpdb->prefix . 'woo_ai_conversations';
+
+            $health['metrics'] = [
+                'total_kb_entries' => $wpdb->get_var("SELECT COUNT(*) FROM {$kbTable}"),
+                'total_conversations' => $wpdb->get_var("SELECT COUNT(*) FROM {$conversationsTable}"),
+                'avg_confidence' => $wpdb->get_var("SELECT AVG(confidence) FROM {$conversationsTable} WHERE confidence > 0"),
+                'last_kb_update' => $wpdb->get_var("SELECT MAX(updated_at) FROM {$kbTable}")
+            ];
+
+            // Calculate health score based on component status
+            $componentCount = count($health['components']);
+            $healthyComponents = array_count_values($health['components'])['loaded'] ?? 0;
+            $health['calculated_score'] = $componentCount > 0 ? round(($healthyComponents / $componentCount) * 100) : 0;
+
+            return $this->createSuccessResponse($health);
+        } catch (Exception $e) {
+            Utils::logError('KB health check error: ' . $e->getMessage());
+            return $this->createErrorResponse('kb_health_check_error', $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -1026,7 +1166,625 @@ class RestController
             'system' => [
                 'health' => rest_url($this->namespace . '/health'),
                 'version' => rest_url($this->namespace . '/version')
+            ],
+            'test' => [
+                'scan' => rest_url($this->namespace . '/test/scan'),
+                'index' => rest_url($this->namespace . '/test/index'),
+                'vector' => rest_url($this->namespace . '/test/vector'),
+                'ai' => rest_url($this->namespace . '/test/ai'),
+                'full_pipeline' => rest_url($this->namespace . '/test/full-pipeline')
             ]
         ];
+    }
+
+    /**
+     * Test Scanner functionality
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function testScanner(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $contentType = $request->get_param('content_type');
+            $limit = $request->get_param('limit');
+
+            Utils::logDebug('Testing Scanner functionality', ['content_type' => $contentType, 'limit' => $limit]);
+
+            // Get Main instance to access KB components
+            $main = \WooAiAssistant\Main::getInstance();
+            $scanner = $main->getComponent('kb_scanner');
+
+            if (!$scanner) {
+                return $this->createErrorResponse('scanner_not_found', 'Scanner component not available', 500);
+            }
+
+            $startTime = microtime(true);
+            $results = [];
+
+            // Test different scanning methods based on content type
+            switch ($contentType) {
+                case 'products':
+                    $results = $scanner->scanProducts(['limit' => $limit]);
+                    break;
+                case 'pages':
+                    $results = $scanner->scanPages(['limit' => $limit]);
+                    break;
+                case 'woo_settings':
+                    $results = $scanner->scanWooSettings();
+                    break;
+                case 'categories':
+                    $results = $scanner->scanCategories(['limit' => $limit]);
+                    break;
+                default:
+                    $results = $scanner->scanProducts(['limit' => $limit]);
+            }
+
+            $executionTime = microtime(true) - $startTime;
+
+            $response = [
+                'test_type' => 'scanner',
+                'content_type' => $contentType,
+                'execution_time' => round($executionTime, 4),
+                'results_count' => count($results),
+                'sample_results' => array_slice($results, 0, 3), // Show first 3 results
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true)
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('Scanner test error: ' . $e->getMessage());
+            return $this->createErrorResponse('scanner_test_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Test Indexer functionality
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function testIndexer(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $sampleContent = $request->get_param('sample_content');
+            $chunkSize = $request->get_param('chunk_size');
+
+            Utils::logDebug('Testing Indexer functionality', ['chunk_size' => $chunkSize]);
+
+            $main = \WooAiAssistant\Main::getInstance();
+            $indexer = $main->getComponent('kb_indexer');
+
+            if (!$indexer) {
+                return $this->createErrorResponse('indexer_not_found', 'Indexer component not available', 500);
+            }
+
+            $startTime = microtime(true);
+
+            // Create test content array
+            $testContent = [[
+                'id' => 'test_' . uniqid(),
+                'title' => 'Test Content for Indexer',
+                'content' => $sampleContent,
+                'type' => 'test',
+                'url' => 'http://test.com/test-content',
+                'metadata' => [
+                    'test' => true,
+                    'created_at' => current_time('mysql')
+                ]
+            ]];
+
+            // Test indexing
+            $indexResults = $indexer->indexContent($testContent, ['chunk_size' => $chunkSize]);
+
+            $executionTime = microtime(true) - $startTime;
+
+            $response = [
+                'test_type' => 'indexer',
+                'chunk_size' => $chunkSize,
+                'execution_time' => round($executionTime, 4),
+                'chunks_created' => $indexResults['chunks_created'] ?? 0,
+                'content_length' => strlen($sampleContent),
+                'index_results' => $indexResults,
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true)
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('Indexer test error: ' . $e->getMessage());
+            return $this->createErrorResponse('indexer_test_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Test VectorManager functionality
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function testVectorManager(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $query = $request->get_param('query');
+            $topK = $request->get_param('top_k');
+
+            Utils::logDebug('Testing VectorManager functionality', ['query' => $query, 'top_k' => $topK]);
+
+            $main = \WooAiAssistant\Main::getInstance();
+            $vectorManager = $main->getComponent('kb_vector_manager');
+
+            if (!$vectorManager) {
+                return $this->createErrorResponse('vector_manager_not_found', 'VectorManager component not available', 500);
+            }
+
+            $startTime = microtime(true);
+
+            // Test similarity search
+            $searchResults = $vectorManager->searchSimilar($query, $topK);
+
+            $executionTime = microtime(true) - $startTime;
+
+            $response = [
+                'test_type' => 'vector_manager',
+                'query' => $query,
+                'top_k' => $topK,
+                'execution_time' => round($executionTime, 4),
+                'results_count' => count($searchResults),
+                'search_results' => $searchResults,
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true)
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('VectorManager test error: ' . $e->getMessage());
+            return $this->createErrorResponse('vector_manager_test_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Test AIManager functionality
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function testAIManager(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $query = $request->get_param('query');
+            $useRag = $request->get_param('use_rag');
+
+            Utils::logDebug('Testing AIManager functionality', ['query' => $query, 'use_rag' => $useRag]);
+
+            $main = \WooAiAssistant\Main::getInstance();
+            $aiManager = $main->getComponent('kb_ai_manager');
+
+            if (!$aiManager) {
+                return $this->createErrorResponse('ai_manager_not_found', 'AIManager component not available', 500);
+            }
+
+            $startTime = microtime(true);
+
+            // Test AI response generation
+            $aiResponse = $aiManager->generateResponse($query, [
+                'use_rag' => $useRag,
+                'conversation_id' => 'test_' . uniqid(),
+                'user_context' => ['test_mode' => true]
+            ]);
+
+            $executionTime = microtime(true) - $startTime;
+
+            $response = [
+                'test_type' => 'ai_manager',
+                'query' => $query,
+                'use_rag' => $useRag,
+                'execution_time' => round($executionTime, 4),
+                'ai_response' => $aiResponse,
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true)
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('AIManager test error: ' . $e->getMessage());
+            return $this->createErrorResponse('ai_manager_test_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Test full KB pipeline
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function testFullPipeline(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $query = $request->get_param('query');
+
+            Utils::logDebug('Testing full KB pipeline', ['query' => $query]);
+
+            $main = \WooAiAssistant\Main::getInstance();
+            $scanner = $main->getComponent('kb_scanner');
+            $indexer = $main->getComponent('kb_indexer');
+            $vectorManager = $main->getComponent('kb_vector_manager');
+            $aiManager = $main->getComponent('kb_ai_manager');
+
+            if (!$scanner || !$indexer || !$vectorManager || !$aiManager) {
+                return $this->createErrorResponse('components_not_found', 'One or more KB components not available', 500);
+            }
+
+            $startTime = microtime(true);
+            $pipelineResults = [];
+
+            // Step 1: Scan some content
+            $scanStart = microtime(true);
+            $scanResults = $scanner->scanProducts(['limit' => 5]);
+            $pipelineResults['scan'] = [
+                'execution_time' => round(microtime(true) - $scanStart, 4),
+                'results_count' => count($scanResults)
+            ];
+
+            // Step 2: Index a sample item
+            if (!empty($scanResults)) {
+                $indexStart = microtime(true);
+                $sampleContent = array_slice($scanResults, 0, 1);
+                $indexResults = $indexer->indexContent($sampleContent);
+                $pipelineResults['index'] = [
+                    'execution_time' => round(microtime(true) - $indexStart, 4),
+                    'chunks_created' => $indexResults['chunks_created'] ?? 0
+                ];
+            }
+
+            // Step 3: Perform vector search
+            $vectorStart = microtime(true);
+            $vectorResults = $vectorManager->searchSimilar($query, 3);
+            $pipelineResults['vector_search'] = [
+                'execution_time' => round(microtime(true) - $vectorStart, 4),
+                'results_count' => count($vectorResults)
+            ];
+
+            // Step 4: Generate AI response
+            $aiStart = microtime(true);
+            $aiResponse = $aiManager->generateResponse($query, [
+                'use_rag' => true,
+                'conversation_id' => 'pipeline_test_' . uniqid()
+            ]);
+            $pipelineResults['ai_response'] = [
+                'execution_time' => round(microtime(true) - $aiStart, 4),
+                'response_generated' => !empty($aiResponse['response'])
+            ];
+
+            $totalExecutionTime = microtime(true) - $startTime;
+
+            $response = [
+                'test_type' => 'full_pipeline',
+                'query' => $query,
+                'total_execution_time' => round($totalExecutionTime, 4),
+                'pipeline_results' => $pipelineResults,
+                'final_ai_response' => $aiResponse,
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true)
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('Full pipeline test error: ' . $e->getMessage());
+            return $this->createErrorResponse('full_pipeline_test_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Register license management routes
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function registerLicenseRoutes(): void
+    {
+        // License status endpoint
+        \register_rest_route($this->namespace, '/admin/license/status', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'getLicenseStatus'],
+            'permission_callback' => [$this, 'checkAdminPermissions']
+        ]);
+
+        // License validation endpoint
+        \register_rest_route($this->namespace, '/admin/license/validate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'validateLicense'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'force_validation' => [
+                    'required' => false,
+                    'type' => 'boolean',
+                    'default' => false,
+                    'description' => 'Force validation even if recently validated'
+                ]
+            ]
+        ]);
+
+        // Set license key endpoint
+        \register_rest_route($this->namespace, '/admin/license/set-key', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'setLicenseKey'],
+            'permission_callback' => [$this, 'checkAdminPermissions'],
+            'args' => [
+                'license_key' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'description' => 'License key to set',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => [$this, 'validateLicenseKeyFormat']
+                ]
+            ]
+        ]);
+
+        // Clear license key endpoint
+        \register_rest_route($this->namespace, '/admin/license/clear', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'clearLicense'],
+            'permission_callback' => [$this, 'checkAdminPermissions']
+        ]);
+
+        // Usage statistics endpoint
+        \register_rest_route($this->namespace, '/admin/license/usage', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'getUsageStatistics'],
+            'permission_callback' => [$this, 'checkAdminPermissions']
+        ]);
+
+        // Available plans endpoint
+        \register_rest_route($this->namespace, '/admin/license/plans', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'getAvailablePlans'],
+            'permission_callback' => [$this, 'checkAdminPermissions']
+        ]);
+
+        // Feature check endpoint (can be used by frontend)
+        \register_rest_route($this->namespace, '/license/features', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'getEnabledFeatures'],
+            'permission_callback' => [$this, 'checkPublicPermissions']
+        ]);
+
+        Utils::logDebug('License management routes registered');
+    }
+
+    /**
+     * Get license status
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function getLicenseStatus(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseManager = $this->getLicenseManager();
+            $status = $licenseManager->getLicenseStatus();
+
+            return $this->createSuccessResponse($status);
+        } catch (Exception $e) {
+            Utils::logError('Error getting license status: ' . $e->getMessage());
+            return $this->createErrorResponse('license_status_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Validate license
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function validateLicense(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $forceValidation = $request->get_param('force_validation') ?? false;
+
+            $licenseManager = $this->getLicenseManager();
+            $result = $licenseManager->validateLicense($forceValidation);
+
+            if ($result['valid']) {
+                return $this->createSuccessResponse($result);
+            } else {
+                return $this->createErrorResponse('license_validation_failed', $result['message'] ?? 'License validation failed', 400);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error validating license: ' . $e->getMessage());
+            return $this->createErrorResponse('license_validation_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Set license key
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function setLicenseKey(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseKey = $request->get_param('license_key');
+
+            $licenseManager = $this->getLicenseManager();
+            $result = $licenseManager->setLicenseKey($licenseKey);
+
+            if ($result['valid']) {
+                return $this->createSuccessResponse([
+                    'message' => 'License key set and validated successfully',
+                    'license_data' => $result
+                ]);
+            } else {
+                return $this->createErrorResponse('invalid_license_key', $result['message'] ?? 'Invalid license key', 400);
+            }
+        } catch (Exception $e) {
+            Utils::logError('Error setting license key: ' . $e->getMessage());
+            return $this->createErrorResponse('license_key_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Clear license
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function clearLicense(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseManager = $this->getLicenseManager();
+            $result = $licenseManager->clearLicenseKey();
+
+            return $this->createSuccessResponse([
+                'message' => 'License cleared successfully, reverted to Free plan',
+                'success' => $result
+            ]);
+        } catch (Exception $e) {
+            Utils::logError('Error clearing license: ' . $e->getMessage());
+            return $this->createErrorResponse('license_clear_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get usage statistics
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function getUsageStatistics(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseManager = $this->getLicenseManager();
+            $stats = $licenseManager->getUsageStatistics();
+
+            return $this->createSuccessResponse($stats);
+        } catch (Exception $e) {
+            Utils::logError('Error getting usage statistics: ' . $e->getMessage());
+            return $this->createErrorResponse('usage_stats_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get available plans
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function getAvailablePlans(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseManager = $this->getLicenseManager();
+            $plans = $licenseManager->getAvailablePlans();
+
+            $response = [
+                'plans' => $plans,
+                'upgrade_url' => $licenseManager->getUpgradeUrl(),
+                'can_upgrade' => $licenseManager->canUpgrade()
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('Error getting available plans: ' . $e->getMessage());
+            return $this->createErrorResponse('plans_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get enabled features for current plan
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response object
+     */
+    public function getEnabledFeatures(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $licenseManager = $this->getLicenseManager();
+            $planConfig = $licenseManager->getPlanConfiguration();
+
+            $features = [
+                'basic_chat' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_BASIC_CHAT),
+                'proactive_triggers' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_PROACTIVE_TRIGGERS),
+                'custom_messages' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_CUSTOM_MESSAGES),
+                'add_to_cart' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_ADD_TO_CART),
+                'auto_coupon' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_AUTO_COUPON),
+                'upsell_crosssell' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_UPSELL_CROSSSELL),
+                'white_label' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_WHITE_LABEL),
+                'advanced_ai' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_ADVANCED_AI),
+                'chat_recovery' => $licenseManager->isFeatureEnabled(\WooAiAssistant\Api\LicenseManager::FEATURE_CHAT_RECOVERY)
+            ];
+
+            $response = [
+                'features' => $features,
+                'plan' => $planConfig['name'] ?? 'Unknown',
+                'ai_model' => $licenseManager->getCurrentAiModel(),
+                'branding' => $licenseManager->getBrandingConfig(),
+                'usage_limits' => [
+                    'conversations' => $planConfig['conversations_per_month'] ?? 0,
+                    'items_indexable' => $planConfig['items_indexable'] ?? 0
+                ]
+            ];
+
+            return $this->createSuccessResponse($response);
+        } catch (Exception $e) {
+            Utils::logError('Error getting enabled features: ' . $e->getMessage());
+            return $this->createErrorResponse('features_error', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get license manager instance
+     *
+     * @since 1.0.0
+     * @return \WooAiAssistant\Api\LicenseManager
+     * @throws Exception If license manager not available
+     */
+    private function getLicenseManager(): \WooAiAssistant\Api\LicenseManager
+    {
+        // Get from main plugin instance
+        $main = \WooAiAssistant\Main::getInstance();
+        $licenseManager = $main->getComponent('license_manager');
+
+        if (!$licenseManager) {
+            throw new Exception('License manager not available');
+        }
+
+        return $licenseManager;
+    }
+
+    /**
+     * Validate license key format
+     *
+     * @since 1.0.0
+     * @param string $value License key value
+     * @param WP_REST_Request $request Request object
+     * @param string $param Parameter name
+     * @return bool|WP_Error True if valid, WP_Error if invalid
+     */
+    public function validateLicenseKeyFormat($value, $request, $param)
+    {
+        if (empty($value)) {
+            return new WP_Error('invalid_license_key', 'License key cannot be empty');
+        }
+
+        // Basic format validation (adjust based on actual license key format)
+        if (strlen($value) < 10 || strlen($value) > 100) {
+            return new WP_Error('invalid_license_key_format', 'License key format is invalid');
+        }
+
+        return true;
     }
 }

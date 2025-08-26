@@ -14,17 +14,43 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 // Mock the child components to isolate App testing
-jest.mock('./components/ChatWidget', () => {
-  return function MockChatWidget(props) {
-    return <div data-testid="chat-widget">Chat Widget Mock</div>;
+jest.mock('./components/ChatWindow', () => {
+  return function MockChatWindow(_props) {
+    return <div data-testid="chat-window">Chat Window Mock</div>;
   };
 });
 
 jest.mock('./components/ErrorBoundary', () => {
+  // eslint-disable-next-line react/prop-types
   return function MockErrorBoundary({ children }) {
     return <div data-testid="error-boundary">{children}</div>;
   };
 });
+
+jest.mock('./services/ApiService', () => ({
+  // eslint-disable-next-line react/prop-types
+  ApiProvider: function MockApiProvider({ children }) {
+    return <div data-testid="api-provider">{children}</div>;
+  },
+  useApi: () => ({
+    request: jest.fn(),
+  }),
+}));
+
+jest.mock('./hooks/useChat', () => ({
+  useChat: () => ({
+    conversation: [],
+    isTyping: false,
+    connectionStatus: 'connected',
+    sendMessage: jest.fn(),
+    clearConversation: jest.fn(),
+    reconnect: jest.fn(),
+  }),
+}));
+
+jest.mock('./hooks/useKeyboardNavigation', () => ({
+  useKeyboardNavigation: () => {},
+}));
 
 describe('App Component', () => {
   const defaultConfig = {
@@ -93,11 +119,11 @@ describe('App Component', () => {
     consoleSpy.mockRestore();
   });
 
-  it('renders ChatWidget with correct props', () => {
+  it('renders ChatWindow with correct props', () => {
     render(<App widgetId="test-widget" config={defaultConfig} />);
     
-    const chatWidget = screen.getByTestId('chat-widget');
-    expect(chatWidget).toBeInTheDocument();
+    const chatWindow = screen.getByTestId('chat-window');
+    expect(chatWindow).toBeInTheDocument();
   });
 
   it('handles critical errors gracefully', () => {

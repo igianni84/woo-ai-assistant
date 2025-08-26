@@ -151,7 +151,7 @@ class AdminMenu
             return;
         }
 
-        foreach ($this->pages as $page_key => $page) {
+        foreach ($this->pages as $pageKey => $page) {
             if (isset($page['is_parent']) && $page['is_parent']) {
                 // Add main menu item
                 add_menu_page(
@@ -188,8 +188,8 @@ class AdminMenu
      */
     private function setCurrentPage(): void
     {
-        $current_screen = get_current_screen();
-        if ($current_screen && strpos($current_screen->id, 'woo-ai-assistant') !== false) {
+        $currentScreen = get_current_screen();
+        if ($currentScreen && strpos($currentScreen->id, 'woo-ai-assistant') !== false) {
             $this->currentPage = sanitize_text_field($_GET['page'] ?? '');
         }
     }
@@ -208,7 +208,7 @@ class AdminMenu
             return;
         }
 
-        $asset_version = WOO_AI_ASSISTANT_VERSION;
+        $assetVersion = WOO_AI_ASSISTANT_VERSION;
         $plugin_url = WOO_AI_ASSISTANT_URL;
 
         // Enqueue CSS
@@ -216,7 +216,7 @@ class AdminMenu
             'woo-ai-assistant-admin',
             $plugin_url . 'assets/css/admin.css',
             ['wp-admin', 'dashicons'],
-            $asset_version
+            $assetVersion
         );
 
         // Enqueue JavaScript
@@ -224,7 +224,7 @@ class AdminMenu
             'woo-ai-assistant-admin',
             $plugin_url . 'assets/js/admin.js',
             ['jquery', 'wp-api-fetch', 'wp-i18n'],
-            $asset_version,
+            $assetVersion,
             true
         );
 

@@ -155,8 +155,8 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
         ),
         'phpDocumentor\\JsonPath\\' => 
         array (
@@ -164,10 +164,10 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         ),
         'phpDocumentor\\Guides\\' => 
         array (
-            0 => __DIR__ . '/..' . '/phpdocumentor/guides-markdown/src',
+            0 => __DIR__ . '/..' . '/phpdocumentor/guides/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/guides-graphs/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/guides-restructured-text/src',
-            3 => __DIR__ . '/..' . '/phpdocumentor/guides/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/guides-markdown/src',
+            3 => __DIR__ . '/..' . '/phpdocumentor/guides-restructured-text/src',
         ),
         'phpDocumentor\\GraphViz\\PHPStan\\' => 
         array (
@@ -183,8 +183,8 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         ),
         'phpDocumentor\\' => 
         array (
-            0 => __DIR__ . '/..' . '/phpdocumentor/reflection/src/phpDocumentor',
-            1 => __DIR__ . '/..' . '/phpdocumentor/phpdocumentor/src/phpDocumentor',
+            0 => __DIR__ . '/..' . '/phpdocumentor/phpdocumentor/src/phpDocumentor',
+            1 => __DIR__ . '/..' . '/phpdocumentor/reflection/src/phpDocumentor',
         ),
         'WooAiAssistant\\Tests\\' => 
         array (
@@ -328,8 +328,8 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\EventDispatcher\\' => 
         array (
@@ -381,8 +381,8 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri-interfaces',
-            1 => __DIR__ . '/..' . '/league/uri',
+            0 => __DIR__ . '/..' . '/league/uri',
+            1 => __DIR__ . '/..' . '/league/uri-interfaces',
         ),
         'League\\Tactician\\' => 
         array (
@@ -4544,18 +4544,29 @@ class ComposerStaticInita9fe35cf75b70f424be9247d0f5b5c5b
         'Webmozart\\Assert\\InvalidArgumentException' => __DIR__ . '/..' . '/webmozart/assert/src/InvalidArgumentException.php',
         'Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
         'WooAiAssistant\\Admin\\AdminMenu' => __DIR__ . '/../..' . '/src/Admin/AdminMenu.php',
+        'WooAiAssistant\\Api\\IntermediateServerClient' => __DIR__ . '/../..' . '/src/Api/IntermediateServerClient.php',
+        'WooAiAssistant\\Api\\LicenseManager' => __DIR__ . '/../..' . '/src/Api/LicenseManager.php',
         'WooAiAssistant\\Common\\Traits\\Singleton' => __DIR__ . '/../..' . '/src/Common/Traits/Singleton.php',
         'WooAiAssistant\\Common\\Utils' => __DIR__ . '/../..' . '/src/Common/Utils.php',
+        'WooAiAssistant\\KnowledgeBase\\AIManager' => __DIR__ . '/../..' . '/src/KnowledgeBase/AIManager.php',
+        'WooAiAssistant\\KnowledgeBase\\CronManager' => __DIR__ . '/../..' . '/src/KnowledgeBase/CronManager.php',
+        'WooAiAssistant\\KnowledgeBase\\HealthMonitor' => __DIR__ . '/../..' . '/src/KnowledgeBase/HealthMonitor.php',
         'WooAiAssistant\\KnowledgeBase\\Indexer' => __DIR__ . '/../..' . '/src/KnowledgeBase/Indexer.php',
         'WooAiAssistant\\KnowledgeBase\\Scanner' => __DIR__ . '/../..' . '/src/KnowledgeBase/Scanner.php',
+        'WooAiAssistant\\KnowledgeBase\\VectorManager' => __DIR__ . '/../..' . '/src/KnowledgeBase/VectorManager.php',
         'WooAiAssistant\\Main' => __DIR__ . '/../..' . '/src/Main.php',
         'WooAiAssistant\\RestApi\\RestController' => __DIR__ . '/../..' . '/src/RestApi/RestController.php',
         'WooAiAssistant\\Setup\\Activator' => __DIR__ . '/../..' . '/src/Setup/Activator.php',
         'WooAiAssistant\\Setup\\Deactivator' => __DIR__ . '/../..' . '/src/Setup/Deactivator.php',
+        'WooAiAssistant\\Tests\\Integration\\KnowledgeBaseIntegrationTest' => __DIR__ . '/../..' . '/tests/Integration/KnowledgeBaseIntegrationTest.php',
         'WooAiAssistant\\Tests\\Unit\\Admin\\AdminMenuTest' => __DIR__ . '/../..' . '/tests/Unit/Admin/AdminMenuTest.php',
+        'WooAiAssistant\\Tests\\Unit\\Api\\IntermediateServerClientTest' => __DIR__ . '/../..' . '/tests/Unit/Api/IntermediateServerClientTest.php',
+        'WooAiAssistant\\Tests\\Unit\\Api\\LicenseManagerTest' => __DIR__ . '/../..' . '/tests/Unit/Api/LicenseManagerTest.php',
         'WooAiAssistant\\Tests\\Unit\\Common\\Traits\\SingletonTest' => __DIR__ . '/../..' . '/tests/Unit/Common/Traits/SingletonTest.php',
         'WooAiAssistant\\Tests\\Unit\\Common\\UtilsTest' => __DIR__ . '/../..' . '/tests/Unit/Common/UtilsTest.php',
+        'WooAiAssistant\\Tests\\Unit\\KnowledgeBase\\AIManagerTest' => __DIR__ . '/../..' . '/tests/Unit/KnowledgeBase/AIManagerTest.php',
         'WooAiAssistant\\Tests\\Unit\\KnowledgeBase\\ScannerTest' => __DIR__ . '/../..' . '/tests/Unit/KnowledgeBase/ScannerTest.php',
+        'WooAiAssistant\\Tests\\Unit\\KnowledgeBase\\VectorManagerTest' => __DIR__ . '/../..' . '/tests/Unit/KnowledgeBase/VectorManagerTest.php',
         'WooAiAssistant\\Tests\\Unit\\MainTest' => __DIR__ . '/../..' . '/tests/Unit/MainTest.php',
         'WooAiAssistant\\Tests\\Unit\\RestApi\\RestControllerTest' => __DIR__ . '/../..' . '/tests/Unit/RestApi/RestControllerTest.php',
         'WooAiAssistant\\Tests\\Unit\\Setup\\ActivatorTest' => __DIR__ . '/../..' . '/tests/Unit/Setup/ActivatorTest.php',

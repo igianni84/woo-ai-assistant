@@ -62,20 +62,25 @@ module.exports = (api) => {
         },
       ],
       
-      // TypeScript support
-      [
-        '@babel/preset-typescript',
-        {
-          // Allow TS in .js files
-          allExtensions: true,
-          
-          // Generate .d.ts files
-          onlyRemoveTypeImports: true,
-          
-          // Optimize for production
-          optimizeConstEnums: isProduction,
-        },
-      ],
+      // TypeScript support (only for .ts/.tsx files)
+      ...(isTest ? [] : [
+        [
+          '@babel/preset-typescript',
+          {
+            // Only process .ts/.tsx files, not .js files
+            allExtensions: false,
+            
+            // Generate .d.ts files
+            onlyRemoveTypeImports: true,
+            
+            // Optimize for production
+            optimizeConstEnums: isProduction,
+            
+            // Don't interfere with JSX parsing
+            isTSX: false,
+          },
+        ],
+      ]),
     ],
 
     // Plugins for additional transformations
@@ -157,9 +162,6 @@ module.exports = (api) => {
 
     // Ignore configuration
     ignore: [
-      '**/*.test.{js,jsx,ts,tsx}',
-      '**/*.spec.{js,jsx,ts,tsx}',
-      '**/__tests__/**',
       '**/node_modules/**',
       '**/dist/**',
       '**/coverage/**',

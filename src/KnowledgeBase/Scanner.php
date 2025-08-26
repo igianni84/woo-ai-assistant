@@ -580,7 +580,7 @@ class Scanner
                     'regular_price' => $product->get_regular_price(),
                     'sale_price' => $product->get_sale_price(),
                     'stock_status' => $product->get_stock_status(),
-                    'stock_quantity' => $product->get_stock_quantity(),
+                    'stock_quantity' => $product->managing_stock() ? $product->get_stock_quantity() : null,
                     'categories' => $this->getProductCategories($product),
                     'tags' => $this->getProductTags($product),
                     'attributes' => $this->getProductAttributes($product),
@@ -698,7 +698,7 @@ class Scanner
                     'post_type' => $post->post_type,
                     'post_date' => $post->post_date,
                     'post_modified' => $post->post_modified,
-                    'author' => get_the_author_meta('display_name', $post->post_author),
+                    'author' => \get_the_author_meta('display_name', $post->post_author),
                     'excerpt' => $post->post_excerpt ? strip_tags($post->post_excerpt) : '',
                     'categories' => $this->getPostCategories($post),
                     'tags' => $this->getPostTags($post),
@@ -732,7 +732,7 @@ class Scanner
             'id' => 'store_info',
             'title' => 'Store Information',
             'content' => $this->buildStoreInfoContent(),
-            'type' => 'woo_setting',
+            'type' => 'woo_settings',
             'url' => admin_url('admin.php?page=wc-settings'),
             'metadata' => [
                 'setting_type' => 'store_info',
@@ -779,7 +779,7 @@ class Scanner
             'id' => 'shipping_settings',
             'title' => 'Shipping Information',
             'content' => $this->buildShippingContent(),
-            'type' => 'woo_setting',
+            'type' => 'woo_settings',
             'url' => admin_url('admin.php?page=wc-settings&tab=shipping'),
             'metadata' => [
                 'setting_type' => 'shipping',
@@ -827,7 +827,7 @@ class Scanner
             'id' => 'payment_settings',
             'title' => 'Payment Information',
             'content' => $this->buildPaymentContent(),
-            'type' => 'woo_setting',
+            'type' => 'woo_settings',
             'url' => admin_url('admin.php?page=wc-settings&tab=checkout'),
             'metadata' => [
                 'setting_type' => 'payment',
@@ -874,7 +874,7 @@ class Scanner
             'id' => 'tax_settings',
             'title' => 'Tax Information',
             'content' => $this->buildTaxContent(),
-            'type' => 'woo_setting',
+            'type' => 'woo_settings',
             'url' => admin_url('admin.php?page=wc-settings&tab=tax'),
             'metadata' => [
                 'setting_type' => 'tax',

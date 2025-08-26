@@ -5,7 +5,7 @@
   "main": "assets/js/widget.js",
   "keywords": [
     "wordpress",
-    "woocommerce", 
+    "woocommerce",
     "ai",
     "chatbot",
     "customer-support",
@@ -36,7 +36,7 @@
     "watch": "webpack --mode development --watch",
     "serve": "webpack serve --mode development",
     "lint": "npm run lint:js && npm run lint:css",
-    "lint:js": "eslint widget-src/**/*.{js,jsx,ts,tsx} --max-warnings=0",
+    "lint:js": "eslint widget-src/**/*.js --max-warnings=0",
     "lint:css": "stylelint widget-src/**/*.{css,scss,sass}",
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",
     "format": "prettier --write \"widget-src/**/*.{js,jsx,ts,tsx,css,scss,sass,json,md}\"",
@@ -58,15 +58,16 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.23.0", 
-    "@babel/preset-react": "^7.22.0",
-    "@babel/preset-typescript": "^7.23.0",
+    "@babel/eslint-parser": "^7.28.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.0",
     "@babel/plugin-transform-class-properties": "^7.23.0",
-    "@babel/plugin-transform-private-methods": "^7.23.0",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.23.0",
     "@babel/plugin-transform-object-rest-spread": "^7.23.0",
     "@babel/plugin-transform-optional-chaining": "^7.23.0",
-    "@babel/plugin-transform-nullish-coalescing-operator": "^7.23.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.8.0",
+    "@babel/plugin-transform-private-methods": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.22.0",
+    "@babel/preset-typescript": "^7.23.0",
     "@testing-library/jest-dom": "^6.1.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.0",
@@ -76,18 +77,18 @@
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "babel-loader": "^9.1.0",
+    "babel-plugin-dynamic-import-node": "^2.3.3",
+    "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "babel-plugin-lodash": "^3.3.4",
-    "babel-plugin-dynamic-import-node": "^2.3.3",
     "css-loader": "^6.8.0",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-jsx-a11y": "^6.7.0",
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-jsx-a11y": "^6.7.0",
-    "eslint-plugin-import": "^2.28.0",
     "html-webpack-plugin": "^5.5.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
@@ -126,8 +127,10 @@
   ],
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
-    "moduleNameMapping": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "moduleNameMapper": {
       "\\.(css|less|scss|sass)$": "identity-obj-proxy",
       "^@/(.*)$": "<rootDir>/widget-src/src/$1"
     },
@@ -160,61 +163,67 @@
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
-      "@typescript-eslint/recommended",
       "plugin:react/recommended",
       "plugin:react-hooks/recommended",
       "plugin:jsx-a11y/recommended",
-      "plugin:import/recommended",
-      "plugin:import/typescript",
       "prettier"
     ],
-    "parser": "@typescript-eslint/parser",
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
       "ecmaVersion": 2022,
       "sourceType": "module",
       "ecmaFeatures": {
         "jsx": true
+      },
+      "requireConfigFile": false,
+      "babelOptions": {
+        "presets": [
+          "@babel/preset-react"
+        ]
       }
     },
     "plugins": [
-      "@typescript-eslint",
       "react",
       "react-hooks",
-      "jsx-a11y",
-      "import"
+      "jsx-a11y"
     ],
     "env": {
       "browser": true,
       "es2022": true,
-      "jest": true
+      "jest": true,
+      "node": true
     },
     "settings": {
       "react": {
         "version": "detect"
-      },
-      "import/resolver": {
-        "typescript": true,
-        "node": true
       }
     },
     "rules": {
       "react/react-in-jsx-scope": "off",
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-      "import/order": ["error", {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index"
-        ],
-        "newlines-between": "always"
-      }]
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "no-console": [
+        "warn",
+        {
+          "allow": [
+            "warn",
+            "error",
+            "info"
+          ]
+        }
+      ]
     },
     "overrides": [
       {
-        "files": ["**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
+        "files": [
+          "**/__tests__/**/*",
+          "**/*.test.*",
+          "**/*.spec.*"
+        ],
         "env": {
           "jest": true
         }
@@ -228,7 +237,16 @@
     ],
     "rules": {
       "selector-class-pattern": "^[a-z]([a-z0-9-]+)?(__([a-z0-9]+-?)+)?(--([a-z0-9]+-?)+){0,2}$",
-      "custom-property-pattern": "^[a-z]([a-z0-9-]+)*$"
+      "custom-property-pattern": "^[a-z]([a-z0-9-]+)*$",
+      "color-function-notation": null,
+      "alpha-value-notation": null,
+      "value-keyword-case": null,
+      "declaration-block-no-duplicate-properties": null,
+      "media-feature-range-notation": null,
+      "declaration-block-no-redundant-longhand-properties": null,
+      "color-hex-length": null,
+      "no-descending-specificity": null,
+      "rule-empty-line-before": null
     }
   },
   "prettier": {

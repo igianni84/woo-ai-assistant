@@ -178,6 +178,128 @@ class Indexer
     }
 
     /**
+     * Index content for knowledge base (wrapper method for CronManager compatibility)
+     *
+     * This method provides a simplified interface for indexing content, primarily
+     * used by the CronManager for automated processing tasks. It wraps the more
+     * comprehensive processContent method with sensible defaults.
+     *
+     * @since 1.0.0
+     * @param array $contentData Array of content items to index.
+     * @param array $options Optional. Processing options.
+     * @param bool  $options['update_existing'] Whether to update existing content. Default false.
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException When content data format is invalid.
+     * @throws \RuntimeException When indexing operations fail.
+     *
+     * @example
+     * ```php
+     * $indexer = Indexer::getInstance();
+     * $indexer->indexContent($products, ['update_existing' => true]);
+     * ```
+     */
+    public function indexContent(array $contentData, array $options = []): array
+    {
+        if (empty($contentData)) {
+            Utils::logDebug('Empty content data provided to indexContent, skipping');
+            return [
+                'total_processed' => 0,
+                'batches_processed' => 0,
+                'errors' => [],
+                'success' => true
+            ];
+        }
+
+        // Set default options for cron processing
+        $defaultOptions = [
+            'chunk_size' => self::DEFAULT_CHUNK_SIZE,
+            'overlap' => self::DEFAULT_CHUNK_OVERLAP,
+            'optimize_for_ai' => true,
+            'remove_duplicates' => true,
+            'preserve_sentences' => true,
+            'batch_size' => self::DEFAULT_BATCH_SIZE,
+            'force_update' => $options['update_existing'] ?? false
+        ];
+
+        $processOptions = wp_parse_args($options, $defaultOptions);
+
+        try {
+            Utils::logDebug('Starting content indexing via indexContent method - items: ' . count($contentData));
+
+            $result = $this->processContent($contentData, $processOptions);
+
+            Utils::logDebug('Content indexing completed successfully', [
+                'total_processed' => $result['total_processed'],
+                'chunks_created' => $result['chunks_created'],
+                'duplicates_found' => $result['duplicates_found'],
+                'errors' => $result['errors']
+            ]);
+
+            // Log any errors for monitoring
+            if ($result['errors'] > 0) {
+                Utils::logError('Content indexing completed with errors: ' . $result['errors'] . ' out of ' . count($contentData) . ' items failed');
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            Utils::logError('Content indexing failed: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to index content: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Remove content from knowledge base by type or ID
+     *
+     * This method allows removal of specific content from the knowledge base,
+     * typically used during reindexing operations or when content is deleted.
+     *
+     * @since 1.0.0
+     * @param string $contentType Type of content to remove (e.g., 'woo_settings', 'product', 'page').
+     * @param int|null $sourceId Optional. Specific source ID to remove. If null, removes all of the type.
+     *
+     * @return int Number of items removed.
+     *
+     * @throws \RuntimeException When database operations fail.
+     */
+    public function removeContent(string $contentType, ?int $sourceId = null): int
+    {
+        $tableName = $this->wpdb->prefix . 'woo_ai_knowledge_base';
+
+        if ($sourceId !== null) {
+            // Remove specific item
+            $result = $this->wpdb->delete(
+                $tableName,
+                [
+                    'source_type' => $contentType,
+                    'source_id' => $sourceId
+                ],
+                ['%s', '%d']
+            );
+        } else {
+            // Remove all items of this type
+            $result = $this->wpdb->delete(
+                $tableName,
+                ['source_type' => $contentType],
+                ['%s']
+            );
+        }
+
+        if ($result === false) {
+            throw new \RuntimeException('Failed to remove content from knowledge base: ' . $this->wpdb->last_error);
+        }
+
+        $removedCount = $result;
+        Utils::logDebug("Removed {$removedCount} items from knowledge base", [
+            'content_type' => $contentType,
+            'source_id' => $sourceId
+        ]);
+
+        return $removedCount;
+    }
+
+    /**
      * Process content from Scanner and create optimized chunks for knowledge base
      *
      * This method takes raw content data from the Scanner, applies intelligent
@@ -416,7 +538,7 @@ class Indexer
         $tableName = $this->wpdb->prefix . 'woo_ai_knowledge_base';
 
         // Check for existing content hash to prevent duplicates
-        if ($this->isDuplicateContent($contentHash, $sourceData['id'] ?? 0)) {
+        if ($this->isDuplicateContent($contentHash, (int)($sourceData['id'] ?? 0))) {
             Utils::logDebug('Duplicate content detected, skipping storage for hash: ' . $contentHash);
             $results['skipped'] = count($chunks);
             return $results;
@@ -616,7 +738,7 @@ class Indexer
                 $contentHash = $this->generateContentHash($item['content']);
 
                 // Check for duplicates if requested
-                if ($options['remove_duplicates'] && $this->isDuplicateContent($contentHash, $item['id'] ?? 0)) {
+                if ($options['remove_duplicates'] && $this->isDuplicateContent($contentHash, (int)($item['id'] ?? 0))) {
                     $batchResults['duplicates_found']++;
                     continue;
                 }

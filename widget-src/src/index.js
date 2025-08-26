@@ -24,7 +24,7 @@ const initializeWidget = () => {
   }
 
   // Find all widget containers on the page
-  const widgetContainers = document.querySelectorAll('[data-woo-ai-widget]');
+  let widgetContainers = Array.from(document.querySelectorAll('[data-woo-ai-widget]'));
   
   if (widgetContainers.length === 0) {
     // Create a default container if none exists (for manual initialization)
@@ -89,7 +89,7 @@ const initializeWidget = () => {
 
       // Log successful initialization in debug mode
       if (config.isDebug) {
-        console.log('Woo AI Assistant Widget initialized:', {
+        console.info('Woo AI Assistant Widget initialized:', {
           widgetId,
           config,
           container,
@@ -133,8 +133,8 @@ document.addEventListener('DOMContentLoaded', initializeWidget);
 window.addEventListener('load', initializeWidget);
 
 // 4. WordPress-specific ready event (if available)
-if (typeof jQuery !== 'undefined') {
-  jQuery(document).ready(initializeWidget);
+if (typeof window.jQuery !== 'undefined') {
+  window.jQuery(document).ready(initializeWidget);
 }
 
 // 5. Manual initialization method for programmatic use

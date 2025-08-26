@@ -125,6 +125,28 @@ class Utils
     }
 
     /**
+     * Log error message
+     *
+     * Logs error messages regardless of debug mode.
+     *
+     * @since 1.0.0
+     * @param string $message The error message to log
+     * @param array $context Optional. Context data for the error
+     * @return void
+     */
+    public static function logError(string $message, array $context = []): void
+    {
+        $logMessage = "Woo AI Assistant [ERROR]: {$message}";
+
+        // Add context data if provided
+        if (!empty($context)) {
+            $logMessage .= ' | Context: ' . json_encode($context);
+        }
+
+        error_log($logMessage);
+    }
+
+    /**
      * Sanitize text field
      *
      * Wrapper around WordPress sanitize_text_field with additional validation.

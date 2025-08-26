@@ -1,449 +1,475 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/phpunit.xml" tests="133" assertions="591" errors="40" failures="9" skipped="0" time="0.210847">
-    <testsuite name="unit" tests="133" assertions="591" errors="40" failures="9" skipped="0" time="0.210847">
-      <testsuite name="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" tests="15" assertions="127" errors="0" failures="0" skipped="0" time="0.008104">
-        <testcase name="testClassExistsAndInstantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="104" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="3" time="0.004119"/>
-        <testcase name="testClassFollowsNamingConventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="116" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="16" time="0.000373"/>
-        <testcase name="testPublicMethodsExistAndReturnCorrectTypes" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="141" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="13" time="0.000129"/>
-        <testcase name="testSingletonPatternWorksCorrectly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="172" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000315"/>
-        <testcase name="testPageConfigurationSetup" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="186" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="12" time="0.000533"/>
-        <testcase name="testConstantsFollowNamingConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="213" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="6" time="0.000239"/>
-        <testcase name="testDocblockDocumentationExists" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="235" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="45" time="0.000994"/>
-        <testcase name="testPrivateMethodsFollowCamelCase" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="261" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="20" time="0.000157"/>
-        <testcase name="testGetCurrentPageReturnsString" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="282" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000173"/>
-        <testcase name="testCustomAdminFooterText" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="296" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000080"/>
-        <testcase name="testSecurityFeaturesImplemented" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="310" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="3" time="0.000463"/>
-        <testcase name="testWordPressHooksNamingConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="333" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="0" time="0.000134"/>
-        <testcase name="testVariablesFollowCamelCaseConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="363" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000121"/>
-        <testcase name="testClassUsesProperNamespace" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="389" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000081"/>
-        <testcase name="testPsr4Compliance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="403" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000192"/>
+  <testsuite name="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/phpunit.xml" tests="270" assertions="3099" errors="0" failures="12" skipped="53" time="2.251653">
+    <testsuite name="unit" tests="256" assertions="2655" errors="0" failures="12" skipped="52" time="0.192054">
+      <testsuite name="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" tests="15" assertions="128" errors="0" failures="0" skipped="0" time="0.005009">
+        <testcase name="testClassExistsAndInstantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="104" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="3" time="0.001782"/>
+        <testcase name="testClassFollowsNamingConventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="116" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="16" time="0.000287"/>
+        <testcase name="testPublicMethodsExistAndReturnCorrectTypes" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="141" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="13" time="0.000141"/>
+        <testcase name="testSingletonPatternWorksCorrectly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="172" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000167"/>
+        <testcase name="testPageConfigurationSetup" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="186" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="12" time="0.000316"/>
+        <testcase name="testConstantsFollowNamingConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="213" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="6" time="0.000327"/>
+        <testcase name="testDocblockDocumentationExists" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="235" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="45" time="0.000729"/>
+        <testcase name="testPrivateMethodsFollowCamelCase" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="261" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="20" time="0.000161"/>
+        <testcase name="testGetCurrentPageReturnsString" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="282" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000134"/>
+        <testcase name="testCustomAdminFooterText" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="296" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000083"/>
+        <testcase name="testSecurityFeaturesImplemented" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="310" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="3" time="0.000460"/>
+        <testcase name="testWordPressHooksNamingConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="333" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000120"/>
+        <testcase name="testVariablesFollowCamelCaseConvention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="371" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000112"/>
+        <testcase name="testClassUsesProperNamespace" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="397" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="1" time="0.000076"/>
+        <testcase name="testPsr4Compliance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Admin/AdminMenuTest.php" line="411" class="WooAiAssistant\Tests\Unit\Admin\AdminMenuTest" classname="WooAiAssistant.Tests.Unit.Admin.AdminMenuTest" assertions="2" time="0.000114"/>
       </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" tests="8" assertions="20" errors="0" failures="0" skipped="0" time="0.001120">
-        <testcase name="test_trait_exists_and_works" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="30" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000076"/>
-        <testcase name="test_trait_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="36" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="3" time="0.000073"/>
-        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="51" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="5" time="0.000082"/>
-        <testcase name="test_getInstance_returns_same_instance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="63" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="1" time="0.000066"/>
-        <testcase name="test_hasInstance_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="71" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000070"/>
-        <testcase name="test_destroyInstance_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="79" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="3" time="0.000086"/>
-        <testcase name="test_cloning_throws_exception" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="91" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000583"/>
-        <testcase name="test_unserialization_throws_exception" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="101" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000084"/>
+      <testsuite name="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" tests="27" assertions="105" errors="0" failures="0" skipped="0" time="0.006739">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="94" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000764"/>
+        <testcase name="test_singleton_pattern" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="106" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000120"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="121" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="16" time="0.000166"/>
+        <testcase name="test_configuration_initialization" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="147" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="12" time="0.000237"/>
+        <testcase name="test_updateConfiguration_should_update_settings_when_valid_config_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="181" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="5" time="0.000121"/>
+        <testcase name="test_setAuthToken_should_store_token_when_valid_token_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="208" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000124"/>
+        <testcase name="test_clearAuthToken_should_remove_token_and_clear_cache" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="232" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000094"/>
+        <testcase name="test_sendRequest_should_throw_exception_when_endpoint_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="258" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000326"/>
+        <testcase name="test_sendRequest_should_return_dummy_response_when_development_mode" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="272" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000131"/>
+        <testcase name="test_logError_should_record_error_with_context" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="296" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000112"/>
+        <testcase name="test_getLastError_should_return_null_when_no_error_occurred" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="326" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="1" time="0.000087"/>
+        <testcase name="test_clearLastError_should_reset_error_state" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="337" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="1" time="0.000083"/>
+        <testcase name="test_getConnectionStatus_should_return_null_when_not_tested" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="354" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="1" time="0.000080"/>
+        <testcase name="test_getServerStatus_should_return_status_array_with_required_fields" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="365" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="4" time="0.000219"/>
+        <testcase name="test_authenticateConnection_should_return_true_when_development_mode" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="383" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000100"/>
+        <testcase name="test_authenticateConnection_should_return_false_when_no_token" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="406" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000094"/>
+        <testcase name="test_testConnection_should_return_true_when_development_mode" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="420" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000091"/>
+        <testcase name="test_rate_limiting_should_prevent_excessive_requests" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="443" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000115"/>
+        <testcase name="test_configuration_should_use_custom_server_url_when_set" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="493" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="1" time="0.000093"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="517" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="12" time="0.000305"/>
+        <testcase name="test_dummy_responses_should_match_endpoint_patterns" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="555" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="8" time="0.002377"/>
+        <testcase name="test_wordpress_options_integration" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="593" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000108"/>
+        <testcase name="test_wordpress_transient_cache_integration" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="620" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="2" time="0.000090"/>
+        <testcase name="test_wordpress_actions_integration" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="641" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000099"/>
+        <testcase name="test_input_sanitization" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="670" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="3" time="0.000116"/>
+        <testcase name="test_edge_cases_and_error_conditions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="691" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="6" time="0.000340"/>
+        <testcase name="test_performance_and_memory_usage" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/IntermediateServerClientTest.php" line="714" class="WooAiAssistant\Tests\Unit\Api\IntermediateServerClientTest" classname="WooAiAssistant.Tests.Unit.Api.IntermediateServerClientTest" assertions="1" time="0.000149"/>
       </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\Common\UtilsTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" tests="8" assertions="60" errors="0" failures="0" skipped="0" time="0.001136">
-        <testcase name="test_class_exists" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="18" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="1" time="0.000232"/>
-        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="23" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="24" time="0.000154"/>
-        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="43" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="11" time="0.000121"/>
-        <testcase name="test_sanitizeTextField_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="60" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="5" time="0.000083"/>
-        <testcase name="test_formatBytes_formats_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="81" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="5" time="0.000074"/>
-        <testcase name="test_generateUniqueId_creates_unique_ids" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="92" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="4" time="0.000269"/>
-        <testcase name="test_getMemoryUsage_returns_array_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="106" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="10" time="0.000137"/>
-        <testcase name="test_logDebug_works_without_errors" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="124" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="0" time="0.000067"/>
-      </testsuite>
-      <testsuite name="IndexerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" tests="30" assertions="237" errors="1" failures="1" skipped="0" time="0.187384">
-        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="121" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000770"/>
-        <testcase name="test_singleton_pattern_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="133" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000078"/>
-        <testcase name="test_class_and_methods_follow_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="148" class="IndexerTest" classname="IndexerTest" assertions="14" time="0.000122"/>
-        <testcase name="test_constants_follow_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="178" class="IndexerTest" classname="IndexerTest" assertions="7" time="0.000089"/>
-        <testcase name="test_processContent_should_return_success_stats_when_valid_data_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="195" class="IndexerTest" classname="IndexerTest" assertions="6" time="0.001159"/>
-        <testcase name="test_processContent_should_throw_exception_when_content_data_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="216" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000085"/>
-        <testcase name="test_processContent_should_throw_exception_when_chunk_size_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="230" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000081"/>
-        <testcase name="test_createChunks_should_return_proper_chunks_when_content_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="246" class="IndexerTest" classname="IndexerTest" assertions="8" time="0.000328"/>
-        <testcase name="test_createChunks_should_throw_exception_when_content_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="270" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000080"/>
-        <testcase name="test_createChunks_should_throw_exception_when_chunk_size_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="284" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000073"/>
-        <testcase name="test_createChunks_should_preserve_sentence_boundaries_when_requested" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="298" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000074"/>
-        <testcase name="test_createChunks_should_return_single_chunk_when_content_smaller_than_chunk_size" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="320" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000205"/>
-        <testcase name="test_storeChunks_should_store_chunks_successfully_when_valid_data_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="337" class="IndexerTest" classname="IndexerTest" assertions="5" time="0.000119"/>
-        <testcase name="test_storeChunks_should_return_zero_stats_when_chunks_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="381" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000078"/>
-        <testcase name="test_removeDuplicates_should_identify_duplicates_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="396" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000111"/>
-        <testcase name="test_optimizeForAi_should_return_optimized_content_when_valid_content_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="418" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000110"/>
-        <testcase name="test_optimizeForAi_should_enhance_keywords_when_requested" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="435" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000082"/>
-        <testcase name="test_getIndexingStats_should_return_array_with_statistics" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="451" class="IndexerTest" classname="IndexerTest" assertions="4" time="0.000229"/>
-        <testcase name="test_clearCache_should_return_true_when_cache_cleared" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="470" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000079"/>
-        <testcase name="test_getChunkStats_should_return_database_statistics" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="485" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000103"/>
-        <testcase name="test_onContentUpdated_should_handle_content_updates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="524" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000074"/>
-        <testcase name="test_processBulkReindex_should_handle_bulk_operations" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="539" class="IndexerTest" classname="IndexerTest" assertions="0" time="0.005861">
-          <error type="Error">IndexerTest::test_processBulkReindex_should_handle_bulk_operations
-Error: Call to undefined method WC_Product::get_stock_status()
+      <testsuite name="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" tests="29" assertions="108" errors="0" failures="12" skipped="0" time="0.010933">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="91" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.003167"/>
+        <testcase name="test_singleton_pattern" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="103" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000099"/>
+        <testcase name="test_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="118" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="24" time="0.000177"/>
+        <testcase name="test_validateLicense_should_return_valid_for_free_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="146" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="4" time="0.000102"/>
+        <testcase name="test_validateLicense_should_succeed_with_valid_key" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="162" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.001052"/>
+        <testcase name="test_validateLicense_should_handle_server_error" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="192" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="1" time="0.002458">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_validateLicense_should_handle_server_error
+Failed asserting that true is false.
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Indexer.php:943
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php:548</error>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:206</failure>
         </testcase>
-        <testcase name="test_processContent_should_handle_malformed_data_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="559" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000196"/>
-        <testcase name="test_processContent_should_handle_large_datasets_efficiently" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="580" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.166129">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">IndexerTest::test_processContent_should_handle_large_datasets_efficiently
-Failed asserting that 76283072 is less than 10485760.
+        <testcase name="test_validateLicense_should_use_cache_when_recently_validated" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="217" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000258">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_validateLicense_should_use_cache_when_recently_validated
+Failed asserting that null is true.
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php:607</failure>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:229</failure>
         </testcase>
-        <testcase name="test_wordpress_integration_hooks_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="616" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000107"/>
-        <testcase name="test_database_table_operations_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="629" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000106"/>
-        <testcase name="test_createChunks_should_handle_very_long_content" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="666" class="IndexerTest" classname="IndexerTest" assertions="126" time="0.001082"/>
-        <testcase name="test_optimizeForAi_should_handle_special_characters" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="689" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000104"/>
-        <testcase name="test_performance_with_realistic_ecommerce_content" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="706" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.009510"/>
-        <testcase name="test_all_required_public_methods_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="747" class="IndexerTest" classname="IndexerTest" assertions="20" time="0.000161"/>
-      </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" tests="25" assertions="71" errors="9" failures="3" skipped="0" time="0.005425">
-        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="90" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="2" time="0.000109"/>
-        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="101" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="14" time="0.000140"/>
-        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="126" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="10" time="0.000106"/>
-        <testcase name="test_scanProducts_should_return_array_when_products_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="155" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000317">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanProducts_should_return_array_when_products_exist
-Error: Call to undefined method WC_Product::get_stock_status()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:158</error>
-        </testcase>
-        <testcase name="test_scanProducts_should_throw_exception_when_limit_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="182" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="2" time="0.000085"/>
-        <testcase name="test_scanProducts_should_throw_exception_when_woocommerce_inactive" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="195" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000448">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanProducts_should_throw_exception_when_woocommerce_inactive
-Failed asserting that exception of type "Error" matches expected exception "RuntimeException". Message was: "Call to undefined method WC_Product::get_stock_status()" at
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:202
-.</failure>
-        </testcase>
-        <testcase name="test_scanPages_should_return_array_when_pages_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="211" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000253">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanPages_should_return_array_when_pages_exist
-Error: Call to undefined function WooAiAssistant\KnowledgeBase\get_the_author_meta()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:701
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:299
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:212</error>
-        </testcase>
-        <testcase name="test_scanPages_should_throw_exception_when_limit_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="236" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="2" time="0.000083"/>
-        <testcase name="test_scanWooSettings_should_return_array_when_woocommerce_active" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="249" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="21" time="0.000373"/>
-        <testcase name="test_scanWooSettings_should_throw_exception_when_woocommerce_inactive" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="273" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000265">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanWooSettings_should_throw_exception_when_woocommerce_inactive
-Failed asserting that exception of type "RuntimeException" is thrown.</failure>
-        </testcase>
-        <testcase name="test_scanCategories_should_return_array_for_taxonomies" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="288" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000297">
-          <error type="TypeError">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanCategories_should_return_array_for_taxonomies
-TypeError: WooAiAssistant\KnowledgeBase\Scanner::extractTermData(): Argument #1 ($term) must be of type WP_Term, stdClass given, called in /Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php on line 442
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:919
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:442
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:289</error>
-        </testcase>
-        <testcase name="test_processBatch_should_return_valid_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="304" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000288">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_processBatch_should_return_valid_structure
-Error: Call to undefined method WC_Product::get_stock_status()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:495
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:307</error>
-        </testcase>
-        <testcase name="test_processBatch_should_throw_exception_for_unsupported_type" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="328" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="2" time="0.000084"/>
-        <testcase name="test_getSupportedContentTypes_should_return_array" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="341" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="7" time="0.000444"/>
-        <testcase name="test_getLastScanStats_should_return_array" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="359" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000299">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_getLastScanStats_should_return_array
-Error: Call to undefined method WC_Product::get_stock_status()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:362</error>
-        </testcase>
-        <testcase name="test_clearCache_should_return_boolean" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="378" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000074"/>
-        <testcase name="test_onProductUpdated_should_handle_product_id" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="389" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000076"/>
-        <testcase name="test_onPostSaved_should_handle_post_data" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="403" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000274">
-          <error type="TypeError">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_onPostSaved_should_handle_post_data
-TypeError: WooAiAssistant\KnowledgeBase\Scanner::onPostSaved(): Argument #2 ($post) must be of type WP_Post, stdClass given, called in /Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php on line 412
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:1177
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:412</error>
-        </testcase>
-        <testcase name="test_singleton_pattern_should_return_same_instance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="422" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000072"/>
-        <testcase name="test_content_sanitization_should_clean_html" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="435" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="3" time="0.000102"/>
-        <testcase name="test_content_truncation_should_limit_length" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="454" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="2" time="0.000088"/>
-        <testcase name="test_processBatch_should_handle_different_content_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="472" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000310">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_processBatch_should_handle_different_content_types
-Error: Call to undefined function WooAiAssistant\KnowledgeBase\get_the_author_meta()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:701
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:299
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:501
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:478</error>
-        </testcase>
-        <testcase name="test_scanProducts_should_handle_invalid_product_ids" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="490" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000270">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_scanProducts_should_handle_invalid_product_ids
-Error: Call to undefined method WC_Product::get_stock_status()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:494</error>
-        </testcase>
-        <testcase name="test_caching_should_improve_performance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="507" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000264">
-          <error type="Error">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_caching_should_improve_performance
-Error: Call to undefined method WC_Product::get_stock_status()
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:642
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:573
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/KnowledgeBase/Scanner.php:216
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:512</error>
-        </testcase>
-        <testcase name="test_wordpress_hooks_should_be_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="535" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="1" time="0.000303">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest::test_wordpress_hooks_should_be_registered
-Failed asserting that 10 is true.
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php:537</failure>
-        </testcase>
-      </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\MainTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" tests="8" assertions="39" errors="0" failures="0" skipped="0" time="0.000895">
-        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="37" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000293"/>
-        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="43" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="21" time="0.000150"/>
-        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="63" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="9" time="0.000104"/>
-        <testcase name="test_singleton_pattern_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="78" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000067"/>
-        <testcase name="test_getVersion_returns_correct_version" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="86" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000072"/>
-        <testcase name="test_component_registration_works" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="93" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000077"/>
-        <testcase name="test_initialization_state_tracking" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="107" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000067"/>
-        <testcase name="test_get_nonexistent_component_returns_null" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="116" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000065"/>
-      </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" tests="23" assertions="0" errors="23" failures="0" skipped="0" time="0.000000">
-        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="94" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_class_exists_and_instantiates
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_singleton_pattern_implementation" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="105" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_singleton_pattern_implementation
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="118" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_class_follows_naming_conventions
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_namespace_follows_psr4_convention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="143" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_namespace_follows_psr4_convention
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_rest_api_namespace_is_correct" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="157" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_rest_api_namespace_is_correct
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_all_rest_routes_are_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="169" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_all_rest_routes_are_registered
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_chat_endpoint_accepts_post_requests" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="196" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_chat_endpoint_accepts_post_requests
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_permission_callbacks_are_set" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="210" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_permission_callbacks_are_set
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_frontend_permissions_allow_all_users" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="235" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_frontend_permissions_allow_all_users
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_admin_permissions_require_proper_capabilities" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="248" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_admin_permissions_require_proper_capabilities
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_public_permissions_always_allow" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="269" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_public_permissions_always_allow
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_health_check_returns_correct_format" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="282" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_health_check_returns_correct_format
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_version_info_returns_correct_data" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="307" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_version_info_returns_correct_data
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_widget_config_returns_proper_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="329" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_widget_config_returns_proper_structure
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_chat_message_validation_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="363" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_chat_message_validation_works_correctly
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_error_response_format_is_consistent" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="387" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_error_response_format_is_consistent
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_success_response_format_is_consistent" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="407" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_success_response_format_is_consistent
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_rate_limiting_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="433" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_rate_limiting_functionality
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_endpoints_return_correct_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="462" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_endpoints_return_correct_structure
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_all_public_methods_exist_and_callable" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="496" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_all_public_methods_exist_and_callable
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_wordpress_hooks_are_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="535" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_wordpress_hooks_are_registered
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_class_implements_security_best_practices" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="551" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_class_implements_security_best_practices
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-        <testcase name="test_singleton_trait_is_properly_used" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="582" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
-          <error type="Error">WooAiAssistant\Tests\Unit\RestApi\RestControllerTest::test_singleton_trait_is_properly_used
-Error: Class "WP_REST_Server" not found
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php:66</error>
-        </testcase>
-      </testsuite>
-      <testsuite name="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" tests="16" assertions="37" errors="7" failures="5" skipped="0" time="0.006782">
-        <testcase name="test_class_exists_and_constants_defined" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="67" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="3" time="0.000963"/>
-        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="78" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="9" time="0.000132"/>
-        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="109" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="7" time="0.000109"/>
-        <testcase name="test_activate_should_complete_without_errors_when_requirements_met" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="131" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="1" time="0.000491">
-          <failure type="PHPUnit\Framework\AssertionFailedError">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_activate_should_complete_without_errors_when_requirements_met
-Activation should not throw exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version:
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:140</failure>
-        </testcase>
-        <testcase name="test_database_tables_should_be_created_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="162" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000278">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_database_tables_should_be_created_correctly
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:169</error>
-        </testcase>
-        <testcase name="test_database_table_structure_should_be_correct" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="191" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000287">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_database_table_structure_should_be_correct
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:198</error>
-        </testcase>
-        <testcase name="test_default_options_should_be_set_correctly_on_activation" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="235" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000282">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_default_options_should_be_set_correctly_on_activation
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:240</error>
-        </testcase>
-        <testcase name="test_user_capabilities_should_be_set_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="268" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000280">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_user_capabilities_should_be_set_correctly
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:273</error>
-        </testcase>
-        <testcase name="test_cron_jobs_should_be_scheduled_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="299" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000283">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_cron_jobs_should_be_scheduled_correctly
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:304</error>
-        </testcase>
-        <testcase name="test_getActivationTime_should_return_correct_timestamp" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="324" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="2" time="0.000522">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_getActivationTime_should_return_correct_timestamp
-Should return correct activation timestamp
-Failed asserting that false matches expected 1756064581.
-
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:334</failure>
-        </testcase>
-        <testcase name="test_isRecentlyActivated_should_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="343" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="2" time="0.000297">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_isRecentlyActivated_should_work_correctly
-Should return true for recent activation
+        <testcase name="test_getPlanConfiguration_should_return_free_plan_config" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="240" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="6" time="0.000143"/>
+        <testcase name="test_getAvailablePlans_should_return_all_plans" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="258" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="6" time="0.000244"/>
+        <testcase name="test_isFeatureEnabled_should_restrict_features_for_free_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="279" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="5" time="0.000101"/>
+        <testcase name="test_isFeatureEnabled_should_enable_pro_features_for_pro_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="295" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000130">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_isFeatureEnabled_should_enable_pro_features_for_pro_plan
 Failed asserting that false is true.
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:351</failure>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:306</failure>
         </testcase>
-        <testcase name="test_database_version_methods_should_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="365" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="3" time="0.001711">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_database_version_methods_should_work_correctly
-Should return correct database version
+        <testcase name="test_isFeatureEnabled_should_enable_all_features_for_unlimited_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="318" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000120">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_isFeatureEnabled_should_enable_all_features_for_unlimited_plan
+Failed asserting that false is true.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:329</failure>
+        </testcase>
+        <testcase name="test_trackConversationUsage_should_increment_counter" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="343" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000109"/>
+        <testcase name="test_trackConversationUsage_should_enforce_limits" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="362" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="1" time="0.000123">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_trackConversationUsage_should_enforce_limits
+Failed asserting that true is false.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:372</failure>
+        </testcase>
+        <testcase name="test_trackIndexingUsage_should_increment_counter" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="381" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000100"/>
+        <testcase name="test_checkUsageLimit_should_validate_conversation_limits" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="400" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000125">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_checkUsageLimit_should_validate_conversation_limits
+Failed asserting that true is false.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:411</failure>
+        </testcase>
+        <testcase name="test_isInGracePeriod_should_detect_grace_period_status" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="422" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000121">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_isInGracePeriod_should_detect_grace_period_status
+Failed asserting that false is true.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:434</failure>
+        </testcase>
+        <testcase name="test_isFeatureEnabled_should_limit_features_during_grace_period" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="443" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000091"/>
+        <testcase name="test_setLicenseKey_should_validate_and_store_key" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="467" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="1" time="0.000107"/>
+        <testcase name="test_setLicenseKey_should_reject_empty_key" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="488" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000087"/>
+        <testcase name="test_clearLicenseKey_should_revert_to_free_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="502" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000101"/>
+        <testcase name="test_getBrandingConfig_should_return_correct_branding" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="528" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="4" time="0.000128">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_getBrandingConfig_should_return_correct_branding
+Failed asserting that true is false.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:544</failure>
+        </testcase>
+        <testcase name="test_getCurrentAiModel_should_return_correct_model_for_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="555" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000651">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_getCurrentAiModel_should_return_correct_model_for_plan
 Failed asserting that two strings are equal.
 --- Expected
 +++ Actual
 @@ @@
--'1.0.0'
-+'0.0.0'
+-'gemini-2.5-pro'
++'gemini-2.5-flash'
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:375</failure>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:574</failure>
         </testcase>
-        <testcase name="test_getDatabaseTables_should_return_correct_table_list" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="391" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="8" time="0.000219"/>
-        <testcase name="test_getDatabaseStats_should_return_correct_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="417" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000320">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_getDatabaseStats_should_return_correct_structure
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
+        <testcase name="test_canUpgrade_should_detect_upgrade_availability" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="585" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="3" time="0.000127">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_canUpgrade_should_detect_upgrade_availability
+Failed asserting that true is false.
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:420</error>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:598</failure>
         </testcase>
-        <testcase name="test_activation_should_fail_when_woocommerce_not_active" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="445" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="2" time="0.000318">
-          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_activation_should_fail_when_woocommerce_not_active
-Failed asserting that exception message 'Woo AI Assistant requires WordPress 6.0 or higher. Current version: ' contains 'WooCommerce to be installed and active'.</failure>
-        </testcase>
-        <testcase name="test_database_naming_follows_wordpress_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="460" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000290">
-          <error type="Exception">WooAiAssistant\Tests\Unit\Setup\ActivatorTest::test_database_naming_follows_wordpress_conventions
-Exception: Woo AI Assistant requires WordPress 6.0 or higher. Current version: 
+        <testcase name="test_getUpgradeUrl_should_generate_correct_url" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="607" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="2" time="0.000134"/>
+        <testcase name="test_validateLicense_should_handle_exceptions_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="672" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="1" time="0.000155">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_validateLicense_should_handle_exceptions_gracefully
+Failed asserting that true is false.
 
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:113
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Setup/Activator.php:59
-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php:467</error>
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:685</failure>
         </testcase>
+        <testcase name="test_monthly_usage_should_reset_automatically" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="696" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="1" time="0.000155">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">WooAiAssistant\Tests\Unit\Api\LicenseManagerTest::test_monthly_usage_should_reset_automatically
+Failed asserting that 2 matches expected 0.
+
+/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php:710</failure>
+        </testcase>
+        <testcase name="test_getLicenseStatus_should_return_complete_status" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="723" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="8" time="0.000374"/>
+        <testcase name="test_getUsageStatistics_should_return_complete_stats" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Api/LicenseManagerTest.php" line="743" class="WooAiAssistant\Tests\Unit\Api\LicenseManagerTest" classname="WooAiAssistant.Tests.Unit.Api.LicenseManagerTest" assertions="7" time="0.000195"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" tests="8" assertions="20" errors="0" failures="0" skipped="0" time="0.000616">
+        <testcase name="test_trait_exists_and_works" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="30" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000082"/>
+        <testcase name="test_trait_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="36" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="3" time="0.000077"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="51" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="5" time="0.000085"/>
+        <testcase name="test_getInstance_returns_same_instance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="63" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="1" time="0.000063"/>
+        <testcase name="test_hasInstance_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="71" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000067"/>
+        <testcase name="test_destroyInstance_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="79" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="3" time="0.000083"/>
+        <testcase name="test_cloning_throws_exception" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="91" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000079"/>
+        <testcase name="test_unserialization_throws_exception" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/Traits/SingletonTest.php" line="101" class="WooAiAssistant\Tests\Unit\Common\Traits\SingletonTest" classname="WooAiAssistant.Tests.Unit.Common.Traits.SingletonTest" assertions="2" time="0.000081"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\Common\UtilsTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" tests="8" assertions="61" errors="0" failures="0" skipped="0" time="0.000748">
+        <testcase name="test_class_exists" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="18" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="1" time="0.000061"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="23" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="25" time="0.000155"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="43" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="11" time="0.000108"/>
+        <testcase name="test_sanitizeTextField_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="60" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="5" time="0.000076"/>
+        <testcase name="test_formatBytes_formats_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="81" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="5" time="0.000073"/>
+        <testcase name="test_generateUniqueId_creates_unique_ids" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="92" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="4" time="0.000086"/>
+        <testcase name="test_getMemoryUsage_returns_array_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="106" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="10" time="0.000131"/>
+        <testcase name="test_logDebug_works_without_errors" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Common/UtilsTest.php" line="124" class="WooAiAssistant\Tests\Unit\Common\UtilsTest" classname="WooAiAssistant.Tests.Unit.Common.UtilsTest" assertions="0" time="0.000058"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" tests="32" assertions="185" errors="0" failures="0" skipped="0" time="0.040077">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="90" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001421"/>
+        <testcase name="test_singleton_pattern" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="101" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.000095"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="115" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="7" time="0.000110"/>
+        <testcase name="test_generateResponse_should_return_success_when_valid_input" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="140" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="7" time="0.001636"/>
+        <testcase name="test_generateResponse_should_return_error_when_empty_message" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="164" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="4" time="0.000118"/>
+        <testcase name="test_generateResponse_should_return_error_when_whitespace_only_message" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="181" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.000109"/>
+        <testcase name="test_generateResponse_should_trigger_safety_filter_when_malicious_input" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="198" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="12" time="0.000145"/>
+        <testcase name="test_generateResponse_should_handle_streaming_option" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="221" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001447"/>
+        <testcase name="test_generateResponse_should_use_custom_model_when_specified" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="237" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001448"/>
+        <testcase name="test_generateResponse_should_use_additional_context" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="254" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.001513"/>
+        <testcase name="test_generateResponse_should_maintain_conversation_context" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="277" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="4" time="0.002930"/>
+        <testcase name="test_generateResponse_should_return_complete_response_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="303" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="12" time="0.001669"/>
+        <testcase name="test_generateResponse_should_respect_max_tokens_option" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="330" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.001503"/>
+        <testcase name="test_generateResponse_should_respect_temperature_option" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="346" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001475"/>
+        <testcase name="test_getServiceStatus_should_return_service_availability" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="362" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="12" time="0.000217"/>
+        <testcase name="test_handleStreamingRequest_should_process_ajax_request" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="389" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="1" time="0.001465"/>
+        <testcase name="test_handleStreamingRequest_should_fail_with_invalid_nonce" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="418" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="1" time="0.000096"/>
+        <testcase name="test_generateResponse_should_generate_unique_conversation_ids" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="437" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="5" time="0.002860"/>
+        <testcase name="test_generateResponse_should_calculate_confidence_score" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="454" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="8" time="0.001587"/>
+        <testcase name="test_generateResponse_should_track_response_time" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="471" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="6" time="0.001573"/>
+        <testcase name="test_generateResponse_should_select_model_based_on_plan" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="487" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="6" time="0.004241"/>
+        <testcase name="test_generateResponse_should_return_proper_error_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="512" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="10" time="0.000198"/>
+        <testcase name="test_generateResponse_should_apply_comprehensive_safety_filters" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="534" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="27" time="0.000235"/>
+        <testcase name="test_generateResponse_should_handle_large_messages" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="568" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001522"/>
+        <testcase name="test_generateResponse_should_handle_multiple_conversations" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="583" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="6" time="0.002842"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="605" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="9" time="0.001521"/>
+        <testcase name="test_class_constants_are_properly_defined" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="638" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="13" time="0.000149"/>
+        <testcase name="test_wordpress_hooks_are_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="671" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.000111"/>
+        <testcase name="test_integration_with_vector_manager" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="689" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.000121"/>
+        <testcase name="test_generateResponse_should_handle_extremely_short_message" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="705" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.001465"/>
+        <testcase name="test_generateResponse_should_handle_special_characters" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="719" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="2" time="0.001452"/>
+        <testcase name="test_conversation_context_cleanup" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/AIManagerTest.php" line="734" class="WooAiAssistant\Tests\Unit\KnowledgeBase\AIManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.AIManagerTest" assertions="3" time="0.002800"/>
+      </testsuite>
+      <testsuite name="IndexerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" tests="30" assertions="240" errors="0" failures="0" skipped="0" time="0.007522">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="121" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000659"/>
+        <testcase name="test_singleton_pattern_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="133" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000087"/>
+        <testcase name="test_class_and_methods_follow_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="148" class="IndexerTest" classname="IndexerTest" assertions="16" time="0.000134"/>
+        <testcase name="test_constants_follow_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="178" class="IndexerTest" classname="IndexerTest" assertions="7" time="0.000096"/>
+        <testcase name="test_processContent_should_return_success_stats_when_valid_data_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="195" class="IndexerTest" classname="IndexerTest" assertions="6" time="0.001183"/>
+        <testcase name="test_processContent_should_throw_exception_when_content_data_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="216" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000099"/>
+        <testcase name="test_processContent_should_throw_exception_when_chunk_size_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="230" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000079"/>
+        <testcase name="test_createChunks_should_return_proper_chunks_when_content_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="246" class="IndexerTest" classname="IndexerTest" assertions="8" time="0.000153"/>
+        <testcase name="test_createChunks_should_throw_exception_when_content_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="270" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000083"/>
+        <testcase name="test_createChunks_should_throw_exception_when_chunk_size_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="284" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000081"/>
+        <testcase name="test_createChunks_should_preserve_sentence_boundaries_when_requested" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="298" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000075"/>
+        <testcase name="test_createChunks_should_return_single_chunk_when_content_smaller_than_chunk_size" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="320" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000190"/>
+        <testcase name="test_storeChunks_should_store_chunks_successfully_when_valid_data_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="337" class="IndexerTest" classname="IndexerTest" assertions="5" time="0.000125"/>
+        <testcase name="test_storeChunks_should_return_zero_stats_when_chunks_empty" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="381" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000081"/>
+        <testcase name="test_removeDuplicates_should_identify_duplicates_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="396" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000113"/>
+        <testcase name="test_optimizeForAi_should_return_optimized_content_when_valid_content_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="418" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000117"/>
+        <testcase name="test_optimizeForAi_should_enhance_keywords_when_requested" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="435" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000080"/>
+        <testcase name="test_getIndexingStats_should_return_array_with_statistics" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="451" class="IndexerTest" classname="IndexerTest" assertions="4" time="0.000255"/>
+        <testcase name="test_clearCache_should_return_true_when_cache_cleared" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="470" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000077"/>
+        <testcase name="test_getChunkStats_should_return_database_statistics" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="485" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000132"/>
+        <testcase name="test_onContentUpdated_should_handle_content_updates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="524" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000097"/>
+        <testcase name="test_processBulkReindex_should_handle_bulk_operations" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="539" class="IndexerTest" classname="IndexerTest" assertions="1" time="0.000644"/>
+        <testcase name="test_processContent_should_handle_malformed_data_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="559" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000222"/>
+        <testcase name="test_processContent_should_handle_large_datasets_efficiently" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="580" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000475"/>
+        <testcase name="test_wordpress_integration_hooks_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="616" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000084"/>
+        <testcase name="test_database_table_operations_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="629" class="IndexerTest" classname="IndexerTest" assertions="2" time="0.000118"/>
+        <testcase name="test_createChunks_should_handle_very_long_content" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="666" class="IndexerTest" classname="IndexerTest" assertions="126" time="0.001140"/>
+        <testcase name="test_optimizeForAi_should_handle_special_characters" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="689" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000102"/>
+        <testcase name="test_performance_with_realistic_ecommerce_content" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="706" class="IndexerTest" classname="IndexerTest" assertions="3" time="0.000591"/>
+        <testcase name="test_all_required_public_methods_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/IndexerTest.php" line="747" class="IndexerTest" classname="IndexerTest" assertions="20" time="0.000150"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" tests="25" assertions="0" errors="0" failures="0" skipped="25" time="0.000000">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="87" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="98" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="123" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanProducts_should_return_array_when_products_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="152" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanProducts_should_throw_exception_when_limit_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="181" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanProducts_should_throw_exception_when_woocommerce_inactive" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="194" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanPages_should_return_array_when_pages_exist" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="210" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanPages_should_throw_exception_when_limit_invalid" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="237" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanWooSettings_should_return_array_when_woocommerce_active" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="250" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanWooSettings_should_throw_exception_when_woocommerce_inactive" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="276" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanCategories_should_return_array_for_taxonomies" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="291" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_processBatch_should_return_valid_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="309" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_processBatch_should_throw_exception_for_unsupported_type" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="335" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_getSupportedContentTypes_should_return_array" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="348" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_getLastScanStats_should_return_array" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="366" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_clearCache_should_return_boolean" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="387" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_onProductUpdated_should_handle_product_id" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="398" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_onPostSaved_should_handle_post_data" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="412" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_singleton_pattern_should_return_same_instance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="431" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_content_sanitization_should_clean_html" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="444" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_content_truncation_should_limit_length" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="465" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_processBatch_should_handle_different_content_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="485" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_scanProducts_should_handle_invalid_product_ids" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="505" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_caching_should_improve_performance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="524" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_wordpress_hooks_should_be_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/ScannerTest.php" line="554" class="WooAiAssistant\Tests\Unit\KnowledgeBase\ScannerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.ScannerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" tests="35" assertions="1679" errors="0" failures="0" skipped="0" time="0.116140">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="95" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.000110"/>
+        <testcase name="test_singleton_pattern_enforced" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="107" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000075"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="121" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="12" time="0.000115"/>
+        <testcase name="test_generateEmbedding_should_return_array_when_valid_text_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="155" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1539" time="0.009424"/>
+        <testcase name="test_generateEmbedding_should_handle_empty_text_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="175" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.003790"/>
+        <testcase name="test_generateEmbedding_should_use_cache_when_enabled" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="190" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.007146"/>
+        <testcase name="test_generateEmbeddings_should_process_multiple_texts" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="211" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="8" time="0.029710"/>
+        <testcase name="test_generateEmbeddings_should_throw_exception_when_empty_array_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="236" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.000145"/>
+        <testcase name="test_normalizeVector_should_return_normalized_array_when_valid_vector_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="250" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="6" time="0.000255"/>
+        <testcase name="test_normalizeVector_should_return_null_when_empty_vector_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="276" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000089"/>
+        <testcase name="test_normalizeVector_should_handle_zero_vector_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="289" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.000106"/>
+        <testcase name="test_normalizeVector_should_return_null_when_non_numeric_values_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="304" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000079"/>
+        <testcase name="test_getDummyEmbedding_should_return_deterministic_embedding" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="318" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="4" time="0.007051"/>
+        <testcase name="test_getDummyEmbedding_should_respect_custom_dimension" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="342" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000438"/>
+        <testcase name="test_getDummyEmbedding_should_handle_empty_text_gracefully" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="358" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.001938"/>
+        <testcase name="test_storeVector_should_return_true_when_valid_data_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="372" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.000123"/>
+        <testcase name="test_storeVector_should_return_false_when_invalid_chunk_id_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="397" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000081"/>
+        <testcase name="test_storeVector_should_return_false_when_invalid_vector_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="409" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000082"/>
+        <testcase name="test_searchSimilar_should_return_results_when_valid_query_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="423" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000103"/>
+        <testcase name="test_searchSimilar_should_return_empty_array_when_empty_query_provided" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="455" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="2" time="0.000142"/>
+        <testcase name="test_searchSimilar_should_respect_search_options" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="469" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.000172"/>
+        <testcase name="test_public_methods_exist_and_follow_naming_convention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="498" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="16" time="0.000148"/>
+        <testcase name="test_methods_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="531" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="7" time="0.004760"/>
+        <testcase name="test_embedding_generation_consistency" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="568" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.004003"/>
+        <testcase name="test_vector_normalization_properties" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="584" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="8" time="0.000136"/>
+        <testcase name="test_similarity_search_ordering" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="610" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="1" time="0.000118"/>
+        <testcase name="test_testServerConnection_should_return_status_array" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="647" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="12" time="0.000253"/>
+        <testcase name="test_getServerClientStatus_should_return_status_information" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="681" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="5" time="0.000157"/>
+        <testcase name="test_server_client_integration_in_development_mode" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="703" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="4" time="0.010388"/>
+        <testcase name="test_embedding_generation_with_server_fallback" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="726" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.003505"/>
+        <testcase name="test_batch_processing_with_server_integration" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="747" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="8" time="0.028800"/>
+        <testcase name="test_vector_normalization_in_integrated_workflow" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="775" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.002261"/>
+        <testcase name="test_server_connection_testing_handles_unavailable_server" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="806" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="3" time="0.000152"/>
+        <testcase name="test_intermediate_server_client_integration_initialization" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="828" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="5" time="0.000153"/>
+        <testcase name="test_error_handling_for_invalid_inputs" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/KnowledgeBase/VectorManagerTest.php" line="852" class="WooAiAssistant\Tests\Unit\KnowledgeBase\VectorManagerTest" classname="WooAiAssistant.Tests.Unit.KnowledgeBase.VectorManagerTest" assertions="6" time="0.000132"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\MainTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" tests="8" assertions="48" errors="0" failures="0" skipped="0" time="0.001183">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="37" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000505"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="43" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="30" time="0.000191"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="63" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="9" time="0.000109"/>
+        <testcase name="test_singleton_pattern_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="78" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000073"/>
+        <testcase name="test_getVersion_returns_correct_version" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="86" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000078"/>
+        <testcase name="test_component_registration_works" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="93" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="2" time="0.000084"/>
+        <testcase name="test_initialization_state_tracking" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="107" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000072"/>
+        <testcase name="test_get_nonexistent_component_returns_null" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/MainTest.php" line="116" class="WooAiAssistant\Tests\Unit\MainTest" classname="WooAiAssistant.Tests.Unit.MainTest" assertions="1" time="0.000072"/>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" tests="23" assertions="0" errors="0" failures="0" skipped="23" time="0.000000">
+        <testcase name="test_class_exists_and_instantiates" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="86" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_singleton_pattern_implementation" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="97" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="110" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_namespace_follows_psr4_convention" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="135" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_rest_api_namespace_is_correct" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="149" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_all_rest_routes_are_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="161" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_chat_endpoint_accepts_post_requests" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="188" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_permission_callbacks_are_set" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="202" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_frontend_permissions_allow_all_users" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="227" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_admin_permissions_require_proper_capabilities" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="240" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_public_permissions_always_allow" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="261" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_health_check_returns_correct_format" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="274" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_version_info_returns_correct_data" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="299" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_widget_config_returns_proper_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="321" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_chat_message_validation_works_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="355" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_error_response_format_is_consistent" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="379" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_success_response_format_is_consistent" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="399" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_rate_limiting_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="425" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_endpoints_return_correct_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="454" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_all_public_methods_exist_and_callable" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="488" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_wordpress_hooks_are_registered" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="527" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_class_implements_security_best_practices" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="543" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="test_singleton_trait_is_properly_used" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/RestApi/RestControllerTest.php" line="574" class="WooAiAssistant\Tests\Unit\RestApi\RestControllerTest" classname="WooAiAssistant.Tests.Unit.RestApi.RestControllerTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" tests="16" assertions="81" errors="0" failures="0" skipped="4" time="0.003086">
+        <testcase name="test_class_exists_and_constants_defined" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="68" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="3" time="0.000415"/>
+        <testcase name="test_class_follows_naming_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="79" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="9" time="0.000142"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="110" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="7" time="0.000115"/>
+        <testcase name="test_activate_should_complete_without_errors_when_requirements_met" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="132" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="5" time="0.000503"/>
+        <testcase name="test_database_tables_should_be_created_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="174" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="6" time="0.000160"/>
+        <testcase name="test_database_table_structure_should_be_correct" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="212" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000097">
+          <skipped/>
+        </testcase>
+        <testcase name="test_default_options_should_be_set_correctly_on_activation" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="256" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="8" time="0.000162"/>
+        <testcase name="test_user_capabilities_should_be_set_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="289" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000092">
+          <skipped/>
+        </testcase>
+        <testcase name="test_cron_jobs_should_be_scheduled_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="319" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000096">
+          <skipped/>
+        </testcase>
+        <testcase name="test_getActivationTime_should_return_correct_timestamp" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="328" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="2" time="0.000100"/>
+        <testcase name="test_isRecentlyActivated_should_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="347" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="3" time="0.000099"/>
+        <testcase name="test_database_version_methods_should_work_correctly" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="369" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="5" time="0.000110"/>
+        <testcase name="test_getDatabaseTables_should_return_correct_table_list" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="395" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="8" time="0.000189"/>
+        <testcase name="test_getDatabaseStats_should_return_correct_structure" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="421" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="14" time="0.000510"/>
+        <testcase name="test_activation_should_fail_when_woocommerce_not_active" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="449" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="0" time="0.000096">
+          <skipped/>
+        </testcase>
+        <testcase name="test_database_naming_follows_wordpress_conventions" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Unit/Setup/ActivatorTest.php" line="466" class="WooAiAssistant\Tests\Unit\Setup\ActivatorTest" classname="WooAiAssistant.Tests.Unit.Setup.ActivatorTest" assertions="11" time="0.000200"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="integration" tests="14" assertions="444" errors="0" failures="0" skipped="1" time="2.059598">
+      <testsuite name="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" tests="14" assertions="444" errors="0" failures="0" skipped="1" time="2.059598">
+        <testcase name="test_kb_components_initialization" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="98" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="7" time="0.105085"/>
+        <testcase name="test_full_content_processing_pipeline" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="125" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="22" time="0.109710"/>
+        <testcase name="test_scanner_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="196" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="25" time="0.114721"/>
+        <testcase name="test_indexer_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="249" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="9" time="0.106905"/>
+        <testcase name="test_vector_manager_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="301" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="6" time="0.125625"/>
+        <testcase name="test_ai_manager_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="357" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="37" time="0.134189"/>
+        <testcase name="test_cron_manager_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="425" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="8" time="0.114755"/>
+        <testcase name="test_health_monitor_functionality" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="459" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="13" time="0.118871"/>
+        <testcase name="test_realtime_updates_and_sync" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="507" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="0" time="0.105648">
+          <skipped/>
+        </testcase>
+        <testcase name="test_error_handling_and_recovery" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="564" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="6" time="0.107280"/>
+        <testcase name="test_performance_benchmarks" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="610" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="9" time="0.115334"/>
+        <testcase name="test_system_integration_under_load" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="661" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="12" time="0.587691"/>
+        <testcase name="test_naming_conventions_compliance" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="849" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="280" time="0.107449"/>
+        <testcase name="test_public_methods_exist_and_return_correct_types" file="/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/tests/Integration/KnowledgeBaseIntegrationTest.php" line="882" class="WooAiAssistant\Tests\Integration\KnowledgeBaseIntegrationTest" classname="WooAiAssistant.Tests.Integration.KnowledgeBaseIntegrationTest" assertions="10" time="0.106334"/>
       </testsuite>
     </testsuite>
   </testsuite>
