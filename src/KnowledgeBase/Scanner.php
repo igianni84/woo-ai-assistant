@@ -334,6 +334,32 @@ class Scanner
     }
 
     /**
+     * Scan posts for knowledge base
+     * 
+     * This is a wrapper method that calls scanPages with post-specific parameters.
+     * It's provided for clarity and backward compatibility.
+     *
+     * @since 1.0.0
+     * @param array $args Optional. Arguments for post scanning.
+     * @param int   $args['limit'] Maximum number of posts to scan. Default 100.
+     * @param int   $args['offset'] Number of posts to skip. Default 0.
+     * @param bool  $args['force_update'] Whether to rescan existing posts. Default false.
+     * @param string $args['language'] Language filter for multilingual sites. Default null.
+     *
+     * @return array Array of post data formatted for indexing.
+     *
+     * @throws \InvalidArgumentException When arguments are invalid.
+     */
+    public function scanPosts(array $args = []): array
+    {
+        // Override post_types to only scan posts
+        $args['post_types'] = ['post'];
+        
+        // Call scanPages with post-specific configuration
+        return $this->scanPages($args);
+    }
+
+    /**
      * Extract WooCommerce settings for knowledge base
      *
      * @since 1.0.0

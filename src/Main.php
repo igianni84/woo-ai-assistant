@@ -20,6 +20,7 @@ use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Admin\AdminMenu;
 use WooAiAssistant\Admin\Pages\DashboardPage;
 use WooAiAssistant\Admin\Pages\ConversationsLogPage;
+use WooAiAssistant\Admin\Pages\KnowledgeBaseStatusPage;
 use WooAiAssistant\RestApi\RestController;
 use WooAiAssistant\Api\IntermediateServerClient;
 use WooAiAssistant\Api\LicenseManager;
@@ -761,6 +762,15 @@ class Main
                 Utils::logDebug('ConversationsLogPage component loaded');
             } else {
                 Utils::logError('ConversationsLogPage class not found');
+            }
+
+            // Load KnowledgeBaseStatusPage component
+            if (class_exists('WooAiAssistant\Admin\Pages\KnowledgeBaseStatusPage')) {
+                $kbStatusPage = KnowledgeBaseStatusPage::getInstance();
+                $this->registerComponent('kb_status_page', $kbStatusPage);
+                Utils::logDebug('KnowledgeBaseStatusPage component loaded');
+            } else {
+                Utils::logError('KnowledgeBaseStatusPage class not found');
             }
 
             Utils::logDebug('Admin components loaded successfully');

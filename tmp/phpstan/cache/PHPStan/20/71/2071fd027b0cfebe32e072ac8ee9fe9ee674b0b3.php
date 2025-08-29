@@ -2,6 +2,6 @@
 
 // variadic-method-WooAiAssistant\RestApi\RestController-getCurrentUserId-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/RestApi/RestController.php
 return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => '1756188784-v4',
+   'variableKey' => '1756294712-v4',
    'data' => false,
 ));

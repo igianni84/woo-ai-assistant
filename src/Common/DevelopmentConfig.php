@@ -43,7 +43,7 @@ class DevelopmentConfig
      * @since 1.0.0
      * @var string
      */
-    private const DEV_ENV_FILE = '.env.development';
+    private const DEV_ENV_FILE = '.env';
 
     /**
      * Cached development configuration
@@ -123,7 +123,7 @@ class DevelopmentConfig
      * Get development API key for specified service
      *
      * @since 1.0.0
-     * @param string $service Service name (openrouter, openai, pinecone, google)
+     * @param string $service Service name (openrouter, openai, pinecone, google, stripe)
      * @return string API key or empty string if not found
      */
     public function getApiKey(string $service): string
@@ -132,7 +132,18 @@ class DevelopmentConfig
             return '';
         }
 
-        $envVar = strtoupper($service) . '_API_KEY';
+        // Map service names to environment variable names
+        $envVarMap = [
+            'openrouter' => 'OPENROUTER_API_KEY',
+            'openai' => 'OPENAI_API_KEY',
+            'pinecone' => 'PINECONE_API_KEY',
+            'google' => 'GOOGLE_API_KEY',
+            'stripe' => 'STRIPE_SECRET_KEY',
+            'stripe_public' => 'STRIPE_PUBLISHABLE_KEY',
+            'stripe_webhook' => 'STRIPE_WEBHOOK_SECRET',
+        ];
+
+        $envVar = $envVarMap[$service] ?? strtoupper($service) . '_API_KEY';
         $apiKey = $this->getEnvironmentVariable($envVar);
 
         if (!empty($apiKey)) {
@@ -155,7 +166,29 @@ class DevelopmentConfig
             return '';
         }
 
-        return $this->getEnvironmentVariable('WOO_AI_DEVELOPMENT_LICENSE_KEY', 'dev-license-bypass');
+        return $this->getEnvironmentVariable('WOO_AI_LICENSE_KEY', 'dev-license-bypass');
+    }
+
+    /**
+     * Get AI model configuration
+     *
+     * @since 1.0.0
+     * @return array AI model configuration for development
+     */
+    public function getAiModelConfig(): array
+    {
+        if (!$this->isDevelopmentMode()) {
+            return [];
+        }
+
+        return [
+            'primary_model' => $this->getEnvironmentVariable('WOO_AI_PRIMARY_MODEL', 'google/gemini-2.0-flash-exp:free'),
+            'fallback_model' => $this->getEnvironmentVariable('WOO_AI_FALLBACK_MODEL', 'google/gemini-2.0-flash-thinking-exp:free'),
+            'embedding_model' => $this->getEnvironmentVariable('WOO_AI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+            'max_tokens' => (int) $this->getEnvironmentVariable('WOO_AI_MAX_TOKENS', '2000'),
+            'temperature' => (float) $this->getEnvironmentVariable('WOO_AI_TEMPERATURE', '0.7'),
+            'top_p' => (float) $this->getEnvironmentVariable('WOO_AI_TOP_P', '0.9'),
+        ];
     }
 
     /**
@@ -185,6 +218,7 @@ class DevelopmentConfig
             'api_key' => $this->getApiKey('pinecone'),
             'environment' => $this->getEnvironmentVariable('PINECONE_ENVIRONMENT', 'development'),
             'index_name' => $this->getEnvironmentVariable('PINECONE_INDEX_NAME', 'woo-ai-assistant-dev'),
+            'host' => $this->getEnvironmentVariable('PINECONE_HOST', ''),
         ];
     }
 
@@ -259,7 +293,7 @@ class DevelopmentConfig
         }
 
         return [
-            'url' => $this->getEnvironmentVariable('WOO_AI_DEVELOPMENT_SERVER_URL', 'http://localhost:3000'),
+            'url' => $this->getEnvironmentVariable('WOO_AI_SERVER_URL', 'http://localhost:3000'),
             'timeout' => (int) $this->getEnvironmentVariable('WOO_AI_DEV_API_TIMEOUT', '10'),
             'retry_attempts' => 1, // Reduced for development
         ];
@@ -275,6 +309,25 @@ class DevelopmentConfig
     {
         return $this->isDevelopmentMode() &&
                $this->getEnvironmentVariable('WOO_AI_USE_DUMMY_DATA') === 'true';
+    }
+
+    /**
+     * Check if Pinecone should be used for vector operations
+     *
+     * @since 1.0.0
+     * @return bool True if Pinecone should be used
+     */
+    public function shouldUsePinecone(): bool
+    {
+        // In development mode, check if we explicitly want to use Pinecone
+        if ($this->isDevelopmentMode()) {
+            $usePinecone = $this->getEnvironmentVariable('WOO_AI_USE_PINECONE');
+            // Default to false in development unless explicitly enabled
+            return $usePinecone === 'true';
+        }
+        
+        // In production, always use Pinecone
+        return true;
     }
 
     /**
@@ -310,7 +363,7 @@ class DevelopmentConfig
     public function getCacheTtl(): int
     {
         if (!$this->isDevelopmentMode()) {
-            return HOUR_IN_SECONDS; // Default production TTL
+            return 3600; // Default production TTL (1 hour)
         }
 
         return (int) $this->getEnvironmentVariable('WOO_AI_DEV_CACHE_TTL', '60');

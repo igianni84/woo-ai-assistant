@@ -39,6 +39,70 @@
 
 ---
 
+## 🔧 DEVELOPMENT TESTING CONFIGURATION
+
+**📅 Last Updated:** 2025-08-29
+
+### ⚠️ IMPORTANT ARCHITECTURE CLARIFICATION
+
+**The plugin architecture has been designed with a CRITICAL separation of concerns:**
+
+1. **Production Architecture (Zero-Config):**
+   - Plugin communicates ONLY with intermediate server (EU-based)
+   - ALL API keys (OpenRouter, OpenAI, Pinecone, Stripe) are on the server
+   - Client plugin uses ONLY a license key for authentication
+   - Server handles all API calls, rate limiting, and usage tracking
+   - This ensures the SaaS business model where we manage costs
+
+2. **Development Mode (Local Testing):**
+   - Uses `.env` file for local API keys (NEVER in production)
+   - `DevelopmentConfig.php` manages development-only settings
+   - Bypasses license validation for testing
+   - Allows direct API calls without intermediate server
+
+### 🧪 TESTING SETUP INSTRUCTIONS
+
+**To test the plugin locally without the intermediate server:**
+
+1. **Create .env file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Configure API keys in .env:**
+   - `OPENROUTER_API_KEY` - For Gemini models via OpenRouter
+   - `OPENAI_API_KEY` - For embeddings (text-embedding-3-small)
+   - `PINECONE_API_KEY` - For vector database
+   - `STRIPE_SECRET_KEY` - For payment testing (use test keys)
+   - Set `WOO_AI_DEVELOPMENT_MODE=true`
+
+3. **Verify configuration:**
+   ```bash
+   php test-development-config.php
+   ```
+
+4. **Key Points:**
+   - Settings page fields are PLACEHOLDERS in production
+   - Real API configuration happens on intermediate server
+   - Embedding model selection is server-side, not client-side
+   - Server URL defaults to `https://api.wooaiassistant.com`
+
+### 📝 CONFIGURATION NOTES
+
+**What the settings fields actually mean:**
+- **Server URL:** Intermediate server endpoint (NOT for API providers)
+- **Webhook URL:** For async notifications from server
+- **License Key:** The ONLY credential users need in production
+- **API Keys fields:** Should be REMOVED or disabled in production UI
+
+**Development files created:**
+- `.env.example` - Template with all configuration options
+- `.env` - Actual configuration (git-ignored)
+- `test-development-config.php` - Configuration verification script
+- `DevelopmentConfig.php` - Updated to use `.env` instead of `.env.development`
+
+---
+
 ## 🎯 Development Phases
 
 ### ⚡ Quick Reference
@@ -1617,6 +1681,64 @@ Use the "File Coverage Checklist" below to verify all files are created.
 - **Integration Testing:** WordPress/WooCommerce compatibility
 
 **🚫 CRITICAL:** Tasks are NOT completed until ALL quality gates pass!
+
+---
+
+### **PHASE 13: Intermediate Server Development** 🔴
+*Estimated: 10-14 days*
+*Status: CRITICAL - Required for Production*
+
+#### Task 13.1: Server Architecture & Setup 🔴
+*Status: NOT STARTED - BLOCKING PRODUCTION*
+- [ ] Design Node.js/Express server architecture
+- [ ] Setup EU-based hosting infrastructure
+- [ ] Configure SSL certificates and security
+- [ ] Implement authentication system for license keys
+- [ ] Setup database for license management
+- [ ] Configure rate limiting and quota management
+- [ ] Implement logging and monitoring
+- **Output:** Basic server infrastructure operational
+- **Dependencies:** None - Can start immediately
+- **Notes:** CRITICAL: Without this, the plugin cannot work in production
+
+#### Task 13.2: API Proxy Implementation 🔴
+*Status: NOT STARTED - BLOCKING PRODUCTION*
+- [ ] Implement OpenRouter API proxy for Gemini models
+- [ ] Implement OpenAI API proxy for embeddings
+- [ ] Implement Pinecone proxy for vector database
+- [ ] Add request/response caching layer
+- [ ] Implement error handling and fallbacks
+- [ ] Add usage tracking per license
+- [ ] Setup cost monitoring and alerts
+- **Output:** Complete API proxy system
+- **Dependencies:** Task 13.1
+- **Notes:** Must handle all API keys securely on server side
+
+#### Task 13.3: License & Billing System 🔴
+*Status: NOT STARTED - BLOCKING PRODUCTION*
+- [ ] Integrate Stripe for subscription management
+- [ ] Implement license key generation system
+- [ ] Create usage-based billing logic
+- [ ] Add plan management (Free/Pro/Unlimited)
+- [ ] Implement grace periods and warnings
+- [ ] Create admin dashboard for license management
+- [ ] Setup automated billing emails
+- **Output:** Complete SaaS billing infrastructure
+- **Dependencies:** Task 13.2
+- **Notes:** Essential for business model
+
+#### Task 13.4: Client Plugin Integration 🔴
+*Status: NOT STARTED*
+- [ ] Update IntermediateServerClient.php to use real server
+- [ ] Remove/disable API key fields from settings UI
+- [ ] Implement license validation flow
+- [ ] Add server health check monitoring
+- [ ] Update all API calls to go through server
+- [ ] Test complete end-to-end flow
+- [ ] Add proper error messages for license issues
+- **Output:** Plugin fully integrated with intermediate server
+- **Dependencies:** Task 13.3
+- **Notes:** Final step to make plugin production-ready
 
 ---
 

@@ -81,6 +81,12 @@ $RECYCLE.BIN/
 .cache/
 tmp/
 
+# Debug and test files
+debug/
+test-*.php
+test-*.html
+*-debug.php
+
 # WordPress specific
 wp-config.php
 wp-content/uploads/

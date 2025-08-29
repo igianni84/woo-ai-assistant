@@ -19,6 +19,7 @@ use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\KnowledgeBase\Scanner;
 use WooAiAssistant\KnowledgeBase\Indexer;
 use WooAiAssistant\KnowledgeBase\VectorManager;
+use WooAiAssistant\KnowledgeBase\IndexingProcessor;
 use WooAiAssistant\KnowledgeBase\AIManager;
 
 // Exit if accessed directly
@@ -51,7 +52,7 @@ class KnowledgeBaseStatusPage
      * @since 1.0.0
      * @var string
      */
-    private const PAGE_SLUG = 'woo-ai-assistant-kb-status';
+    private const PAGE_SLUG = 'woo-ai-assistant-knowledge-base';
 
     /**
      * Constructor
@@ -78,6 +79,7 @@ class KnowledgeBaseStatusPage
         add_action('wp_ajax_woo_ai_kb_refresh_status', [$this, 'handleRefreshStatus']);
         add_action('wp_ajax_woo_ai_kb_start_indexing', [$this, 'handleStartIndexing']);
         add_action('wp_ajax_woo_ai_kb_clear_index', [$this, 'handleClearIndex']);
+        add_action('wp_ajax_woo_ai_kb_check_indexing_status', [$this, 'handleCheckIndexingStatus']);
     }
 
     /**
@@ -367,28 +369,29 @@ class KnowledgeBaseStatusPage
      */
     public function enqueueAssets(string $hook): void
     {
-        if (!str_contains($hook, self::PAGE_SLUG)) {
+        // Check if we're on our Knowledge Base page
+        if (!str_contains($hook, 'woo-ai-assistant-knowledge-base')) {
             return;
         }
 
-        // Enqueue styles
+        // Enqueue styles - Use proper plugin URL constant
         wp_enqueue_style(
             'woo-ai-kb-status',
-            plugin_dir_url(dirname(__DIR__)) . 'assets/css/kb-status.css',
+            WOO_AI_ASSISTANT_ASSETS_URL . 'css/kb-status.css',
             [],
             WOO_AI_ASSISTANT_VERSION
         );
 
-        // Enqueue scripts
+        // Enqueue scripts - Use proper plugin URL constant
         wp_enqueue_script(
             'woo-ai-kb-status',
-            plugin_dir_url(dirname(__DIR__)) . 'assets/js/kb-status.js',
+            WOO_AI_ASSISTANT_ASSETS_URL . 'js/kb-status.js',
             ['jquery'],
             WOO_AI_ASSISTANT_VERSION,
             true
         );
 
-        // Localize script
+        // Localize script with proper nonce and AJAX URL
         wp_localize_script('woo-ai-kb-status', 'wooAiKbStatus', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('woo_ai_kb_status'),
@@ -439,15 +442,15 @@ class KnowledgeBaseStatusPage
         $tableName = $wpdb->prefix . 'woo_ai_knowledge_base';
         if ($wpdb->get_var("SHOW TABLES LIKE '$tableName'") === $tableName) {
             $stats['products_indexed'] = $wpdb->get_var(
-                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE content_type = %s", 'product')
+                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE source_type = %s", 'product')
             ) ?? 0;
 
             $stats['pages_indexed'] = $wpdb->get_var(
-                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE content_type = %s", 'page')
+                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE source_type = %s", 'page')
             ) ?? 0;
 
             $stats['posts_indexed'] = $wpdb->get_var(
-                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE content_type = %s", 'post')
+                $wpdb->prepare("SELECT COUNT(*) FROM $tableName WHERE source_type = %s", 'post')
             ) ?? 0;
 
             $stats['total_chunks'] = $wpdb->get_var("SELECT COUNT(*) FROM $tableName") ?? 0;
@@ -535,19 +538,36 @@ class KnowledgeBaseStatusPage
             ];
         }
 
-        // Check API configuration
-        $apiKey = get_option('woo_ai_assistant_settings')['api']['openrouter_key'] ?? '';
-        if (!empty($apiKey)) {
+        // Check API configuration using ApiConfiguration
+        $apiConfig = \WooAiAssistant\Common\ApiConfiguration::getInstance();
+        $openRouterKey = $apiConfig->getApiKey('openrouter');
+        $openAiKey = $apiConfig->getApiKey('openai');
+        $pineconeKey = $apiConfig->getApiKey('pinecone');
+
+        $allKeysConfigured = !empty($openRouterKey) && !empty($openAiKey) && !empty($pineconeKey);
+
+        if ($allKeysConfigured) {
             $checks[] = [
                 'title' => __('API Configuration', 'woo-ai-assistant'),
-                'message' => __('API keys are configured', 'woo-ai-assistant'),
+                'message' => __('All API keys are configured', 'woo-ai-assistant'),
                 'status' => 'success',
                 'icon' => 'yes-alt'
             ];
         } else {
+            $missingKeys = [];
+            if (empty($openRouterKey)) {
+                $missingKeys[] = 'OpenRouter';
+            }
+            if (empty($openAiKey)) {
+                $missingKeys[] = 'OpenAI';
+            }
+            if (empty($pineconeKey)) {
+                $missingKeys[] = 'Pinecone';
+            }
+
             $checks[] = [
                 'title' => __('API Configuration', 'woo-ai-assistant'),
-                'message' => __('API keys are not configured', 'woo-ai-assistant'),
+                'message' => sprintf(__('Missing API keys: %s', 'woo-ai-assistant'), implode(', ', $missingKeys)),
                 'status' => 'warning',
                 'icon' => 'warning',
                 'action' => '<a href="' . admin_url('admin.php?page=woo-ai-assistant-settings#api') . '">Configure API</a>'
@@ -675,25 +695,77 @@ class KnowledgeBaseStatusPage
      */
     private function getRecentActivities(): array
     {
-        // This would normally fetch from a log table
-        // For now, returning mock data
-        return [
-            [
-                'timestamp' => date('Y-m-d H:i:s', strtotime('-2 hours')),
+        global $wpdb;
+        $activities = [];
+
+        // Check for recent indexing activities
+        $lastIndexTime = get_option('woo_ai_kb_indexing_start_time');
+        $lastIndexStatus = get_option('woo_ai_kb_indexing_status', 'idle');
+        if ($lastIndexTime) {
+            $message = __('Indexing started', 'woo-ai-assistant');
+            if ($lastIndexStatus === 'completed') {
+                $message = __('Indexing completed successfully', 'woo-ai-assistant');
+            } elseif ($lastIndexStatus === 'failed') {
+                $message = __('Indexing failed', 'woo-ai-assistant');
+            } elseif ($lastIndexStatus === 'running') {
+                $progress = get_option('woo_ai_kb_indexing_progress', 0);
+                $message = sprintf(__('Indexing in progress (%d%%)', 'woo-ai-assistant'), $progress);
+            }
+
+            $activities[] = [
+                'timestamp' => $lastIndexTime,
                 'type' => 'indexing',
-                'message' => __('Indexed 50 products', 'woo-ai-assistant')
-            ],
-            [
-                'timestamp' => date('Y-m-d H:i:s', strtotime('-1 day')),
-                'type' => 'update',
-                'message' => __('Knowledge base auto-update completed', 'woo-ai-assistant')
-            ],
-            [
-                'timestamp' => date('Y-m-d H:i:s', strtotime('-2 days')),
-                'type' => 'settings',
-                'message' => __('API configuration updated', 'woo-ai-assistant')
-            ]
-        ];
+                'message' => $message
+            ];
+        }
+
+        // Get recent knowledge base entries
+        $tableName = $wpdb->prefix . 'woo_ai_knowledge_base';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$tableName'") === $tableName) {
+            $recentEntries = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) as count, MAX(indexed_at) as last_indexed 
+                     FROM {$tableName} 
+                     WHERE indexed_at > %s",
+                    date('Y-m-d H:i:s', strtotime('-7 days'))
+                )
+            );
+
+            if (!empty($recentEntries) && $recentEntries[0]->count > 0) {
+                $activities[] = [
+                    'timestamp' => $recentEntries[0]->last_indexed,
+                    'type' => 'scan',
+                    'message' => sprintf(__('Knowledge base updated: %d items indexed', 'woo-ai-assistant'), $recentEntries[0]->count)
+                ];
+            }
+        }
+
+        // Check for plugin activation
+        $activationTime = get_option('woo_ai_assistant_activated_at');
+        if ($activationTime && strtotime($activationTime) > strtotime('-7 days')) {
+            $activities[] = [
+                'timestamp' => $activationTime,
+                'type' => 'activation',
+                'message' => __('Plugin activated', 'woo-ai-assistant')
+            ];
+        }
+
+        // If no real activities, show informative message
+        if (empty($activities)) {
+            $activities[] = [
+                'timestamp' => current_time('mysql'),
+                'type' => 'info',
+                'message' => __('No recent activity. Click "Start Full Index" to begin indexing.', 'woo-ai-assistant')
+            ];
+        }
+
+        // Sort by timestamp (most recent first)
+        usort($activities, function ($a, $b) {
+            return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+        });
+
+        // Limit to 10 most recent activities
+        return array_slice($activities, 0, 10);
     }
 
     /**
@@ -728,11 +800,56 @@ class KnowledgeBaseStatusPage
             wp_send_json_error(__('Insufficient permissions', 'woo-ai-assistant'));
         }
 
-        // Trigger indexing process
-        do_action('woo_ai_assistant_start_full_index');
+        try {
+            // Use the new IndexingProcessor
+            $processor = IndexingProcessor::getInstance();
+
+            // Start indexing all content
+            $result = $processor->startIndexing('all');
+
+            if ($result['success']) {
+                wp_send_json_success([
+                    'message' => $result['message']
+                ]);
+            } else {
+                wp_send_json_error($result['message']);
+            }
+        } catch (\Exception $e) {
+            update_option('woo_ai_kb_indexing_status', 'failed');
+            wp_send_json_error($e->getMessage());
+        }
+    }
+
+    /**
+     * Handle check indexing status AJAX request
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function handleCheckIndexingStatus(): void
+    {
+        check_ajax_referer('woo_ai_kb_status', 'nonce');
+
+        if (!current_user_can(self::REQUIRED_CAPABILITY)) {
+            wp_send_json_error(__('Insufficient permissions', 'woo-ai-assistant'));
+        }
+
+        // Use the new IndexingProcessor to get status
+        $processor = IndexingProcessor::getInstance();
+        $statusInfo = $processor->getIndexingStatus();
+
+        // If completed, reset status for next run
+        if ($statusInfo['status'] === 'completed') {
+            update_option('woo_ai_kb_indexing_status', 'idle');
+        }
 
         wp_send_json_success([
-            'message' => __('Indexing process started', 'woo-ai-assistant')
+            'status' => $statusInfo['status'],
+            'progress' => $statusInfo['progress'],
+            'message' => $statusInfo['message'],
+            'total' => $statusInfo['total'],
+            'processed' => $statusInfo['processed'],
+            'errors' => $statusInfo['errors']
         ]);
     }
 

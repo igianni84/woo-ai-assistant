@@ -2,6 +2,6 @@
 
 // variadic-method-WooAiAssistant\Api\IntermediateServerClient-prepareRequestArgs-/Applications/MAMP/htdocs/wp/wp-content/plugins/woo-ai-assistant/src/Api/IntermediateServerClient.php
 return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => '1756152247-v4',
+   'variableKey' => '1756318722-v4',
    'data' => false,
 ));

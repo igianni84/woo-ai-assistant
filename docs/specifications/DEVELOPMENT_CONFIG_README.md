@@ -1,21 +1,78 @@
-# Woo AI Assistant - Development Configuration System
+# Woo AI Assistant - Development Configuration Guide
 
-This document explains how to use the development configuration system for the Woo AI Assistant plugin.
+## 🎯 Executive Summary
 
-## Quick Setup
+This document clarifies the **critical architectural distinction** between development and production environments for the Woo AI Assistant plugin.
 
-1. **Copy the template file:**
-   ```bash
-   cp .env.development .env.development.local
-   ```
+---
 
-2. **Edit the configuration:**
-   ```bash
-   # Open .env.development.local and add your actual API keys
-   nano .env.development.local
-   ```
+## ⚠️ CRITICAL UNDERSTANDING
 
-3. **The plugin will automatically detect development mode and use your configuration.**
+### Production Architecture (What Users Get)
+```
+┌─────────────┐      License Key      ┌──────────────────┐      API Keys     ┌─────────────┐
+│  WP Plugin  │ ──────────────────────>│ Intermediate     │ ───────────────> │ AI Services │
+│  (Client)   │                        │ Server (EU)      │                  │ (OpenRouter,│
+└─────────────┘                        └──────────────────┘                  │  OpenAI,    │
+                                              │                               │  Pinecone)  │
+                                              │                               └─────────────┘
+                                              ▼
+                                       ┌──────────────┐
+                                       │    Stripe    │
+                                       │   Billing    │
+                                       └──────────────┘
+```
+
+**Key Points:**
+- Plugin uses ONLY a license key
+- ALL API keys are on the intermediate server
+- Server manages costs, rate limiting, usage tracking
+- This ensures the SaaS business model
+
+### Development Architecture (Local Testing)
+```
+┌─────────────┐      Direct API Calls     ┌─────────────┐
+│  WP Plugin  │ ─────────────────────────>│ AI Services │
+│  (Local)    │   (Using .env API keys)   │ (OpenRouter,│
+└─────────────┘                           │  OpenAI,    │
+                                          │  Pinecone)  │
+                                          └─────────────┘
+```
+
+**Key Points:**
+- Uses `.env` file for API keys (NEVER in production)
+- Bypasses license validation
+- Direct API calls for testing
+- DevelopmentConfig.php manages this mode
+
+---
+
+## 🔧 Development Setup
+
+### Step 1: Create Configuration File
+```bash
+cp .env.example .env
+```
+
+### Step 2: Add Your API Keys
+Edit `.env` and add:
+- `OPENROUTER_API_KEY` - For Gemini models
+- `OPENAI_API_KEY` - For embeddings  
+- `PINECONE_API_KEY` - For vector database
+- `STRIPE_SECRET_KEY` - For payment testing (use test keys)
+
+### Step 3: Enable Development Mode
+In `.env`, set:
+```
+WOO_AI_DEVELOPMENT_MODE=true
+```
+
+### Step 4: Verify Configuration
+```bash
+php test-development-config.php
+```
+
+You should see all green checkmarks if configured correctly.
 
 ## How It Works
 

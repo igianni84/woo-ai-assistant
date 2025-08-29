@@ -265,6 +265,7 @@ class SettingsPage
         add_action('wp_ajax_woo_ai_reset_settings', [$this, 'handleSettingsReset']);
         add_action('wp_ajax_woo_ai_test_api_connection', [$this, 'handleApiTest']);
         add_action('wp_ajax_woo_ai_generate_license', [$this, 'handleLicenseGeneration']);
+        add_action('wp_ajax_woo_ai_trigger_indexing', [$this, 'handleTriggerIndexing']);
     }
 
     /**
@@ -1147,9 +1148,38 @@ class SettingsPage
     private function renderApiSettings(): void
     {
         $api = $this->settings['api'];
+
+        // Check if we're in development mode
+        $developmentConfig = null;
+        $isDevelopmentMode = false;
+        if (class_exists('WooAiAssistant\\Common\\DevelopmentConfig')) {
+            $developmentConfig = \WooAiAssistant\Common\DevelopmentConfig::getInstance();
+            $isDevelopmentMode = $developmentConfig->isDevelopmentMode();
+        }
         ?>
         <div id="api" class="tab-panel">
             <h2><?php esc_html_e('API & License Configuration', 'woo-ai-assistant'); ?></h2>
+            
+            <?php if ($isDevelopmentMode) : ?>
+            <div class="notice notice-info inline">
+                <p>
+                    <strong><?php esc_html_e('🚀 Development Mode Active', 'woo-ai-assistant'); ?></strong><br>
+                    <?php esc_html_e('API keys are being loaded from your .env file. The fields below show the configured status.', 'woo-ai-assistant'); ?>
+                </p>
+                <p>
+                    <?php
+                    $apiStatus = [];
+                    if ($developmentConfig) {
+                        $apiStatus[] = !empty($developmentConfig->getApiKey('openrouter')) ? '✅ OpenRouter' : '❌ OpenRouter';
+                        $apiStatus[] = !empty($developmentConfig->getApiKey('openai')) ? '✅ OpenAI' : '❌ OpenAI';
+                        $apiStatus[] = !empty($developmentConfig->getApiKey('pinecone')) ? '✅ Pinecone' : '❌ Pinecone';
+                        $apiStatus[] = !empty($developmentConfig->getApiKey('google')) ? '✅ Google' : '❌ Google';
+                    }
+                    echo '<strong>' . esc_html__('API Keys Status:', 'woo-ai-assistant') . '</strong> ' . implode(' | ', $apiStatus);
+                    ?>
+                </p>
+            </div>
+            <?php endif; ?>
             
             <table class="form-table">
                 <tr>
@@ -1857,9 +1887,9 @@ class SettingsPage
         // Enqueue custom settings script
         wp_enqueue_script(
             'woo-ai-settings',
-            plugin_dir_url(dirname(dirname(__FILE__))) . 'assets/js/settings.js',
+            WOO_AI_ASSISTANT_ASSETS_URL . 'js/settings.js',
             ['jquery', 'wp-color-picker'],
-            filemtime(plugin_dir_path(dirname(dirname(__FILE__))) . 'assets/js/settings.js'),
+            WOO_AI_ASSISTANT_VERSION,
             true
         );
 
@@ -1884,9 +1914,9 @@ class SettingsPage
         // Enqueue custom settings styles
         wp_enqueue_style(
             'woo-ai-settings',
-            plugin_dir_url(dirname(dirname(__FILE__))) . 'assets/css/settings.css',
+            WOO_AI_ASSISTANT_ASSETS_URL . 'css/settings.css',
             ['wp-admin'],
-            filemtime(plugin_dir_path(dirname(dirname(__FILE__))) . 'assets/css/settings.css')
+            WOO_AI_ASSISTANT_VERSION
         );
     }
 
@@ -2501,5 +2531,102 @@ class SettingsPage
         }
 
         return $value;
+    }
+
+    /**
+     * Handle AJAX request to trigger knowledge base indexing
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function handleTriggerIndexing(): void
+    {
+        // Verify nonce
+        if (!check_ajax_referer('woo_ai_settings', 'nonce', false)) {
+            wp_send_json_error(['message' => __('Security verification failed.', 'woo-ai-assistant')]);
+        }
+
+        // Check capability
+        if (!current_user_can(self::REQUIRED_CAPABILITY)) {
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'woo-ai-assistant')]);
+        }
+
+        try {
+            // Get the KnowledgeBase components
+            $scanner = null;
+            $indexer = null;
+
+            if (class_exists('WooAiAssistant\\KnowledgeBase\\Scanner')) {
+                $scanner = \WooAiAssistant\KnowledgeBase\Scanner::getInstance();
+            }
+
+            if (class_exists('WooAiAssistant\\KnowledgeBase\\Indexer')) {
+                $indexer = \WooAiAssistant\KnowledgeBase\Indexer::getInstance();
+            }
+
+            if (!$scanner || !$indexer) {
+                wp_send_json_error(['message' => __('Knowledge Base components not available.', 'woo-ai-assistant')]);
+                return;
+            }
+
+            // Start indexing process
+            $results = [
+                'products' => 0,
+                'pages' => 0,
+                'posts' => 0,
+                'chunks' => 0
+            ];
+
+            // Scan products
+            $products = $scanner->scanProducts(['limit' => 100]);
+            $results['products'] = count($products);
+
+            // Index products
+            foreach ($products as $product) {
+                $chunks = $indexer->processContent(
+                    $product['content'] ?? '',
+                    $product['id'] ?? 0,
+                    'product',
+                    $product
+                );
+                $results['chunks'] += count($chunks);
+            }
+
+            // Scan pages
+            $pages = $scanner->scanPages(['limit' => 50]);
+            $results['pages'] = count($pages);
+
+            // Index pages
+            foreach ($pages as $page) {
+                $chunks = $indexer->processContent(
+                    $page['content'] ?? '',
+                    $page['id'] ?? 0,
+                    'page',
+                    $page
+                );
+                $results['chunks'] += count($chunks);
+            }
+
+            // Update last index time
+            update_option('woo_ai_assistant_last_index_time', current_time('mysql'));
+
+            wp_send_json_success([
+                'message' => sprintf(
+                    __('Indexing completed successfully! Processed %d products, %d pages, created %d chunks.', 'woo-ai-assistant'),
+                    $results['products'],
+                    $results['pages'],
+                    $results['chunks']
+                ),
+                'results' => $results
+            ]);
+        } catch (\Exception $e) {
+            Utils::logError('Knowledge Base indexing failed: ' . $e->getMessage());
+            wp_send_json_error([
+                'message' => sprintf(
+                    __('Indexing failed: %s', 'woo-ai-assistant'),
+                    $e->getMessage()
+                )
+            ]);
+        }
     }
 }
