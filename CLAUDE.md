@@ -1200,7 +1200,7 @@ La cartella contiene 5 file di documentazione completa:
 - ROADMAP.md - Task corrente e progressione
 - CLAUDE.md - Standard di sviluppo e convenzioni  
 - ARCHITETTURA.md - Struttura file e componenti
-- PROJECT_SPECIFICATIONS.md - Specifiche funzionali
+- docs/specifications/PROJECT_SPECIFICATIONS.md - Specifiche funzionali
 - README.md - Setup e comandi
 
 WORKFLOW OBBLIGATORIO CON AGENTI:

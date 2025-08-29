@@ -808,10 +808,13 @@ apply_filters('woo_ai_assistant_coupon_rules', $rules, $context);
 
 ## 📚 Related Documentation
 
-- **[CLAUDE.md](./CLAUDE.md)** - Complete development guidelines, coding standards, and workflow
-- **[ARCHITETTURA.md](./ARCHITETTURA.md)** - Detailed file structure and component architecture  
-- **[ROADMAP.md](./ROADMAP.md)** - Active development roadmap and task tracking
-- **[README.md](./README.md)** - Quick start guide for developers
+- **[CLAUDE.md](../../CLAUDE.md)** - Complete development guidelines, coding standards, and workflow
+- **[ARCHITETTURA.md](../../ARCHITETTURA.md)** - Detailed file structure and component architecture  
+- **[ROADMAP.md](../../ROADMAP.md)** - Active development roadmap and task tracking
+- **[README.md](../../README.md)** - Quick start guide for developers
+- **[DEVELOPMENT_CONFIG_README.md](./DEVELOPMENT_CONFIG_README.md)** - Development environment configuration
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Comprehensive testing guidelines
+- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Production deployment checklist
 
 ---
 

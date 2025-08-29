@@ -11,6 +11,20 @@ woo-ai-assistant/
 ├── webpack.config.js           # (O vite.config.js) File di configurazione per il processo di build che compila il codice sorgente del widget React in file statici JS/CSS pronti per la produzione.
 │
 ├── README.md                   # Documentazione per gli sviluppatori, con istruzioni di installazione, build e descrizione degli endpoint API.
+├── ROADMAP.md                  # Roadmap di sviluppo e tracking dei task
+├── CLAUDE.md                   # Linee guida di sviluppo, standard di codice e workflow
+├── ARCHITETTURA.md            # Questo file - struttura dettagliata del progetto
+│
+├── docs/                       # Documentazione organizzata del progetto
+│   ├── reports/               # Report di test e completion summaries
+│   └── specifications/        # Specifiche tecniche e guide
+│       ├── PROJECT_SPECIFICATIONS.md  # Specifiche complete del progetto
+│       ├── DEVELOPMENT_CONFIG_README.md # Guida configurazione ambiente di sviluppo
+│       ├── TESTING_GUIDE.md           # Linee guida per i test
+│       └── DEPLOYMENT_CHECKLIST.md    # Checklist per il deployment
+│
+├── debug/                      # File di test e debugging (non in produzione)
+│   └── [test-*.php files]     # File di test vari per debugging locale
 │
 ├─ languages/                   # Directory per l'internazionalizzazione (i18n).
 │   └── woo-ai-assistant.pot    # File template (.pot) per le traduzioni del plugin, generato automaticamente dallo scan del codice.

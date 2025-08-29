@@ -130,10 +130,13 @@ define('WP_DEBUG_LOG', true);
 
 ## 📚 Documentation
 
-- **[PROJECT_SPECIFICATIONS.md](./PROJECT_SPECIFICATIONS.md)** - Complete project specifications and requirements
+- **[PROJECT_SPECIFICATIONS.md](./docs/specifications/PROJECT_SPECIFICATIONS.md)** - Complete project specifications and requirements
 - **[CLAUDE.md](./CLAUDE.md)** - Development guidelines, coding standards, and workflow  
 - **[ROADMAP.md](./ROADMAP.md)** - Active development roadmap and task tracking
 - **[ARCHITETTURA.md](./ARCHITETTURA.md)** - Detailed file structure and component architecture
+- **[DEVELOPMENT_CONFIG_README.md](./docs/specifications/DEVELOPMENT_CONFIG_README.md)** - Development environment configuration guide
+- **[TESTING_GUIDE.md](./docs/specifications/TESTING_GUIDE.md)** - Comprehensive testing guidelines
+- **[DEPLOYMENT_CHECKLIST.md](./docs/specifications/DEPLOYMENT_CHECKLIST.md)** - Production deployment checklist
 
 ## 📄 License
 
