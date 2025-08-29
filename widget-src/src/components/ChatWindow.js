@@ -32,6 +32,9 @@ const ChatWindow = ({
   pageContext,
   error,
   onDismissError,
+  streamingMessage,
+  streamingProgress,
+  isStreamingSupported,
 }) => {
   const [isMinimizing, setIsMinimizing] = useState(false);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
@@ -259,6 +262,9 @@ const ChatWindow = ({
                 message={message}
                 showTimestamp={config?.showTimestamps !== false}
                 showAvatar={message.type === 'bot'}
+                isStreaming={message.id === streamingMessage}
+                streamingProgress={message.id === streamingMessage ? streamingProgress : 0}
+                enableStreamingAnimation={config?.enableStreamingAnimation !== false}
               />
             ))}
             
@@ -406,6 +412,21 @@ ChatWindow.propTypes = {
    * Function to dismiss errors
    */
   onDismissError: PropTypes.func.isRequired,
+  
+  /**
+   * ID of message currently being streamed
+   */
+  streamingMessage: PropTypes.string,
+  
+  /**
+   * Progress of current streaming (0-1)
+   */
+  streamingProgress: PropTypes.number,
+  
+  /**
+   * Whether streaming is supported
+   */
+  isStreamingSupported: PropTypes.bool,
 };
 
 ChatWindow.defaultProps = {
@@ -414,6 +435,9 @@ ChatWindow.defaultProps = {
   connectionStatus: 'connecting',
   error: null,
   onReconnect: null,
+  streamingMessage: null,
+  streamingProgress: 0,
+  isStreamingSupported: false,
 };
 
 export default ChatWindow;

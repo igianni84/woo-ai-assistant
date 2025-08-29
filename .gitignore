@@ -11,6 +11,7 @@ dist/
 # Environment files
 .env
 .env.local
+.env.development
 .env.development.local
 .env.test.local
 .env.production.local
@@ -78,6 +79,7 @@ $RECYCLE.BIN/
 *.tmp
 *.temp
 .cache/
+tmp/
 
 # WordPress specific
 wp-config.php

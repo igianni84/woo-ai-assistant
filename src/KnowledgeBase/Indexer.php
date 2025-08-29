@@ -380,10 +380,29 @@ class Indexer
         ];
 
         try {
-            // Process content in batches
+            // Process content in batches with safety limits
             $batches = array_chunk($contentData, $options['batch_size']);
+            $maxBatches = min(count($batches), 100); // Limit to 100 batches maximum
+            $totalStartTime = microtime(true);
+            $maxTotalTime = 180; // Maximum 3 minutes total processing time
+
+            Utils::logDebug("Processing {$maxBatches} batches with safety limits (max time: {$maxTotalTime}s)");
 
             foreach ($batches as $batchIndex => $batch) {
+                // EMERGENCY FIX: Global timeout check
+                if ((microtime(true) - $totalStartTime) > $maxTotalTime) {
+                    Utils::logError("Global processing timeout reached after {$maxTotalTime} seconds - stopping to prevent crash");
+                    $results['timeout_reached'] = true;
+                    break;
+                }
+
+                // EMERGENCY FIX: Limit number of batches processed
+                if ($batchIndex >= $maxBatches) {
+                    Utils::logError("Maximum batch limit reached ({$maxBatches}) - stopping to prevent infinite processing");
+                    $results['max_batches_reached'] = true;
+                    break;
+                }
+
                 $batchResult = $this->processBatch($batch, $options, $batchIndex);
 
                 // Aggregate results
@@ -393,11 +412,22 @@ class Indexer
                 $results['errors'] += $batchResult['errors'];
                 $results['batches_processed']++;
 
+                // Check for batch-level errors and timeouts
+                if (isset($batchResult['timeout_reached']) && $batchResult['timeout_reached']) {
+                    Utils::logError("Batch timeout detected - stopping further processing");
+                    break;
+                }
+
                 // Memory management - clear processed data
                 unset($batch);
 
                 if (function_exists('gc_collect_cycles')) {
                     gc_collect_cycles();
+                }
+
+                // Small delay to prevent overwhelming the system
+                if ($batchIndex % 10 === 0) {
+                    usleep(100000); // 0.1 second delay every 10 batches
                 }
             }
         } catch (\Exception $e) {
@@ -469,7 +499,22 @@ class Indexer
         $chunkIndex = 0;
         $position = 0;
 
-        while ($position < $contentLength) {
+        // EMERGENCY FIX: Add safety limits to prevent infinite loops
+        $maxChunks = 1000; // Maximum number of chunks per content
+        $maxIterations = 2000; // Maximum iterations to prevent infinite loops
+        $iterationCount = 0;
+        $startTime = microtime(true);
+        $maxTime = 15; // Maximum 15 seconds for chunk creation
+
+        while ($position < $contentLength && $chunkIndex < $maxChunks && $iterationCount < $maxIterations) {
+            $iterationCount++;
+
+            // EMERGENCY FIX: Timeout check
+            if ((microtime(true) - $startTime) > $maxTime) {
+                Utils::logError("Chunk creation timeout reached after {$maxTime} seconds - stopping to prevent crash");
+                break;
+            }
+
             // Calculate chunk boundaries
             $endPosition = min($position + $chunkSize, $contentLength);
 
@@ -501,7 +546,21 @@ class Indexer
 
             // Calculate next position with overlap
             $nextPosition = $endPosition - $overlap;
-            $position = max($position + 1, $nextPosition);
+
+            // EMERGENCY FIX: Ensure position always advances to prevent infinite loops
+            if ($nextPosition <= $position) {
+                $nextPosition = $position + max(1, $chunkSize / 10); // Force advancement
+            }
+
+            $position = $nextPosition;
+        }
+
+        // Log if we hit safety limits
+        if ($chunkIndex >= $maxChunks) {
+            Utils::logError("Maximum chunk limit reached ({$maxChunks}) - content may be truncated");
+        }
+        if ($iterationCount >= $maxIterations) {
+            Utils::logError("Maximum iterations reached ({$maxIterations}) - stopping to prevent infinite loop");
         }
 
         Utils::logDebug('Chunks created successfully - total: ' . count($chunks));
@@ -706,7 +765,7 @@ class Indexer
     }
 
     /**
-     * Process content batch for large-scale operations
+     * Process content batch for large-scale operations with safety mechanisms
      *
      * @since 1.0.0
      * @param array $batch Array of content items to process in this batch.
@@ -717,16 +776,40 @@ class Indexer
      */
     private function processBatch(array $batch, array $options, int $batchIndex): array
     {
-        Utils::logDebug('Processing batch ' . $batchIndex . ' - items: ' . count($batch));
+        // EMERGENCY FIX: Add timeout and safety mechanisms to prevent infinite loops
+        $batchStartTime = microtime(true);
+        $maxExecutionTime = 20; // Maximum 20 seconds per batch
+        $maxIterations = 500; // Maximum iterations per batch
+        $currentIteration = 0;
+
+        Utils::logDebug('Processing batch ' . $batchIndex . ' - items: ' . count($batch) . ' (with safety limits)');
 
         $batchResults = [
             'processed' => 0,
             'chunks_created' => 0,
             'duplicates_found' => 0,
-            'errors' => 0
+            'errors' => 0,
+            'timeout_reached' => false,
+            'max_iterations_reached' => false
         ];
 
         foreach ($batch as $item) {
+            // EMERGENCY FIX: Safety check for timeout and max iterations
+            $currentIteration++;
+            $currentTime = microtime(true);
+
+            if (($currentTime - $batchStartTime) > $maxExecutionTime) {
+                Utils::logError("Batch processing timeout reached after {$maxExecutionTime} seconds - stopping to prevent crash");
+                $batchResults['timeout_reached'] = true;
+                break;
+            }
+
+            if ($currentIteration > $maxIterations) {
+                Utils::logError("Maximum iterations ({$maxIterations}) reached - stopping to prevent infinite loop");
+                $batchResults['max_iterations_reached'] = true;
+                break;
+            }
+
             try {
                 // Validate item structure
                 if (!isset($item['content']) || empty($item['content'])) {
@@ -749,6 +832,13 @@ class Indexer
                     $content = $this->optimizeForAi($content, $options);
                 }
 
+                // Create chunks with additional safety check
+                if (strlen($content) > 50000) { // Skip extremely large content
+                    Utils::logError("Content too large (" . strlen($content) . " chars) - skipping to prevent memory issues");
+                    $batchResults['errors']++;
+                    continue;
+                }
+
                 // Create chunks
                 $chunks = $this->createChunks(
                     $content,
@@ -766,11 +856,19 @@ class Indexer
                 } else {
                     $batchResults['processed']++;
                 }
+
+                // Memory cleanup every 50 items
+                if ($currentIteration % 50 === 0 && function_exists('gc_collect_cycles')) {
+                    gc_collect_cycles();
+                }
             } catch (\Exception $e) {
-                Utils::logDebug('Error processing batch item - id: ' . ($item['id'] ?? 'unknown') . ', error: ' . $e->getMessage(), 'error');
+                Utils::logError('Error processing batch item - id: ' . ($item['id'] ?? 'unknown') . ', error: ' . $e->getMessage());
                 $batchResults['errors']++;
             }
         }
+
+        $processingTime = microtime(true) - $batchStartTime;
+        Utils::logDebug("Batch {$batchIndex} completed - processed: {$batchResults['processed']}, errors: {$batchResults['errors']}, time: {$processingTime}s");
 
         return $batchResults;
     }

@@ -18,6 +18,8 @@ namespace WooAiAssistant;
 use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Admin\AdminMenu;
+use WooAiAssistant\Admin\Pages\DashboardPage;
+use WooAiAssistant\Admin\Pages\ConversationsLogPage;
 use WooAiAssistant\RestApi\RestController;
 use WooAiAssistant\Api\IntermediateServerClient;
 use WooAiAssistant\Api\LicenseManager;
@@ -27,6 +29,21 @@ use WooAiAssistant\KnowledgeBase\VectorManager;
 use WooAiAssistant\KnowledgeBase\AIManager;
 use WooAiAssistant\KnowledgeBase\CronManager;
 use WooAiAssistant\KnowledgeBase\HealthMonitor;
+use WooAiAssistant\Frontend\WidgetLoader;
+use WooAiAssistant\Chatbot\ConversationHandler;
+use WooAiAssistant\Chatbot\RagEngine;
+use WooAiAssistant\Chatbot\ProactiveTriggers;
+use WooAiAssistant\Chatbot\CouponHandler;
+use WooAiAssistant\Setup\AutoIndexer;
+use WooAiAssistant\Setup\WooCommerceDetector;
+use WooAiAssistant\Setup\DefaultMessageSetup;
+use WooAiAssistant\Compatibility\WpmlAndPolylang;
+use WooAiAssistant\Compatibility\GdprPlugins;
+use WooAiAssistant\Security\InputSanitizer;
+use WooAiAssistant\Security\CsrfProtection;
+use WooAiAssistant\Security\RateLimiter;
+use WooAiAssistant\Security\PromptDefense;
+use WooAiAssistant\Security\AuditLogger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -158,6 +175,9 @@ class Main
 
         // WooCommerce integration hooks
         add_action('woocommerce_loaded', [$this, 'onWooCommerceLoaded']);
+
+        // Auto-installation hooks
+        add_action('woo_ai_assistant_auto_install', [$this, 'handleScheduledAutoInstall']);
     }
 
     /**
@@ -183,8 +203,13 @@ class Main
         // Load core components
         $this->loadComponents();
 
-        // Initialize Knowledge Base system
-        $this->initializeKnowledgeBase();
+        // Initialize Knowledge Base system with protection
+        try {
+            $this->initializeKnowledgeBase();
+            Utils::logDebug('Knowledge Base system initialized');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to initialize Knowledge Base: ' . $e->getMessage());
+        }
 
         // Mark as initialized
         $this->initialized = true;
@@ -237,7 +262,8 @@ class Main
      */
     public function enqueueScripts(): void
     {
-        // Frontend scripts will be handled by WidgetLoader component
+        // Frontend scripts are automatically handled by WidgetLoader component
+        // when loaded in loadFrontendComponents() method
         Utils::logDebug('Frontend scripts enqueue hook fired');
     }
 
@@ -293,6 +319,53 @@ class Main
     public function onWooCommerceLoaded(): void
     {
         Utils::logDebug('WooCommerce loaded - ready for integration');
+    }
+
+    /**
+     * Handle scheduled auto-installation
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function handleScheduledAutoInstall(): void
+    {
+        try {
+            Utils::logDebug('Processing scheduled auto-installation');
+
+            // Get AutoIndexer component
+            $autoIndexer = $this->getComponent('auto_indexer');
+
+            if (!$autoIndexer) {
+                // Try to load it if not already loaded
+                if (class_exists('WooAiAssistant\Setup\AutoIndexer')) {
+                    $autoIndexer = \WooAiAssistant\Setup\AutoIndexer::getInstance();
+                    $this->registerComponent('auto_indexer', $autoIndexer);
+                } else {
+                    throw new \Exception('AutoIndexer component not available');
+                }
+            }
+
+            // Trigger auto-indexing
+            $results = $autoIndexer->triggerAutoIndexing(true);
+
+            if ($results && !isset($results['error'])) {
+                Utils::logDebug('Scheduled auto-installation completed successfully', $results);
+                update_option('woo_ai_assistant_needs_auto_install', false);
+
+                // Trigger completion action
+                do_action('woo_ai_assistant_auto_install_completed', $results);
+            } else {
+                throw new \Exception('Auto-indexing failed: ' . ($results['error'] ?? 'Unknown error'));
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Scheduled auto-installation failed: ' . $e->getMessage());
+
+            // Reschedule for later if it failed
+            if (!wp_next_scheduled('woo_ai_assistant_auto_install')) {
+                wp_schedule_single_event(time() + 1800, 'woo_ai_assistant_auto_install'); // Try again in 30 minutes
+                Utils::logDebug('Auto-installation rescheduled due to failure');
+            }
+        }
     }
 
     /**
@@ -372,45 +445,283 @@ class Main
      */
     private function loadCoreComponents(): void
     {
+        // PROGRESSIVE RESTORATION: Loading components with protection
+        Utils::logDebug('Starting progressive component restoration with error protection');
+
         // Load REST API Controller (needed for both admin and frontend)
-        if (!class_exists('WooAiAssistant\RestApi\RestController')) {
-            Utils::logError('RestController class not found - autoloader may not be initialized properly');
-            return;
+        try {
+            if (class_exists('WooAiAssistant\RestApi\RestController')) {
+                $restController = RestController::getInstance();
+                $this->registerComponent('rest_controller', $restController);
+                Utils::logDebug('REST Controller loaded successfully');
+            } else {
+                Utils::logError('RestController class not found - autoloader may not be initialized properly');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load REST Controller: ' . $e->getMessage());
         }
 
-        $restController = RestController::getInstance();
-        $this->registerComponent('rest_controller', $restController);
-
-        // Load Intermediate Server Client for API communication
-        if (class_exists('WooAiAssistant\Api\IntermediateServerClient')) {
-            $serverClient = IntermediateServerClient::getInstance();
-            $this->registerComponent('server_client', $serverClient);
-            Utils::logDebug('Intermediate Server Client loaded');
-        } else {
-            Utils::logError('IntermediateServerClient class not found');
+        // Load Intermediate Server Client for API communication (fixed blocking issue)
+        try {
+            if (class_exists('WooAiAssistant\Api\IntermediateServerClient')) {
+                $serverClient = IntermediateServerClient::getInstance();
+                $this->registerComponent('server_client', $serverClient);
+                Utils::logDebug('Intermediate Server Client loaded');
+            } else {
+                Utils::logError('IntermediateServerClient class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load Intermediate Server Client: ' . $e->getMessage());
         }
 
-        // Load License Manager for plan management and usage tracking
-        if (class_exists('WooAiAssistant\Api\LicenseManager')) {
-            $licenseManager = LicenseManager::getInstance();
-            $this->registerComponent('license_manager', $licenseManager);
-            Utils::logDebug('License Manager loaded');
-        } else {
-            Utils::logError('LicenseManager class not found');
+        // Load remaining components with protection
+        Utils::logDebug('Loading components with fixed circular dependencies');
+
+        // Load Conversation Handler (safe to load)
+        try {
+            if (class_exists('WooAiAssistant\Chatbot\ConversationHandler')) {
+                $conversationHandler = ConversationHandler::getInstance();
+                $this->registerComponent('conversation_handler', $conversationHandler);
+                Utils::logDebug('Conversation Handler loaded');
+            } else {
+                Utils::logError('ConversationHandler class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load Conversation Handler: ' . $e->getMessage());
         }
 
-        // Load Knowledge Base components
-        $this->loadKnowledgeBaseComponents();
+        // Load Knowledge Base components with protection
+        try {
+            Utils::logDebug('Starting to load Knowledge Base components');
+            $this->loadKnowledgeBaseComponents();
+            Utils::logDebug('Knowledge Base components loaded successfully');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load Knowledge Base components: ' . $e->getMessage());
+        }
 
-        Utils::logDebug('Core components loaded');
+        // Load License Manager with protection (now with fixed lazy loading)
+        try {
+            if (class_exists('WooAiAssistant\Api\LicenseManager')) {
+                $licenseManager = LicenseManager::getInstance();
+                $this->registerComponent('license_manager', $licenseManager);
+                Utils::logDebug('License Manager loaded successfully');
+            } else {
+                Utils::logError('LicenseManager class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load License Manager: ' . $e->getMessage());
+        }
 
-        /**
-         * Core components loaded action
-         *
-         * @since 1.0.0
-         * @param Main $instance The main plugin instance
-         */
+        // Load RAG Engine with protection
+        try {
+            if (class_exists('WooAiAssistant\Chatbot\RagEngine')) {
+                $ragEngine = RagEngine::getInstance();
+                $this->registerComponent('rag_engine', $ragEngine);
+                Utils::logDebug('RAG Engine loaded successfully');
+            } else {
+                Utils::logError('RagEngine class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load RAG Engine: ' . $e->getMessage());
+        }
+
+        // Load Proactive Triggers with protection
+        try {
+            if (class_exists('WooAiAssistant\Chatbot\ProactiveTriggers')) {
+                $proactiveTriggers = ProactiveTriggers::getInstance();
+                $this->registerComponent('proactive_triggers', $proactiveTriggers);
+                Utils::logDebug('Proactive Triggers loaded successfully');
+            } else {
+                Utils::logError('ProactiveTriggers class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load Proactive Triggers: ' . $e->getMessage());
+        }
+
+        // Load Coupon Handler with protection
+        try {
+            if (class_exists('WooAiAssistant\Chatbot\CouponHandler')) {
+                $couponHandler = CouponHandler::getInstance();
+                $this->registerComponent('coupon_handler', $couponHandler);
+                Utils::logDebug('Coupon Handler loaded successfully');
+            } else {
+                Utils::logError('CouponHandler class not found');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load Coupon Handler: ' . $e->getMessage());
+        }
+
+
+        // Core components loaded action
         do_action('woo_ai_assistant_core_components_loaded', $this);
+    }
+
+    /**
+     * Load auto-installation components
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadAutoInstallationComponents(): void
+    {
+        try {
+            // Load AutoIndexer for immediate content indexing
+            if (class_exists('WooAiAssistant\Setup\AutoIndexer')) {
+                $autoIndexer = AutoIndexer::getInstance();
+                $this->registerComponent('auto_indexer', $autoIndexer);
+                Utils::logDebug('AutoIndexer component loaded');
+            } else {
+                Utils::logError('AutoIndexer class not found');
+            }
+
+            // Load WooCommerceDetector for settings extraction
+            if (class_exists('WooAiAssistant\Setup\WooCommerceDetector')) {
+                $wooDetector = WooCommerceDetector::getInstance();
+                $this->registerComponent('woo_detector', $wooDetector);
+                Utils::logDebug('WooCommerceDetector component loaded');
+            } else {
+                Utils::logError('WooCommerceDetector class not found');
+            }
+
+            // Load DefaultMessageSetup for conversation configuration
+            if (class_exists('WooAiAssistant\Setup\DefaultMessageSetup')) {
+                $messageSetup = DefaultMessageSetup::getInstance();
+                $this->registerComponent('message_setup', $messageSetup);
+                Utils::logDebug('DefaultMessageSetup component loaded');
+            } else {
+                Utils::logError('DefaultMessageSetup class not found');
+            }
+
+            Utils::logDebug('Auto-installation components loaded successfully');
+
+            /**
+             * Auto-installation components loaded action
+             *
+             * Fired after all auto-installation components have been loaded.
+             *
+             * @since 1.0.0
+             * @param Main $instance The main plugin instance
+             */
+            do_action('woo_ai_assistant_auto_install_components_loaded', $this);
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load auto-installation components: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Load compatibility components
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadCompatibilityComponents(): void
+    {
+        try {
+            // Load multilingual support (WPML/Polylang/TranslatePress)
+            if (class_exists('WooAiAssistant\Compatibility\WpmlAndPolylang')) {
+                $multilingualSupport = WpmlAndPolylang::getInstance();
+                $this->registerComponent('multilingual_support', $multilingualSupport);
+                Utils::logDebug('Multilingual support component loaded');
+            } else {
+                Utils::logError('WpmlAndPolylang class not found');
+            }
+
+            // Load GDPR compliance support
+            if (class_exists('WooAiAssistant\Compatibility\GdprPlugins')) {
+                $gdprSupport = GdprPlugins::getInstance();
+                $this->registerComponent('gdpr_support', $gdprSupport);
+                Utils::logDebug('GDPR compliance component loaded');
+            } else {
+                Utils::logError('GdprPlugins class not found');
+            }
+
+            Utils::logDebug('Compatibility components loaded successfully');
+
+            /**
+             * Compatibility components loaded action
+             *
+             * Fired after all compatibility components have been loaded.
+             *
+             * @since 1.0.0
+             * @param Main $instance The main plugin instance
+             */
+            do_action('woo_ai_assistant_compatibility_components_loaded', $this);
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load compatibility components: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Load security components
+     *
+     * Initializes all security-related components including input sanitization,
+     * CSRF protection, rate limiting, prompt defense, and audit logging.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function loadSecurityComponents(): void
+    {
+        try {
+            // Load InputSanitizer for comprehensive input validation
+            if (class_exists('WooAiAssistant\Security\InputSanitizer')) {
+                $inputSanitizer = InputSanitizer::getInstance();
+                $this->registerComponent('input_sanitizer', $inputSanitizer);
+                Utils::logDebug('InputSanitizer component loaded');
+            } else {
+                Utils::logError('InputSanitizer class not found');
+            }
+
+            // Load CsrfProtection for CSRF attack prevention
+            if (class_exists('WooAiAssistant\Security\CsrfProtection')) {
+                $csrfProtection = CsrfProtection::getInstance();
+                $this->registerComponent('csrf_protection', $csrfProtection);
+                Utils::logDebug('CsrfProtection component loaded');
+            } else {
+                Utils::logError('CsrfProtection class not found');
+            }
+
+            // Load RateLimiter for abuse prevention
+            if (class_exists('WooAiAssistant\Security\RateLimiter')) {
+                $rateLimiter = RateLimiter::getInstance();
+                $this->registerComponent('rate_limiter', $rateLimiter);
+                Utils::logDebug('RateLimiter component loaded');
+            } else {
+                Utils::logError('RateLimiter class not found');
+            }
+
+            // Load PromptDefense for AI prompt injection protection
+            if (class_exists('WooAiAssistant\Security\PromptDefense')) {
+                $promptDefense = PromptDefense::getInstance();
+                $this->registerComponent('prompt_defense', $promptDefense);
+                Utils::logDebug('PromptDefense component loaded');
+            } else {
+                Utils::logError('PromptDefense class not found');
+            }
+
+            // Load AuditLogger for comprehensive security event logging
+            if (class_exists('WooAiAssistant\Security\AuditLogger')) {
+                $auditLogger = AuditLogger::getInstance();
+                $this->registerComponent('audit_logger', $auditLogger);
+                Utils::logDebug('AuditLogger component loaded');
+            } else {
+                Utils::logError('AuditLogger class not found');
+            }
+
+            Utils::logDebug('Security components loaded successfully');
+
+            /**
+             * Security components loaded action
+             *
+             * Fired after all security components have been loaded.
+             *
+             * @since 1.0.0
+             * @param Main $instance The main plugin instance
+             */
+            do_action('woo_ai_assistant_security_components_loaded', $this);
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load security components: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -421,11 +732,41 @@ class Main
      */
     private function loadAdminComponents(): void
     {
-        // Load AdminMenu component
-        $adminMenu = AdminMenu::getInstance();
-        $this->registerComponent('admin_menu', $adminMenu);
+        // PROGRESSIVE RESTORATION: Loading admin components with protection
+        Utils::logDebug('Starting admin component restoration');
 
-        Utils::logDebug('Admin components loaded');
+        try {
+            // Load AdminMenu component
+            if (class_exists('WooAiAssistant\Admin\AdminMenu')) {
+                $adminMenu = AdminMenu::getInstance();
+                $this->registerComponent('admin_menu', $adminMenu);
+                Utils::logDebug('AdminMenu component loaded');
+            } else {
+                Utils::logError('AdminMenu class not found');
+            }
+
+            // Load DashboardPage component
+            if (class_exists('WooAiAssistant\Admin\Pages\DashboardPage')) {
+                $dashboardPage = DashboardPage::getInstance();
+                $this->registerComponent('dashboard_page', $dashboardPage);
+                Utils::logDebug('DashboardPage component loaded');
+            } else {
+                Utils::logError('DashboardPage class not found');
+            }
+
+            // Load ConversationsLogPage component
+            if (class_exists('WooAiAssistant\Admin\Pages\ConversationsLogPage')) {
+                $conversationsLogPage = ConversationsLogPage::getInstance();
+                $this->registerComponent('conversations_log_page', $conversationsLogPage);
+                Utils::logDebug('ConversationsLogPage component loaded');
+            } else {
+                Utils::logError('ConversationsLogPage class not found');
+            }
+
+            Utils::logDebug('Admin components loaded successfully');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load admin components: ' . $e->getMessage());
+        }
 
         /**
          * Admin components loaded action
@@ -444,8 +785,35 @@ class Main
      */
     private function loadFrontendComponents(): void
     {
-        // Frontend components will be loaded here as they are implemented
-        Utils::logDebug('Frontend components ready to load');
+        // Restore frontend components with protection
+        try {
+            Utils::logDebug('Starting frontend component restoration');
+
+            // Load Widget Loader for frontend chat widget
+            if (class_exists('WooAiAssistant\Frontend\WidgetLoader')) {
+                $widgetLoader = WidgetLoader::getInstance();
+                $this->registerComponent('widget_loader', $widgetLoader);
+                Utils::logDebug('WidgetLoader component loaded');
+            } else {
+                Utils::logError('WidgetLoader class not found');
+            }
+
+            Utils::logDebug('Frontend components loaded successfully');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load frontend components: ' . $e->getMessage());
+        }
+
+        /* ORIGINAL CODE DISABLED FOR EMERGENCY FIX:
+        try {
+            // Load Widget Loader for frontend chat widget
+            $this->components['widget_loader'] = WidgetLoader::getInstance();
+            Utils::logDebug('WidgetLoader component initialized');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to load frontend components: ' . $e->getMessage());
+        }
+
+        Utils::logDebug('Frontend components loaded');
+        */
 
         /**
          * Frontend components loaded action
@@ -703,8 +1071,10 @@ class Main
             // Setup KB hooks
             $this->setupKnowledgeBaseHooks();
 
-            // Auto-index on first activation if needed
-            $this->maybeAutoIndex();
+            // EMERGENCY FIX: Temporarily disable auto-indexing to prevent crashes
+            // Auto-index on first activation if needed - DISABLED FOR EMERGENCY
+            // $this->maybeAutoIndex();
+            Utils::logDebug('Auto-indexing temporarily disabled for emergency fix');
 
             $this->kbInitialized = true;
 

@@ -574,7 +574,7 @@ class VectorManager
      * }
      * ```
      */
-    public function searchSimilar(array $queryVector, array $options = []): array
+    public function searchSimilar(array $queryVector, array $options = [])
     {
         global $wpdb;
 

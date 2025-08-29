@@ -81,6 +81,9 @@ class Activator
             // Flush rewrite rules
             flush_rewrite_rules();
 
+            // Trigger auto-indexing for immediate functionality (zero-config)
+            self::triggerAutoInstallation();
+
             Utils::logDebug('Plugin activation completed successfully');
         } catch (\Exception $e) {
             Utils::logDebug('Plugin activation failed: ' . $e->getMessage(), 'error');
@@ -483,8 +486,8 @@ class Activator
      */
     private static function createDirectories(): void
     {
-        $upload_dir = wp_upload_dir();
-        $pluginUploadDir = $upload_dir['basedir'] . '/woo-ai-assistant';
+        $uploadDir = wp_upload_dir();
+        $pluginUploadDir = $uploadDir['basedir'] . '/woo-ai-assistant';
 
         // Create main upload directory
         if (!file_exists($pluginUploadDir)) {
@@ -567,13 +570,13 @@ class Activator
      */
     public static function isRecentlyActivated(int $seconds = 300): bool
     {
-        $activation_time = self::getActivationTime();
+        $activationTime = self::getActivationTime();
 
-        if (false === $activation_time) {
+        if (false === $activationTime) {
             return false;
         }
 
-        return (time() - $activation_time) <= $seconds;
+        return (time() - $activationTime) <= $seconds;
     }
 
     /**
@@ -653,5 +656,164 @@ class Activator
         }
 
         return $stats;
+    }
+
+    /**
+     * Trigger auto-installation for immediate functionality
+     *
+     * Implements the zero-config philosophy by automatically setting up
+     * the plugin for immediate use after activation.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private static function triggerAutoInstallation(): void
+    {
+        try {
+            Utils::logDebug('Starting auto-installation process');
+
+            // Set flag for auto-indexing
+            update_option('woo_ai_assistant_needs_auto_install', true);
+
+            // Schedule immediate auto-indexing if possible, otherwise background
+            if (self::canRunImmediateAutoInstall()) {
+                // Run auto-installation immediately
+                self::runImmediateAutoInstall();
+            } else {
+                // Schedule for background processing
+                self::scheduleBackgroundAutoInstall();
+            }
+
+            Utils::logDebug('Auto-installation process initiated');
+        } catch (\Exception $e) {
+            Utils::logError('Failed to trigger auto-installation: ' . $e->getMessage());
+            // Don't throw - we don't want activation to fail because of auto-install issues
+        }
+    }
+
+    /**
+     * Check if we can run immediate auto-installation
+     *
+     * @since 1.0.0
+     * @return bool True if immediate auto-install is possible
+     */
+    private static function canRunImmediateAutoInstall(): bool
+    {
+        // Check if we're not in CLI or AJAX context
+        if (defined('WP_CLI') && WP_CLI) {
+            return false;
+        }
+
+        if (wp_doing_ajax()) {
+            return false;
+        }
+
+        // Check memory availability (need at least 32MB free)
+        $memoryLimit = wp_convert_hr_to_bytes(ini_get('memory_limit'));
+        $memoryUsage = memory_get_usage(true);
+        $availableMemory = $memoryLimit - $memoryUsage;
+
+        if ($availableMemory < 33554432) { // 32MB
+            return false;
+        }
+
+        // Check execution time (need at least 60 seconds)
+        $maxExecutionTime = ini_get('max_execution_time');
+        if ($maxExecutionTime > 0 && $maxExecutionTime < 60) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Run immediate auto-installation
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private static function runImmediateAutoInstall(): void
+    {
+        try {
+            Utils::logDebug('Running immediate auto-installation');
+
+            // We need to temporarily bootstrap the plugin to access components
+            // This is safe during activation as WordPress is fully loaded
+            if (class_exists('WooAiAssistant\Setup\AutoIndexer')) {
+                $autoIndexer = \WooAiAssistant\Setup\AutoIndexer::getInstance();
+                $results = $autoIndexer->triggerAutoIndexing(true);
+
+                if ($results && !isset($results['error'])) {
+                    Utils::logDebug('Immediate auto-installation completed', $results);
+                    update_option('woo_ai_assistant_needs_auto_install', false);
+                } else {
+                    throw new \Exception('Auto-indexing failed: ' . ($results['error'] ?? 'Unknown error'));
+                }
+            } else {
+                throw new \Exception('AutoIndexer class not available during activation');
+            }
+        } catch (\Exception $e) {
+            Utils::logError('Immediate auto-installation failed: ' . $e->getMessage());
+            // Fall back to scheduled auto-install
+            self::scheduleBackgroundAutoInstall();
+        }
+    }
+
+    /**
+     * Schedule background auto-installation
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private static function scheduleBackgroundAutoInstall(): void
+    {
+        // Cancel any existing auto-install events
+        wp_clear_scheduled_hook('woo_ai_assistant_auto_install');
+
+        // Schedule auto-installation for 5 minutes after activation
+        wp_schedule_single_event(time() + 300, 'woo_ai_assistant_auto_install');
+
+        Utils::logDebug('Auto-installation scheduled for background processing');
+        update_option('woo_ai_assistant_auto_install_scheduled', time());
+    }
+
+    /**
+     * Check if auto-installation is needed
+     *
+     * @since 1.0.0
+     * @return bool True if auto-installation is needed
+     */
+    public static function needsAutoInstallation(): bool
+    {
+        return (bool) get_option('woo_ai_assistant_needs_auto_install', false);
+    }
+
+    /**
+     * Check if auto-installation was completed
+     *
+     * @since 1.0.0
+     * @return bool True if auto-installation was completed
+     */
+    public static function isAutoInstallationComplete(): bool
+    {
+        return !self::needsAutoInstallation() &&
+               get_option('woo_ai_assistant_last_auto_index', false) !== false;
+    }
+
+    /**
+     * Get auto-installation status
+     *
+     * @since 1.0.0
+     * @return array Auto-installation status information
+     */
+    public static function getAutoInstallationStatus(): array
+    {
+        return [
+            'needs_auto_install' => self::needsAutoInstallation(),
+            'is_complete' => self::isAutoInstallationComplete(),
+            'scheduled_at' => get_option('woo_ai_assistant_auto_install_scheduled', false),
+            'last_completed' => get_option('woo_ai_assistant_last_auto_index', false),
+            'activation_time' => self::getActivationTime()
+        ];
     }
 }

@@ -13,6 +13,7 @@
 
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { StreamingService } from './StreamingService';
 
 /**
  * Configuration constants for API service
@@ -113,10 +114,21 @@ class ApiService {
             timeout: 30000 // 30 seconds
         };
 
+        // Initialize streaming service
+        this.streamingService = new StreamingService({
+            baseUrl: this.baseUrl,
+            namespace: API_CONFIG.namespace,
+            nonce: this.nonce,
+            onStateChange: this.handleStreamStateChange.bind(this),
+            onError: this.onError,
+            logger: this
+        });
+
         this.debugLog('ApiService initialized', {
             baseUrl: this.baseUrl,
             userId: this.userId,
-            pageContext: this.pageContext
+            pageContext: this.pageContext,
+            streamingSupported: this.streamingService.isStreamingAvailable()
         });
     }
 
@@ -529,6 +541,25 @@ class ApiService {
     }
 
     /**
+     * Handle streaming service state changes
+     * 
+     * @param {Object} stateChange - State change object
+     */
+    handleStreamStateChange(stateChange) {
+        this.debugLog('Streaming state changed', stateChange);
+        
+        // Notify error callback if streaming service encounters issues
+        if (stateChange.state === 'error') {
+            this.onError({
+                message: 'Streaming service error',
+                type: ERROR_TYPES.STREAMING,
+                critical: false,
+                details: stateChange
+            });
+        }
+    }
+
+    /**
      * Send chat message to backend
      * 
      * @param {string} message - User message
@@ -591,7 +622,7 @@ class ApiService {
     }
 
     /**
-     * Send streaming chat message (future enhancement)
+     * Send streaming chat message with real-time response delivery
      * 
      * @param {string} message - User message
      * @param {string} conversationId - Optional conversation ID
@@ -600,29 +631,154 @@ class ApiService {
      * @returns {Promise<Object>} Final response
      */
     async sendStreamingMessage(message, conversationId = null, onChunk = null, userContext = {}) {
-        // For now, fallback to regular message sending
-        // Streaming will be implemented when backend supports it
-        this.debugLog('Streaming not yet supported, falling back to regular message');
+        if (!message || typeof message !== 'string' || !message.trim()) {
+            throw this.createApiError(
+                ERROR_TYPES.VALIDATION,
+                'Message is required and must be a non-empty string'
+            );
+        }
+
+        // Check if streaming is available
+        if (!this.streamingService.isStreamingAvailable()) {
+            this.debugLog('Streaming not available, falling back to regular message');
+            return this.sendStreamingMessageFallback(message, conversationId, onChunk, userContext);
+        }
+
+        const finalUserContext = {
+            ...this.pageContext,
+            ...userContext,
+            timestamp: new Date().toISOString()
+        };
+
+        this.debugLog('Starting streaming message', {
+            conversationId,
+            messageLength: message.length,
+            streamingState: this.streamingService.getState()
+        });
+
+        return new Promise((resolve, reject) => {
+            let accumulatedResponse = '';
+            let finalMetadata = null;
+            let sessionId = null;
+
+            // Handle chunk callback
+            const handleChunk = (chunkInfo) => {
+                const { chunk, content, isComplete, progress, metadata } = chunkInfo;
+                
+                accumulatedResponse = content;
+                if (metadata) {
+                    finalMetadata = metadata;
+                }
+
+                // Call user's chunk callback if provided
+                if (onChunk) {
+                    try {
+                        onChunk({
+                            chunk,
+                            content,
+                            isComplete,
+                            progress,
+                            metadata
+                        });
+                    } catch (error) {
+                        this.debugLog('Error in user chunk callback', error);
+                    }
+                }
+            };
+
+            // Handle completion
+            const handleComplete = (completionResult) => {
+                const { content, metadata, statistics } = completionResult;
+                
+                this.debugLog('Streaming completed', {
+                    sessionId,
+                    contentLength: content?.length || 0,
+                    statistics
+                });
+
+                resolve({
+                    conversationId: conversationId || metadata?.conversationId,
+                    response: content,
+                    timestamp: new Date().toISOString(),
+                    confidence: metadata?.confidence || 0,
+                    sources: metadata?.sources || [],
+                    metadata: {
+                        streaming: true,
+                        statistics,
+                        ...metadata
+                    }
+                });
+            };
+
+            // Start streaming
+            this.streamingService.startStream(
+                message.trim(),
+                conversationId,
+                finalUserContext,
+                handleChunk,
+                handleComplete
+            ).then((streamSessionId) => {
+                sessionId = streamSessionId;
+                this.debugLog('Streaming session started', { sessionId });
+            }).catch((error) => {
+                this.debugLog('Failed to start streaming session', error);
+                
+                // Try fallback
+                this.sendStreamingMessageFallback(message, conversationId, onChunk, userContext)
+                    .then(resolve)
+                    .catch(reject);
+            });
+        });
+    }
+
+    /**
+     * Fallback streaming message implementation
+     * 
+     * @param {string} message - User message
+     * @param {string} conversationId - Optional conversation ID
+     * @param {Function} onChunk - Callback for each response chunk
+     * @param {Object} userContext - Additional user context
+     * @returns {Promise<Object>} Final response
+     */
+    async sendStreamingMessageFallback(message, conversationId, onChunk, userContext) {
+        this.debugLog('Using streaming fallback (simulated chunks)');
         
         const response = await this.sendMessage(message, conversationId, userContext);
         
         // Simulate streaming for better UX
         if (onChunk && response.response) {
             const words = response.response.split(' ');
-            const chunkSize = Math.max(1, Math.floor(words.length / 8)); // 8 chunks
+            const chunkSize = Math.max(1, Math.floor(words.length / 10)); // 10 chunks
+            let accumulatedContent = '';
             
             for (let i = 0; i < words.length; i += chunkSize) {
                 const chunk = words.slice(i, i + chunkSize).join(' ');
+                accumulatedContent += (i > 0 ? ' ' : '') + chunk;
+                
+                const isComplete = i + chunkSize >= words.length;
+                const progress = Math.min(1, (i + chunkSize) / words.length);
+                
                 onChunk({
                     chunk,
-                    isComplete: i + chunkSize >= words.length,
-                    progress: Math.min(1, (i + chunkSize) / words.length)
+                    content: accumulatedContent,
+                    isComplete,
+                    progress,
+                    metadata: { fallback: true }
                 });
                 
-                // Small delay between chunks
-                await this.delay(100);
+                // Small delay between chunks for realistic feel
+                if (!isComplete) {
+                    await this.delay(150);
+                }
             }
         }
+        
+        // Mark as fallback streaming
+        response.metadata = {
+            ...response.metadata,
+            streaming: false,
+            fallback: true
+        };
         
         return response;
     }
@@ -766,16 +922,52 @@ class ApiService {
     }
 
     /**
-     * Cancel all active requests
+     * Cancel all active requests and streaming connections
      */
     cancelAllRequests() {
-        this.debugLog('Cancelling all active requests', {
-            activeCount: this.activeRequests.size
+        this.debugLog('Cancelling all active requests and streams', {
+            activeRequests: this.activeRequests.size,
+            activeStreams: this.streamingService.getActiveStreamCount()
         });
         
+        // Cancel HTTP requests
         this.activeRequests.clear();
         this.requestQueue = [];
         this.retryAttempts.clear();
+        
+        // Disconnect streaming service
+        this.streamingService.disconnect();
+    }
+
+    /**
+     * Check if streaming is currently available
+     * 
+     * @returns {boolean} True if streaming is supported and available
+     */
+    isStreamingAvailable() {
+        return this.streamingService.isStreamingAvailable();
+    }
+
+    /**
+     * Get streaming service state
+     * 
+     * @returns {string} Current streaming state
+     */
+    getStreamingState() {
+        return this.streamingService.getState();
+    }
+
+    /**
+     * Get streaming statistics
+     * 
+     * @returns {Object} Streaming statistics
+     */
+    getStreamingStats() {
+        return {
+            state: this.streamingService.getState(),
+            activeStreams: this.streamingService.getActiveStreamCount(),
+            supportsStreaming: this.streamingService.isStreamingAvailable()
+        };
     }
 
     /**

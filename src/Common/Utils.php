@@ -451,4 +451,31 @@ class Utils
 
         return substr($string, 0, $length - strlen($suffix)) . $suffix;
     }
+
+    /**
+     * Get client IP address
+     *
+     * Attempts to determine the real IP address of the client,
+     * accounting for proxy servers and CDNs.
+     *
+     * @since 1.0.0
+     * @return string Client IP address
+     */
+    public static function getClientIpAddress(): string
+    {
+        // Check for IP from shared internet
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // Check for IP passed from proxy
+            // Can contain multiple IPs, get the first one
+            $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            return trim($ips[0]);
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            // Check for IP from remote address
+            return $_SERVER['REMOTE_ADDR'];
+        }
+
+        return '127.0.0.1';
+    }
 }

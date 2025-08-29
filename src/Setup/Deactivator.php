@@ -80,7 +80,7 @@ class Deactivator
     private static function clearScheduledEvents(): void
     {
         // List of all cron hooks used by the plugin
-        $cron_hooks = [
+        $cronHooks = [
             'woo_ai_assistant_daily_cleanup',
             'woo_ai_assistant_weekly_stats',
             'woo_ai_assistant_kb_reindex',
@@ -88,7 +88,7 @@ class Deactivator
             'woo_ai_assistant_health_check',
         ];
 
-        foreach ($cron_hooks as $hook) {
+        foreach ($cronHooks as $hook) {
             // Get all scheduled events for this hook
             $scheduledEvents = wp_get_scheduled_event($hook);
 
@@ -116,18 +116,18 @@ class Deactivator
         }
 
         // Clear plugin-specific cache directory
-        $upload_dir = wp_upload_dir();
-        $cache_dir = $upload_dir['basedir'] . '/woo-ai-assistant/cache';
+        $uploadDir = wp_upload_dir();
+        $cacheDir = $uploadDir['basedir'] . '/woo-ai-assistant/cache';
 
-        if (is_dir($cache_dir)) {
-            self::recursiveDelete($cache_dir, false); // Delete contents but keep directory
+        if (is_dir($cacheDir)) {
+            self::recursiveDelete($cacheDir, false); // Delete contents but keep directory
         }
 
         // Clear temporary embeddings and processing files
-        $temp_dir = $upload_dir['basedir'] . '/woo-ai-assistant/temp';
+        $tempDir = $uploadDir['basedir'] . '/woo-ai-assistant/temp';
 
-        if (is_dir($temp_dir)) {
-            self::recursiveDelete($temp_dir, false);
+        if (is_dir($tempDir)) {
+            self::recursiveDelete($tempDir, false);
         }
 
         Utils::logDebug('Temporary data and cache cleared');
@@ -185,14 +185,14 @@ class Deactivator
             )
         );
 
-        $deleted_count = 0;
+        $deletedCount = 0;
         foreach ($pluginTransients as $transient) {
             if (delete_option($transient->option_name)) {
-                $deleted_count++;
+                $deletedCount++;
             }
         }
 
-        Utils::logDebug("Cleaned up {$deleted_count} plugin transients");
+        Utils::logDebug("Cleaned up {$deletedCount} plugin transients");
     }
 
     /**
@@ -244,13 +244,13 @@ class Deactivator
      */
     public static function isRecentlyDeactivated(int $seconds = 300): bool
     {
-        $deactivation_time = self::getDeactivationTime();
+        $deactivationTime = self::getDeactivationTime();
 
-        if (false === $deactivation_time) {
+        if (false === $deactivationTime) {
             return false;
         }
 
-        return (time() - $deactivation_time) <= $seconds;
+        return (time() - $deactivationTime) <= $seconds;
     }
 
     /**

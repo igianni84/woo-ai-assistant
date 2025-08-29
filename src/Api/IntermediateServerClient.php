@@ -18,6 +18,7 @@ namespace WooAiAssistant\Api;
 
 use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\Common\Utils;
+use WooAiAssistant\Common\ApiConfiguration;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -179,13 +180,18 @@ class IntermediateServerClient
 
         if ($this->developmentMode) {
             // Use local development server if available
+            // EMERGENCY FIX: Disabled URL accessibility check to prevent blocking
+            // The check was causing timeout issues during plugin initialization
             $devUrl = $this->getWordPressOption('woo_ai_assistant_dev_server_url', 'http://localhost:3000');
-            if ($this->isUrlAccessible($devUrl)) {
-                $this->baseUrl = $devUrl;
-                Utils::logDebug('Using development server: ' . $this->baseUrl);
-            } else {
-                Utils::logDebug('Development server not accessible, using production URL');
-            }
+            // Skip accessibility check - assume dev server is not available in emergency mode
+            Utils::logDebug('Development mode: Using production URL (dev server check disabled for emergency fix)');
+            // Original code commented out to prevent blocking:
+            // if ($this->isUrlAccessible($devUrl)) {
+            //     $this->baseUrl = $devUrl;
+            //     Utils::logDebug('Using development server: ' . $this->baseUrl);
+            // } else {
+            //     Utils::logDebug('Development server not accessible, using production URL');
+            // }
         }
 
         // Load rate limiting configuration

@@ -172,38 +172,49 @@ class RestController
             ]
         ]);
 
-        // Action endpoint - Execute agentic actions
-        \register_rest_route($this->namespace, '/action', [
+        // Streaming endpoint - Handle real-time streaming responses
+        \register_rest_route($this->namespace, '/stream', [
             'methods' => WP_REST_Server::CREATABLE,
-            'callback' => [$this, 'handleAction'],
+            'callback' => [$this, 'handleStreamingChat'],
             'permission_callback' => [$this, 'checkFrontendPermissions'],
             'args' => [
-                'action_type' => [
+                'message' => [
                     'required' => true,
                     'type' => 'string',
-                    'description' => 'Type of action to execute',
-                    'enum' => ['add_to_cart', 'apply_coupon', 'get_product_info', 'get_shipping_info'],
-                    'sanitize_callback' => 'sanitize_text_field'
-                ],
-                'action_data' => [
-                    'required' => true,
-                    'type' => 'object',
-                    'description' => 'Action-specific data'
+                    'description' => 'User message content',
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                    'validate_callback' => [$this, 'validateChatMessage']
                 ],
                 'conversation_id' => [
-                    'required' => true,
+                    'required' => false,
                     'type' => 'string',
-                    'description' => 'Conversation ID for tracking',
+                    'description' => 'Conversation identifier',
                     'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'user_context' => [
+                    'required' => false,
+                    'type' => 'object',
+                    'description' => 'User context data',
+                    'default' => []
+                ],
+                'stream_config' => [
+                    'required' => false,
+                    'type' => 'object',
+                    'description' => 'Streaming configuration options',
+                    'default' => []
                 ],
                 'nonce' => [
                     'required' => true,
                     'type' => 'string',
-                    'description' => 'Security nonce',
+                    'description' => 'Security nonce for streaming',
                     'sanitize_callback' => 'sanitize_text_field'
                 ]
             ]
         ]);
+
+        // Register ActionEndpoint routes (cart actions, wishlist, recommendations)
+        $actionEndpoint = \WooAiAssistant\RestApi\Endpoints\ActionEndpoint::getInstance();
+        $actionEndpoint->registerRoutes();
 
         // Rating endpoint - Collect conversation ratings
         \register_rest_route($this->namespace, '/rating', [
@@ -519,23 +530,52 @@ class RestController
                 'user_context' => $userContext
             ]);
 
-            // TODO: Implement actual chat processing logic in Phase 5
-            // For now, return a mock response
-            $response = [
-                'success' => true,
-                'data' => [
-                    'conversation_id' => $conversationId ?: $this->generateConversationId(),
-                    'response' => 'Thank you for your message. This is a placeholder response until the AI system is implemented.',
-                    'timestamp' => current_time('mysql'),
-                    'confidence' => 0.8,
-                    'sources' => []
-                ]
-            ];
-
-            return $this->createSuccessResponse($response);
+            // Get ChatEndpoint instance and process message
+            $chatEndpoint = \WooAiAssistant\RestApi\Endpoints\ChatEndpoint::getInstance();
+            return $chatEndpoint->processMessage($request);
         } catch (Exception $e) {
             Utils::logError('Chat processing error: ' . $e->getMessage());
             return $this->createErrorResponse('chat_processing_error', 'Failed to process chat message', 500);
+        }
+    }
+
+    /**
+     * Handle streaming chat message processing
+     *
+     * @since 1.0.0
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response object or error
+     */
+    public function handleStreamingChat(WP_REST_Request $request)
+    {
+        try {
+            // Verify nonce for streaming
+            if (!$this->verifyNonce($request->get_param('nonce'), 'woo_ai_stream')) {
+                return $this->createErrorResponse('invalid_nonce', 'Security check failed', 403);
+            }
+
+            // Apply streaming rate limiting
+            if (!$this->checkStreamingRateLimit($this->getCurrentUserId())) {
+                return $this->createErrorResponse('rate_limit_exceeded', 'Too many streaming requests', 429);
+            }
+
+            $message = $request->get_param('message');
+            $conversationId = $request->get_param('conversation_id');
+            $userContext = $request->get_param('user_context') ?: [];
+            $streamConfig = $request->get_param('stream_config') ?: [];
+
+            Utils::logDebug('Processing streaming chat request', [
+                'message_length' => strlen($message),
+                'conversation_id' => $conversationId,
+                'stream_config' => $streamConfig
+            ]);
+
+            // Get StreamingEndpoint instance and handle streaming request
+            $streamingEndpoint = \WooAiAssistant\RestApi\Endpoints\StreamingEndpoint::getInstance();
+            return $streamingEndpoint->handleStreamingRequest($request);
+        } catch (Exception $e) {
+            Utils::logError('Streaming chat processing error: ' . $e->getMessage());
+            return $this->createErrorResponse('streaming_processing_error', 'Failed to process streaming chat message', 500);
         }
     }
 
@@ -549,41 +589,14 @@ class RestController
     public function handleAction(WP_REST_Request $request)
     {
         try {
-            // Verify nonce
-            if (!$this->verifyNonce($request->get_param('nonce'), 'woo_ai_action')) {
-                return $this->createErrorResponse('invalid_nonce', 'Security check failed', 403);
-            }
+            // Get ActionEndpoint instance and let it handle its own endpoints
+            $actionEndpoint = \WooAiAssistant\RestApi\Endpoints\ActionEndpoint::getInstance();
 
-            // Apply rate limiting
-            if (!$this->checkRateLimit('action', $this->getCurrentUserId())) {
-                return $this->createErrorResponse('rate_limit_exceeded', 'Too many requests', 429);
-            }
-
-            $actionType = $request->get_param('action_type');
-            $actionData = $request->get_param('action_data');
-            $conversationId = $request->get_param('conversation_id');
-
-            Utils::logDebug('Processing action', [
-                'action_type' => $actionType,
-                'conversation_id' => $conversationId
-            ]);
-
-            // TODO: Implement actual action processing logic in Phase 8
-            // For now, return a mock response
-            $response = [
-                'success' => true,
-                'data' => [
-                    'action_type' => $actionType,
-                    'result' => 'Action queued for processing',
-                    'conversation_id' => $conversationId,
-                    'timestamp' => current_time('mysql')
-                ]
-            ];
-
-            return $this->createSuccessResponse($response);
+            // ActionEndpoint handles its own routing internally
+            return $actionEndpoint->handleRequest($request);
         } catch (Exception $e) {
-            Utils::logError('Action processing error: ' . $e->getMessage());
-            return $this->createErrorResponse('action_processing_error', 'Failed to process action', 500);
+            Utils::logError('Action endpoint error: ' . $e->getMessage());
+            return $this->createErrorResponse('action_error', 'Failed to process action', 500);
         }
     }
 
@@ -656,11 +669,14 @@ class RestController
             'avatar_url' => get_option('woo_ai_assistant_avatar', WOO_AI_ASSISTANT_URL . 'assets/images/avatar-default.png'),
             'nonces' => [
                 'chat' => wp_create_nonce('woo_ai_chat'),
+                'stream' => wp_create_nonce('woo_ai_stream'),
+                'stream_init' => wp_create_nonce('woo_ai_stream_init'),
                 'action' => wp_create_nonce('woo_ai_action'),
                 'rating' => wp_create_nonce('woo_ai_rating')
             ],
             'endpoints' => [
                 'chat' => rest_url($this->namespace . '/chat'),
+                'stream' => rest_url($this->namespace . '/stream'),
                 'action' => rest_url($this->namespace . '/action'),
                 'rating' => rest_url($this->namespace . '/rating')
             ],
@@ -984,6 +1000,53 @@ class RestController
     }
 
     /**
+     * Check streaming-specific rate limits (more restrictive than regular chat)
+     *
+     * @since 1.0.0
+     * @param string $userId User identifier
+     * @return bool True if within limits
+     */
+    private function checkStreamingRateLimit(string $userId): bool
+    {
+        $key = 'streaming_' . $userId;
+        $now = time();
+        $rateLimitKey = 'woo_ai_streaming_rate_limits';
+        $streamingLimits = get_transient($rateLimitKey) ?: [];
+
+        $maxRequests = apply_filters('woo_ai_assistant_streaming_rate_limit', 10); // 10 streaming requests per hour
+        $windowSeconds = HOUR_IN_SECONDS;
+
+        if (!isset($streamingLimits[$key])) {
+            $streamingLimits[$key] = [
+                'requests' => 1,
+                'window_start' => $now
+            ];
+        } else {
+            $data = $streamingLimits[$key];
+
+            // Reset window if expired
+            if ($now - $data['window_start'] > $windowSeconds) {
+                $streamingLimits[$key] = [
+                    'requests' => 1,
+                    'window_start' => $now
+                ];
+            } else {
+                // Check if within limits
+                if ($data['requests'] >= $maxRequests) {
+                    return false;
+                }
+
+                $streamingLimits[$key]['requests']++;
+            }
+        }
+
+        // Save streaming rate limits to cache
+        set_transient($rateLimitKey, $streamingLimits, HOUR_IN_SECONDS);
+
+        return true;
+    }
+
+    /**
      * Verify nonce for security
      *
      * @since 1.0.0
@@ -1153,6 +1216,7 @@ class RestController
         return [
             'frontend' => [
                 'chat' => rest_url($this->namespace . '/chat'),
+                'stream' => rest_url($this->namespace . '/stream'),
                 'action' => rest_url($this->namespace . '/action'),
                 'rating' => rest_url($this->namespace . '/rating'),
                 'config' => rest_url($this->namespace . '/config')

@@ -114,6 +114,15 @@ class StandardsVerifier {
                 // Skip magic methods and constructors
                 if (strpos($methodName, '__') === 0) continue;
                 
+                // Skip WordPress override methods (WP_List_Table, etc.)
+                $wpOverrideMethods = [
+                    'get_columns', 'get_sortable_columns', 'get_bulk_actions',
+                    'prepare_items', 'column_default', 'column_cb', 'no_items',
+                    'row_actions', 'current_action', 'column_actions'
+                ];
+                
+                if (in_array($methodName, $wpOverrideMethods)) continue;
+                
                 if (!preg_match('/^[a-z][a-zA-Z0-9]*$/', $methodName)) {
                     $this->addError("Method '$methodName' in $file does not follow camelCase convention");
                 }
@@ -151,6 +160,13 @@ class StandardsVerifier {
                     '/.*_stats?$/',     // Stats arrays
                     '/.*_time$/',       // Time variables
                     '/.*_count$/',      // Count variables
+                    '/per_page$/',      // WordPress pagination variable
+                    '/current_page$/',  // WordPress pagination variable
+                    '/column_name$/',   // WordPress list table variable
+                    '/item_name$/',     // WordPress list table variable
+                    '/post_type$/',     // WordPress post type variable
+                    '/user_id$/',       // WordPress user variable
+                    '/blog_id$/',       // WordPress multisite variable
                 ];
                 
                 $shouldSkip = false;
@@ -231,7 +247,23 @@ class StandardsVerifier {
             preg_match_all('/(do_action|apply_filters)\s*\(\s*[\'"]([^\'"]+)[\'"]/m', $content, $matches);
             
             foreach ($matches[2] as $hookName) {
-                if (strpos($hookName, 'woo_ai_assistant') !== 0) {
+                // Skip third-party plugin hooks (WPML, TranslatePress, etc.)
+                $thirdPartyHooks = [
+                    'wpml_element_language_code', 'wpml_element_trid', 
+                    'wpml_get_element_translations', 'wpml_permalink',
+                    'trp_get_url_for_language', 'pll_get_post_language',
+                    'woocommerce_', 'wp_', 'init', 'admin_init', 'wp_enqueue_scripts'
+                ];
+                
+                $isThirdPartyHook = false;
+                foreach ($thirdPartyHooks as $prefix) {
+                    if (strpos($hookName, $prefix) === 0) {
+                        $isThirdPartyHook = true;
+                        break;
+                    }
+                }
+                
+                if (!$isThirdPartyHook && strpos($hookName, 'woo_ai_assistant') !== 0) {
                     $this->addWarning("Hook '$hookName' in $file should start with 'woo_ai_assistant_'");
                 }
                 

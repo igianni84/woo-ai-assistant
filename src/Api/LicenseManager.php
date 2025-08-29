@@ -19,6 +19,7 @@ namespace WooAiAssistant\Api;
 use WooAiAssistant\Common\Traits\Singleton;
 use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Api\IntermediateServerClient;
+use WooAiAssistant\Common\ApiConfiguration;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -189,6 +190,14 @@ class LicenseManager
     private ?IntermediateServerClient $serverClient = null;
 
     /**
+     * API configuration instance
+     *
+     * @since 1.0.0
+     * @var ApiConfiguration|null
+     */
+    private ?ApiConfiguration $apiConfig = null;
+
+    /**
      * Constructor
      *
      * Initializes the license manager with current license data and usage tracking.
@@ -198,6 +207,8 @@ class LicenseManager
     private function __construct()
     {
         $this->serverClient = IntermediateServerClient::getInstance();
+        // Lazy load ApiConfiguration to prevent circular dependency
+        // $this->apiConfig = ApiConfiguration::getInstance();
         $this->loadLicenseData();
         $this->loadUsageData();
         $this->setupHooks();
@@ -340,6 +351,15 @@ class LicenseManager
     public function validateLicense(bool $forceValidation = false): array
     {
         try {
+            // Lazy load ApiConfiguration when needed
+            if (!$this->apiConfig) {
+                $this->apiConfig = ApiConfiguration::getInstance();
+            }
+            // Check if development mode bypass is enabled
+            if ($this->apiConfig && $this->apiConfig->shouldBypassLicenseValidation()) {
+                return $this->handleDevelopmentModeValidation();
+            }
+
             // Skip validation for Free plan
             if ($this->licenseData['plan'] === self::PLAN_FREE) {
                 return $this->handleFreePlanValidation();
@@ -373,6 +393,47 @@ class LicenseManager
                 'error' => true
             ];
         }
+    }
+
+    /**
+     * Handle development mode license validation bypass
+     *
+     * @since 1.0.0
+     * @return array Validation result for development mode
+     */
+    private function handleDevelopmentModeValidation(): array
+    {
+        // Set up development license data
+        // Lazy load ApiConfiguration when needed
+        if (!$this->apiConfig) {
+            $this->apiConfig = ApiConfiguration::getInstance();
+        }
+        $developmentLicenseKey = $this->apiConfig->getDevelopmentLicenseKey();
+
+        $this->licenseData['status'] = self::STATUS_ACTIVE;
+        $this->licenseData['last_validated'] = current_time('mysql');
+        $this->licenseData['license_key'] = $developmentLicenseKey;
+        $this->licenseData['validation_errors'] = [];
+        $this->licenseData['grace_period_started'] = null;
+
+        // Use Unlimited plan features for development testing
+        $this->licenseData['plan'] = self::PLAN_UNLIMITED;
+        $this->planConfig = $this->planConfigurations[self::PLAN_UNLIMITED];
+
+        $this->saveLicenseData();
+
+        Utils::logDebug('Development mode license validation bypassed', [
+            'plan' => $this->licenseData['plan'],
+            'license_key' => $developmentLicenseKey
+        ]);
+
+        return [
+            'valid' => true,
+            'status' => self::STATUS_ACTIVE,
+            'message' => 'Development mode - license validation bypassed',
+            'plan' => self::PLAN_UNLIMITED,
+            'development_mode' => true
+        ];
     }
 
     /**
@@ -882,6 +943,22 @@ class LicenseManager
             ];
         }
 
+        // Lazy load ApiConfiguration when needed
+        if (!$this->apiConfig) {
+            $this->apiConfig = ApiConfiguration::getInstance();
+        }
+        // In development mode, accept any license key as valid
+        if ($this->apiConfig && $this->apiConfig->shouldBypassLicenseValidation()) {
+            $this->licenseData['license_key'] = $licenseKey;
+            $this->saveLicenseData();
+
+            Utils::logDebug('Development mode: License key accepted without validation', [
+                'key_length' => strlen($licenseKey)
+            ]);
+
+            return $this->handleDevelopmentModeValidation();
+        }
+
         $this->licenseData['license_key'] = $licenseKey;
         $this->saveLicenseData();
 
@@ -1338,6 +1415,17 @@ class LicenseManager
             'branding_text' => $branding === 'white-label' ? '' : $branding,
             'white_label' => $branding === 'white-label'
         ];
+    }
+
+    /**
+     * Get current plan name
+     *
+     * @since 1.0.0
+     * @return string Current plan name
+     */
+    public function getCurrentPlan(): string
+    {
+        return $this->licenseData['plan'] ?? self::PLAN_FREE;
     }
 
     /**

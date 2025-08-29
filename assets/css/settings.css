@@ -1,0 +1,565 @@
+/**
+ * Woo AI Assistant Settings Page Styles
+ *
+ * Custom styles for the plugin settings interface including tabs,
+ * form elements, preview widget, and responsive design.
+ *
+ * @package WooAiAssistant
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Tab Navigation
+   ========================================================================== */
+
+.woo-ai-settings .nav-tab-wrapper {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.woo-ai-settings .nav-tab {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-bottom: none;
+    color: #555;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1.71428571;
+    margin: 0 0 -1px 5px;
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.woo-ai-settings .nav-tab:first-child {
+    margin-left: 0;
+}
+
+.woo-ai-settings .nav-tab:hover {
+    background-color: #f3f4f5;
+    color: #333;
+}
+
+.woo-ai-settings .nav-tab-active {
+    background: #f1f1f1;
+    border-bottom: 1px solid #f1f1f1;
+    color: #000;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Tab Content Panels
+   ========================================================================== */
+
+.woo-ai-settings .tab-content {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.woo-ai-settings .tab-panel {
+    display: none;
+}
+
+.woo-ai-settings .tab-panel.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+.woo-ai-settings .form-table {
+    background: #fff;
+    margin-top: 0;
+}
+
+.woo-ai-settings .form-table th {
+    font-weight: 600;
+    padding: 20px 10px 20px 0;
+    vertical-align: top;
+    width: 250px;
+}
+
+.woo-ai-settings .form-table td {
+    padding: 20px 10px;
+}
+
+.woo-ai-settings .regular-text {
+    width: 400px;
+    max-width: 100%;
+}
+
+.woo-ai-settings .large-text {
+    width: 100%;
+    max-width: 600px;
+}
+
+.woo-ai-settings .description {
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Color Picker Customization */
+.woo-ai-settings .wp-picker-container {
+    display: inline-block;
+}
+
+.woo-ai-settings .wp-picker-container .wp-color-result {
+    margin: 0;
+}
+
+/* Number Inputs */
+.woo-ai-settings input[type="number"] {
+    width: 80px;
+}
+
+/* Textarea */
+.woo-ai-settings textarea {
+    resize: vertical;
+}
+
+.woo-ai-settings textarea.code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   Trigger Sections
+   ========================================================================== */
+
+.trigger-section {
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.trigger-section h3 {
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+}
+
+.trigger-section .form-table {
+    margin-top: 0;
+}
+
+.trigger-section .form-table th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.trigger-section .form-table td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* ==========================================================================
+   License Status Display
+   ========================================================================== */
+
+#license-status {
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.license-valid {
+    color: #46b450;
+    font-weight: 600;
+}
+
+.license-invalid {
+    color: #dc3232;
+    font-weight: 600;
+}
+
+.license-error {
+    color: #ffb900;
+    font-weight: 600;
+}
+
+.license-plan {
+    color: #555;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   Knowledge Base Stats
+   ========================================================================== */
+
+.kb-stats-container {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    margin: 20px 0;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-card .stat-label {
+    color: #666;
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.stat-card .stat-value {
+    color: #23282d;
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.stat-value.score-high {
+    color: #46b450;
+}
+
+.stat-value.score-medium {
+    color: #ffb900;
+}
+
+.stat-value.score-low {
+    color: #dc3232;
+}
+
+/* ==========================================================================
+   Live Preview Widget
+   ========================================================================== */
+
+.preview-container {
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.preview-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.preview-widget {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.preview-widget.size-small {
+    width: 280px;
+    height: 400px;
+}
+
+.preview-widget.size-medium {
+    width: 350px;
+    height: 500px;
+}
+
+.preview-widget.size-large {
+    width: 420px;
+    height: 600px;
+}
+
+.preview-widget-header {
+    background: #7F54B3;
+    color: #fff;
+    padding: 15px;
+    position: relative;
+}
+
+.preview-widget-header-text {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    padding-right: 30px;
+}
+
+.preview-widget-close {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+    opacity: 0.8;
+    padding: 0;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    transition: opacity 0.2s;
+}
+
+.preview-widget-close:hover {
+    opacity: 1;
+}
+
+.preview-widget-body {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 54px);
+}
+
+.preview-widget-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.preview-widget .message {
+    margin-bottom: 12px;
+    max-width: 70%;
+}
+
+.preview-widget .message.bot {
+    background: #f0f0f0;
+    border-radius: 12px 12px 12px 0;
+    padding: 10px 15px;
+}
+
+.preview-widget .message.user {
+    background: #7F54B3;
+    border-radius: 12px 12px 0 12px;
+    color: #fff;
+    margin-left: auto;
+    padding: 10px 15px;
+}
+
+.preview-widget .message.typing {
+    display: flex;
+    padding: 15px;
+}
+
+.preview-widget .message.typing span {
+    animation: typing 1.4s infinite;
+    background: #666;
+    border-radius: 50%;
+    display: inline-block;
+    height: 8px;
+    margin-right: 5px;
+    width: 8px;
+}
+
+.preview-widget .message.typing span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.preview-widget .message.typing span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+.preview-widget-footer {
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    padding: 10px;
+}
+
+.preview-widget-input {
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.preview-widget-send {
+    background: #7F54B3;
+    border: none;
+    border-radius: 20px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    padding: 8px 20px;
+    transition: background 0.2s;
+}
+
+.preview-widget-send:hover {
+    background: #6b4799;
+}
+
+/* ==========================================================================
+   Button Styles
+   ========================================================================== */
+
+.woo-ai-settings .button.toggle-visibility {
+    margin-left: 5px;
+}
+
+.woo-ai-settings .button-secondary {
+    margin-left: 10px;
+}
+
+/* ==========================================================================
+   Progress Indicators
+   ========================================================================== */
+
+.indexing-progress {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    background: #f0f0f0;
+    border-radius: 4px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    animation: progress 2s ease-in-out infinite;
+    background: linear-gradient(90deg, #7F54B3, #9b75d1);
+    height: 100%;
+    width: 100%;
+}
+
+@keyframes progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Notices
+   ========================================================================== */
+
+.woo-ai-notice {
+    animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .woo-ai-settings .form-table th {
+        display: block;
+        padding-bottom: 5px;
+        width: auto;
+    }
+    
+    .woo-ai-settings .regular-text,
+    .woo-ai-settings .large-text {
+        width: 100%;
+    }
+    
+    .kb-stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .preview-widget {
+        max-width: 100%;
+    }
+    
+    .woo-ai-settings .nav-tab {
+        display: block;
+        margin: 0 0 -1px 0;
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .trigger-section {
+        padding: 10px;
+    }
+    
+    .preview-container {
+        padding: 10px;
+    }
+    
+    .preview-widget.size-large,
+    .preview-widget.size-medium {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+.woo-ai-settings .hidden {
+    display: none;
+}
+
+.woo-ai-settings .text-center {
+    text-align: center;
+}
+
+.woo-ai-settings .text-right {
+    text-align: right;
+}
+
+.woo-ai-settings .mt-10 {
+    margin-top: 10px;
+}
+
+.woo-ai-settings .mt-20 {
+    margin-top: 20px;
+}
+
+.woo-ai-settings .mb-10 {
+    margin-bottom: 10px;
+}
+
+.woo-ai-settings .mb-20 {
+    margin-bottom: 20px;
+}

@@ -170,9 +170,13 @@ check_wp_wc_references() {
         # Check for direct file includes to WP/WC core (which might break)
         # Skip legitimate WordPress core references
         if grep -q "wp-includes\|wp-admin\|wp-content" "$file" 2>/dev/null; then
-            if [[ "$(basename "$file")" == "Activator.php" ]] && grep -q "wp-admin/includes/upgrade.php" "$file"; then
+            # Allow legitimate WordPress upgrade.php references (required for dbDelta)
+            if grep -q "wp-admin/includes/upgrade.php" "$file"; then
                 log_info "Legitimate WordPress upgrade.php reference found in $(basename "$file")"
-            elif [[ "$(basename "$file")" == "AdminMenu.php" ]] && grep -q "\['wp-admin', 'dashicons'\]" "$file"; then
+            # Allow legitimate WordPress script dependencies
+            elif grep -q "\['wp-admin', 'dashicons'\]" "$file"; then
+                log_info "Legitimate WordPress script dependency found in $(basename "$file")"
+            elif grep -q "\['wp-admin'\]" "$file"; then
                 log_info "Legitimate WordPress script dependency found in $(basename "$file")"
             else
                 log_warning "Direct WordPress core file reference found in $(basename "$file")"

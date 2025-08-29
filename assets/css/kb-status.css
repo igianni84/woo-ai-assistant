@@ -1,0 +1,336 @@
+/**
+ * Knowledge Base Status Page Styles
+ */
+
+.woo-ai-assistant-kb-status {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+/* Status Summary Section */
+.kb-status-summary {
+    margin-bottom: 30px;
+}
+
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.status-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-card.health-score {
+    position: relative;
+}
+
+.status-card.health-score.good {
+    border-left: 4px solid #46b450;
+}
+
+.status-card.health-score.warning {
+    border-left: 4px solid #ffb900;
+}
+
+.status-card.health-score.error {
+    border-left: 4px solid #dc3232;
+}
+
+.card-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: 600;
+    color: #23282d;
+    margin-bottom: 8px;
+}
+
+.card-detail {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Coverage Bar */
+.coverage-bar {
+    position: relative;
+    height: 20px;
+    background: #f0f0f1;
+    border-radius: 3px;
+    overflow: hidden;
+    width: 150px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.coverage-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #46b450, #00a0d2);
+    transition: width 0.3s ease;
+}
+
+.coverage-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Health Checks Section */
+.kb-health-checks {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.health-checks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.health-check-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+.health-check-item.success {
+    border-left: 3px solid #46b450;
+}
+
+.health-check-item.warning {
+    border-left: 3px solid #ffb900;
+    background: #fffbf0;
+}
+
+.health-check-item.error {
+    border-left: 3px solid #dc3232;
+    background: #fff5f5;
+}
+
+.check-icon {
+    font-size: 20px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.health-check-item.success .check-icon {
+    color: #46b450;
+}
+
+.health-check-item.warning .check-icon {
+    color: #ffb900;
+}
+
+.health-check-item.error .check-icon {
+    color: #dc3232;
+}
+
+.check-content {
+    flex-grow: 1;
+}
+
+.check-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #23282d;
+}
+
+.check-message {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.check-action {
+    margin-top: 8px;
+}
+
+.check-action .button {
+    font-size: 12px;
+}
+
+/* Indexing Operations Section */
+.kb-indexing-operations {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.operations-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.operations-buttons .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.operations-buttons .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+#indexing-progress {
+    margin-top: 20px;
+}
+
+.progress-bar {
+    height: 30px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00a0d2, #46b450);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+#operation-messages {
+    margin-top: 15px;
+}
+
+.operation-message {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-left: 3px solid;
+}
+
+.operation-message.success {
+    background: #f0f8ff;
+    border-color: #46b450;
+    color: #2e7d32;
+}
+
+.operation-message.error {
+    background: #fff5f5;
+    border-color: #dc3232;
+    color: #b71c1c;
+}
+
+.operation-message.info {
+    background: #f0f8ff;
+    border-color: #00a0d2;
+    color: #0073aa;
+}
+
+/* Indexed Content Table */
+.kb-indexed-content {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.kb-indexed-content .wp-list-table {
+    margin-top: 20px;
+}
+
+/* Recent Activity Section */
+.kb-recent-activity {
+    margin-top: 30px;
+}
+
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    color: #999;
+    font-size: 12px;
+    margin-right: 15px;
+    min-width: 80px;
+}
+
+.activity-action {
+    flex-grow: 1;
+    color: #666;
+    font-size: 14px;
+}
+
+.activity-action.indexing {
+    color: #00a0d2;
+}
+
+.activity-action.update {
+    color: #46b450;
+}
+
+.activity-action.settings {
+    color: #826eb4;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .status-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .health-checks-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .operations-buttons {
+        flex-direction: column;
+    }
+    
+    .operations-buttons .button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .coverage-bar {
+        width: 100%;
+        margin-top: 10px;
+    }
+}

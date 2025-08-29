@@ -163,8 +163,12 @@ class Scanner
             'offset' => 0,
             'force_update' => false,
             'include_ids' => [],
-            'exclude_ids' => []
+            'exclude_ids' => [],
+            'language' => null // Language filtering for multilingual support
         ]);
+
+        // Apply multilingual filtering if available
+        $args = apply_filters('woo_ai_assistant_kb_query_args', $args, $args['language']);
 
         // Validate limit
         if (!is_int($args['limit']) || $args['limit'] < 1) {
@@ -262,8 +266,12 @@ class Scanner
             'limit' => self::DEFAULT_BATCH_SIZE,
             'offset' => 0,
             'post_types' => ['page', 'post'],
-            'force_update' => false
+            'force_update' => false,
+            'language' => null // Language filtering for multilingual support
         ]);
+
+        // Apply multilingual filtering if available
+        $args = apply_filters('woo_ai_assistant_kb_query_args', $args, $args['language']);
 
         if (!is_int($args['limit']) || $args['limit'] < 1) {
             throw new \InvalidArgumentException('Limit must be a positive integer');
@@ -463,7 +471,7 @@ class Scanner
     }
 
     /**
-     * Process content in batches for large sites
+     * Process content in batches for large sites with safety mechanisms
      *
      * @since 1.0.0
      * @param string $contentType Type of content to process.
@@ -480,16 +488,32 @@ class Scanner
             throw new \InvalidArgumentException("Unsupported content type: {$contentType}");
         }
 
-        Utils::logDebug('Processing batch', [
+        // EMERGENCY FIX: Add safety limits for batch processing
+        $batchStartTime = microtime(true);
+        $maxBatchTime = 30; // Maximum 30 seconds per batch
+        $maxOffset = 10000; // Maximum offset to prevent runaway pagination
+        $maxLimit = 500; // Maximum limit per batch
+
+        // Sanitize and limit parameters
+        $offset = max(0, min($offset, $maxOffset));
+        $limit = max(1, min($limit, $maxLimit));
+
+        Utils::logDebug('Processing batch with safety limits', [
             'content_type' => $contentType,
             'offset' => $offset,
-            'limit' => $limit
+            'limit' => $limit,
+            'max_time' => $maxBatchTime . 's'
         ]);
 
         $results = [];
         $hasMore = false;
 
         try {
+            // EMERGENCY FIX: Timeout check before processing
+            if ((microtime(true) - $batchStartTime) > $maxBatchTime) {
+                throw new \RuntimeException("Batch processing timeout reached before execution");
+            }
+
             switch ($contentType) {
                 case 'products':
                     $results = $this->scanProducts(['offset' => $offset, 'limit' => $limit]);
@@ -520,15 +544,27 @@ class Scanner
                     break;
             }
 
-            // Check if there are more items to process
-            $hasMore = count($results) === $limit;
+            // EMERGENCY FIX: Final timeout check
+            if ((microtime(true) - $batchStartTime) > $maxBatchTime) {
+                Utils::logError("Batch processing completed but exceeded time limit");
+                $results = array_slice($results, 0, min(count($results), 50)); // Limit results if timeout
+            }
+
+            // Check if there are more items to process (but enforce limits)
+            $hasMore = count($results) === $limit && $offset < $maxOffset;
         } catch (\Exception $e) {
-            Utils::logError('Batch processing failed', [
+            Utils::logError('Batch processing failed with emergency safety', [
                 'content_type' => $contentType,
+                'offset' => $offset,
+                'limit' => $limit,
+                'processing_time' => (microtime(true) - $batchStartTime),
                 'error' => $e->getMessage()
             ]);
             throw $e;
         }
+
+        $processingTime = microtime(true) - $batchStartTime;
+        Utils::logDebug("Batch processing completed - items: " . count($results) . ", time: {$processingTime}s");
 
         return [
             'data' => $results,
@@ -537,7 +573,8 @@ class Scanner
                 'limit' => $limit,
                 'current_batch_size' => count($results),
                 'has_more' => $hasMore,
-                'next_offset' => $hasMore ? $offset + $limit : null
+                'next_offset' => $hasMore ? min($offset + $limit, $maxOffset) : null,
+                'safety_limits_applied' => true
             ],
             'stats' => $this->getLastScanStats($contentType)
         ];
@@ -573,6 +610,7 @@ class Scanner
                 'content' => $this->buildProductContent($product),
                 'type' => 'product',
                 'url' => get_permalink($productId),
+                'language' => apply_filters('woo_ai_assistant_kb_content_language', null, $productId, 'product'),
                 'metadata' => [
                     'product_type' => $product->get_type(),
                     'sku' => $product->get_sku(),
@@ -585,6 +623,7 @@ class Scanner
                     'tags' => $this->getProductTags($product),
                     'attributes' => $this->getProductAttributes($product),
                     'variations' => $this->getProductVariations($product),
+                    'language_code' => apply_filters('woo_ai_assistant_kb_content_language', null, $productId, 'product'),
                     'last_updated' => current_time('mysql')
                 ]
             ];

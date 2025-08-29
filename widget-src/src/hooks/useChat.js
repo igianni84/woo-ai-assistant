@@ -36,6 +36,11 @@ export const useChat = ({
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [conversationId, setConversationId] = useState(null);
   
+  // Streaming state
+  const [streamingMessage, setStreamingMessage] = useState(null);
+  const [streamingProgress, setStreamingProgress] = useState(0);
+  const [isStreamingSupported, setIsStreamingSupported] = useState(false);
+  
   // Get the API service from context
   const apiService = useApi();
 
@@ -53,6 +58,9 @@ export const useChat = ({
           
           // Generate a conversation ID
           setConversationId(`conv_${Date.now()}_${userId}`);
+          
+          // Check streaming support
+          setIsStreamingSupported(apiService.isStreamingAvailable());
         } else {
           throw new Error('API connectivity test failed');
         }
@@ -74,7 +82,7 @@ export const useChat = ({
     }
   }, [apiService, userId, onError]);
 
-  // Send message function using ApiService
+  // Send message function using ApiService with streaming support
   const sendMessage = useCallback(async (messageText) => {
     if (!messageText.trim() || !conversationId || !apiService) {
       return;
@@ -91,13 +99,70 @@ export const useChat = ({
     setConversation(prev => [...prev, userMessage]);
     setIsTyping(true);
 
+    // Create bot message placeholder for streaming
+    const botMessageId = `msg_${Date.now() + 1}`;
+    const botMessage = {
+      id: botMessageId,
+      content: '',
+      type: 'bot',
+      timestamp: new Date().toISOString(),
+      isStreaming: isStreamingSupported
+    };
+
+    // Add bot message placeholder
+    setConversation(prev => [...prev, botMessage]);
+    setStreamingMessage(botMessageId);
+    setStreamingProgress(0);
+
     try {
-      // Use ApiService to send message
-      const response = await apiService.sendMessage(
-        messageText, 
-        conversationId, 
-        pageContext
-      );
+      let response;
+      
+      if (isStreamingSupported) {
+        // Use streaming message with real-time updates
+        response = await apiService.sendStreamingMessage(
+          messageText,
+          conversationId,
+          (chunkInfo) => {
+            const { content, progress, isComplete, metadata } = chunkInfo;
+            
+            // Update the streaming message content
+            setConversation(prev => prev.map(msg =>
+              msg.id === botMessageId
+                ? { ...msg, content, metadata, isStreaming: !isComplete }
+                : msg
+            ));
+            
+            // Update progress
+            setStreamingProgress(progress || 0);
+            
+            // Clear streaming state when complete
+            if (isComplete) {
+              setStreamingMessage(null);
+              setStreamingProgress(0);
+            }
+          },
+          pageContext
+        );
+      } else {
+        // Use regular message sending
+        response = await apiService.sendMessage(
+          messageText, 
+          conversationId, 
+          pageContext
+        );
+        
+        // Update the bot message with response (non-streaming)
+        setConversation(prev => prev.map(msg =>
+          msg.id === botMessageId
+            ? { 
+                ...msg, 
+                content: response.response || 'Sorry, I could not process your request.',
+                metadata: response.metadata,
+                isStreaming: false
+              }
+            : msg
+        ));
+      }
       
       // Update conversation ID if provided by server
       if (response.conversationId && response.conversationId !== conversationId) {
@@ -120,6 +185,22 @@ export const useChat = ({
 
     } catch (error) {
       setIsTyping(false);
+      setStreamingMessage(null);
+      setStreamingProgress(0);
+      
+      // Handle streaming error - update message with error
+      if (streamingMessage) {
+        setConversation(prev => prev.map(msg =>
+          msg.id === streamingMessage
+            ? { 
+                ...msg, 
+                content: 'Sorry, there was an error processing your request.',
+                isStreaming: false,
+                metadata: { error: true }
+              }
+            : msg
+        ));
+      }
       
       // Error is already handled by ApiService onError callback
       // But we also update connection status if it's a critical error
@@ -127,66 +208,7 @@ export const useChat = ({
         setConnectionStatus('error');
       }
     }
-  }, [conversationId, apiService, pageContext]);
-
-  // Send streaming message function using ApiService
-  const sendStreamingMessage = useCallback(async (messageText, onChunk) => {
-    if (!messageText.trim() || !conversationId || !apiService) {
-      return;
-    }
-
-    const userMessage = {
-      id: `msg_${Date.now()}`,
-      content: messageText.trim(),
-      type: 'user',
-      timestamp: new Date().toISOString(),
-    };
-
-    // Add user message to conversation
-    setConversation(prev => [...prev, userMessage]);
-    setIsTyping(true);
-
-    try {
-      // Use ApiService streaming
-      const response = await apiService.sendStreamingMessage(
-        messageText, 
-        conversationId, 
-        onChunk,
-        pageContext
-      );
-      
-      // Update conversation ID if provided by server
-      if (response.conversationId && response.conversationId !== conversationId) {
-        setConversationId(response.conversationId);
-      }
-      
-      // Create AI response message
-      const aiResponse = {
-        id: `msg_${Date.now() + 1}`,
-        content: response.response,
-        type: 'bot',
-        timestamp: response.timestamp || new Date().toISOString(),
-        confidence: response.confidence,
-        sources: response.sources,
-        metadata: response.metadata
-      };
-
-      setConversation(prev => [...prev, aiResponse]);
-      setIsTyping(false);
-
-      return response;
-
-    } catch (error) {
-      setIsTyping(false);
-      
-      // Error is already handled by ApiService onError callback
-      if (error.type === 'auth_error' || error.type === 'server_error') {
-        setConnectionStatus('error');
-      }
-      
-      throw error;
-    }
-  }, [conversationId, apiService, pageContext]);
+  }, [conversationId, apiService, pageContext, isStreamingSupported, streamingMessage]);
 
   // Execute action function using ApiService
   const executeAction = useCallback(async (actionType, actionData) => {
@@ -278,10 +300,13 @@ export const useChat = ({
     connectionStatus,
     conversationId,
     sendMessage,
-    sendStreamingMessage,
     executeAction,
     submitRating,
     clearConversation,
     reconnect,
+    // Streaming-related state
+    streamingMessage,
+    streamingProgress,
+    isStreamingSupported,
   };
 };

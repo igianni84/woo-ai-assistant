@@ -1,0 +1,443 @@
+/**
+ * Chat-Specific Styles
+ * 
+ * Styles for chat window, messages, and conversation interface.
+ * Loaded only when chat functionality is needed.
+ * 
+ * @package WooAiAssistant
+ * @subpackage Chat Styles
+ * @since 1.0.0
+ */
+
+/* Chat window container */
+.woo-ai-chat-window {
+  width: 350px;
+  height: 500px;
+  max-height: 70vh;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: inherit;
+  position: relative;
+}
+
+/* Chat header */
+.woo-ai-chat-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+}
+
+.woo-ai-chat-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+}
+
+.woo-ai-chat-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.woo-ai-chat-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.woo-ai-chat-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.woo-ai-chat-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Chat messages area */
+.woo-ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.woo-ai-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Individual message bubbles */
+.woo-ai-message {
+  max-width: 85%;
+  word-wrap: break-word;
+  animation: woo-ai-message-slide-in 0.3s ease-out;
+}
+
+@keyframes woo-ai-message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.woo-ai-message.user {
+  align-self: flex-end;
+  background: #667eea;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
+  margin-bottom: 4px;
+}
+
+.woo-ai-message.assistant {
+  align-self: flex-start;
+  background: #f8f9fa;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 4px;
+}
+
+.woo-ai-message.error {
+  align-self: center;
+  background: #ffeaa7;
+  color: #d63031;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  text-align: center;
+  max-width: 90%;
+  border: 1px solid #fab1a0;
+}
+
+/* Message content formatting */
+.woo-ai-message p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.woo-ai-message p:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+.woo-ai-message strong {
+  font-weight: 600;
+}
+
+.woo-ai-message a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.woo-ai-message.user a {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.woo-ai-message.assistant a {
+  color: #667eea;
+}
+
+/* Message timestamps */
+.woo-ai-message-time {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.woo-ai-message.assistant .woo-ai-message-time {
+  text-align: left;
+}
+
+/* Typing indicator */
+.woo-ai-typing-indicator {
+  align-self: flex-start;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.woo-ai-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #adb5bd;
+  animation: woo-ai-typing-bounce 1.4s infinite ease-in-out;
+}
+
+.woo-ai-typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.woo-ai-typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes woo-ai-typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Message input area */
+.woo-ai-message-input-container {
+  border-top: 1px solid #e9ecef;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+.woo-ai-message-input {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.woo-ai-message-textarea {
+  flex: 1;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  min-height: 40px;
+  line-height: 1.4;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.woo-ai-message-textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.woo-ai-message-textarea::placeholder {
+  color: #6c757d;
+}
+
+.woo-ai-message-send {
+  background: #667eea;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.woo-ai-message-send:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.woo-ai-message-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.woo-ai-message-send svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Loading states */
+.woo-ai-chat-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #6c757d;
+}
+
+.woo-ai-chat-loading::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e9ecef;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: woo-ai-spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+/* Welcome message */
+.woo-ai-welcome-message {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.woo-ai-welcome-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #495057;
+}
+
+.woo-ai-welcome-text {
+  font-size: 13px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* Responsive design for chat */
+@media (max-width: 480px) {
+  .woo-ai-chat-window {
+    width: calc(100vw - 30px);
+    height: calc(100vh - 120px);
+    max-height: none;
+  }
+  
+  .woo-ai-chat-header {
+    padding: 12px 16px;
+  }
+  
+  .woo-ai-chat-messages {
+    padding: 12px;
+  }
+  
+  .woo-ai-message-input-container {
+    padding: 12px 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .woo-ai-chat-window {
+    background: #2d3748;
+    color: #f7fafc;
+  }
+  
+  .woo-ai-chat-header {
+    background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
+  }
+  
+  .woo-ai-message.assistant {
+    background: #4a5568;
+    color: #f7fafc;
+    border-color: #5a6b7d;
+  }
+  
+  .woo-ai-message.error {
+    background: #742a2a;
+    color: #fed7d7;
+    border-color: #c53030;
+  }
+  
+  .woo-ai-typing-indicator {
+    background: #4a5568;
+    border-color: #5a6b7d;
+  }
+  
+  .woo-ai-message-input-container {
+    background: #2d3748;
+    border-color: #5a6b7d;
+  }
+  
+  .woo-ai-message-textarea {
+    background: #4a5568;
+    color: #f7fafc;
+    border-color: #5a6b7d;
+  }
+  
+  .woo-ai-message-textarea::placeholder {
+    color: #a0aec0;
+  }
+  
+  .woo-ai-welcome-message {
+    background: #4a5568;
+    border-color: #5a6b7d;
+  }
+  
+  .woo-ai-welcome-title {
+    color: #f7fafc;
+  }
+  
+  .woo-ai-welcome-text {
+    color: #a0aec0;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-message,
+  .woo-ai-typing-dot {
+    animation: none;
+  }
+  
+  .woo-ai-chat-messages {
+    scroll-behavior: auto;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .woo-ai-chat-window {
+    border: 2px solid #000;
+  }
+  
+  .woo-ai-message.assistant {
+    border: 2px solid #000;
+  }
+  
+  .woo-ai-message-textarea {
+    border: 2px solid #000;
+  }
+}

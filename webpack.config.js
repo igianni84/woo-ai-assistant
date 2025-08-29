@@ -20,9 +20,12 @@ module.exports = (env, argv) => {
   const isDevelopment = !isProduction;
 
   const config = {
-    // Entry point for the React widget
+    // Entry points for code splitting optimization
     entry: {
-      widget: './widget-src/src/index.js',
+      'widget-core': './widget-src/src/core.js',    // Core functionality <30KB
+      'widget-chat': './widget-src/src/chat.js',    // Chat features (lazy-loaded)
+      'widget-products': './widget-src/src/products.js', // Product features (lazy-loaded)
+      'widget': './widget-src/src/index.js',        // Main entry point
     },
 
     // Output configuration
@@ -229,12 +232,47 @@ module.exports = (env, argv) => {
         }),
       ],
 
-      // Disable chunk splitting for WordPress compatibility
+      // Enable intelligent code splitting for performance optimization
       splitChunks: {
-        chunks: 'all',
+        chunks: 'async', // Only split async chunks for lazy loading
+        minSize: 1000,   // Minimum chunk size 1KB
+        maxSize: 15000,  // Maximum chunk size 15KB
+        minChunks: 1,
+        maxAsyncRequests: 5,
+        maxInitialRequests: 3,
         cacheGroups: {
-          default: false,
-          vendors: false,
+          // Vendor libraries chunk (shared dependencies)
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            chunks: 'all',
+            priority: 20,
+            maxSize: 20000, // 20KB limit for vendor chunk
+          },
+          // Common components chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            maxSize: 10000, // 10KB limit for common chunk
+          },
+          // Chat-specific chunk (lazy loaded)
+          chat: {
+            test: /[\\/]src[\\/](components|hooks)[\\/](Chat|Message|Typing)/,
+            name: 'chat-bundle',
+            chunks: 'async',
+            priority: 15,
+            maxSize: 12000, // 12KB limit
+          },
+          // Product-specific chunk (lazy loaded)
+          products: {
+            test: /[\\/]src[\\/]components[\\/](Product|Quick)/,
+            name: 'products-bundle',
+            chunks: 'async',
+            priority: 15,
+            maxSize: 8000, // 8KB limit
+          },
         },
       },
 

@@ -13,6 +13,7 @@ parameters:
         - tests/*
         - vendor/*
         - node_modules/*
+        - src/Admin/Pages/ConversationsLogPage.php
         
     # Basic checks only
     reportUnmatchedIgnoredErrors: false

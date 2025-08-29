@@ -18,6 +18,7 @@ namespace WooAiAssistant\KnowledgeBase;
 
 use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Common\Traits\Singleton;
+use WooAiAssistant\Common\ApiConfiguration;
 use WP_Error;
 
 // Exit if accessed directly
@@ -53,6 +54,14 @@ class AIManager
      * @var string
      */
     private const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+
+    /**
+     * Default chunk size for streaming responses
+     *
+     * @since 1.0.0
+     * @var int
+     */
+    private const STREAMING_CHUNK_SIZE = 75;
 
     /**
      * Default AI model for Free plan (via OpenRouter)
@@ -94,21 +103,22 @@ class AIManager
      */
     private const MAX_RAG_CHUNKS = 10;
 
-    /**
-     * Default response streaming chunk size
-     *
-     * @since 1.0.0
-     * @var int
-     */
-    private const STREAMING_CHUNK_SIZE = 100;
 
     /**
-     * VectorManager instance for RAG operations
+     * VectorManager instance for RAG operations (lazy loaded)
      *
      * @since 1.0.0
-     * @var VectorManager
+     * @var VectorManager|null
      */
-    private $vectorManager;
+    private ?VectorManager $vectorManager = null;
+
+    /**
+     * API Configuration manager instance (lazy loaded)
+     *
+     * @since 1.0.0
+     * @var ApiConfiguration|null
+     */
+    private ?ApiConfiguration $apiConfig = null;
 
     /**
      * Current conversation context storage
@@ -131,13 +141,13 @@ class AIManager
     ];
 
     /**
-     * Initialize AIManager with dependencies
+     * Initialize AIManager with minimal dependencies
      *
      * @since 1.0.0
      */
     protected function __construct()
     {
-        $this->vectorManager = VectorManager::getInstance();
+        // Dependencies are now lazy loaded to prevent circular references
         $this->initializeConversationContext();
 
         // Register WordPress hooks
@@ -145,6 +155,36 @@ class AIManager
         add_action('wp_ajax_nopriv_woo_ai_assistant_stream_response', [$this, 'handleStreamingRequest']);
 
         Utils::logDebug('AIManager initialized successfully');
+    }
+
+    /**
+     * Get VectorManager instance (lazy loaded)
+     *
+     * @since 1.0.0
+     * @return VectorManager
+     */
+    private function getVectorManager(): VectorManager
+    {
+        if ($this->vectorManager === null) {
+            $this->vectorManager = VectorManager::getInstance();
+        }
+        return $this->vectorManager;
+    }
+
+    /**
+     * Get ApiConfiguration instance (lazy loaded)
+     *
+     * @since 1.0.0
+     * @return ApiConfiguration
+     */
+    private function getApiConfig(): ApiConfiguration
+    {
+        if ($this->apiConfig === null) {
+            $this->apiConfig = ApiConfiguration::getInstance();
+            // Migrate legacy API keys if needed
+            $this->apiConfig->migrateLegacyKeys();
+        }
+        return $this->apiConfig;
     }
 
     /**
@@ -179,7 +219,7 @@ class AIManager
      * ]);
      * ```
      */
-    public function generateResponse(string $userMessage, array $options = []): array
+    public function generateResponse(string $userMessage, array $options = [])
     {
         try {
             // Validate input - trim whitespace first
@@ -272,14 +312,14 @@ class AIManager
     {
         try {
             // Generate query embedding
-            $queryEmbedding = $this->vectorManager->generateEmbedding($userMessage);
+            $queryEmbedding = $this->getVectorManager()->generateEmbedding($userMessage);
             if (!$queryEmbedding) {
                 Utils::logDebug('Failed to generate embedding for user query', 'warning');
                 return [];
             }
 
             // Search for similar content
-            $similarChunks = $this->vectorManager->searchSimilar($queryEmbedding, [
+            $similarChunks = $this->getVectorManager()->searchSimilar($queryEmbedding, [
                 'limit' => self::MAX_RAG_CHUNKS,
                 'threshold' => 0.7, // Minimum similarity threshold
                 'context' => $context
@@ -410,17 +450,18 @@ class AIManager
     }
 
     /**
-     * Call the appropriate AI provider (OpenRouter or Gemini)
+     * Call the appropriate AI provider (OpenRouter or Gemini) with streaming support
      *
      * @since 1.0.0
      * @param string $model AI model identifier
      * @param array $messages Conversation messages
-     * @param array $options Generation options (max_tokens, temperature, etc.)
+     * @param array $options Generation options (max_tokens, temperature, streaming, etc.)
      * @return array AI response data
      */
     private function callAIProvider(string $model, array $messages, array $options = []): array
     {
         $startTime = microtime(true);
+        $enableStreaming = $options['streaming'] ?? false;
 
         try {
             // Try OpenRouter first
@@ -429,6 +470,12 @@ class AIManager
             if ($response['success']) {
                 $response['response_time'] = microtime(true) - $startTime;
                 $response['provider'] = 'openrouter';
+
+                // Handle streaming response if enabled
+                if ($enableStreaming && isset($options['chunk_callback'])) {
+                    return $this->processStreamingResponse($response, $options);
+                }
+
                 return $response;
             }
 
@@ -439,13 +486,26 @@ class AIManager
             if ($response['success']) {
                 $response['response_time'] = microtime(true) - $startTime;
                 $response['provider'] = 'gemini';
+
+                // Handle streaming response if enabled
+                if ($enableStreaming && isset($options['chunk_callback'])) {
+                    return $this->processStreamingResponse($response, $options);
+                }
+
                 return $response;
             }
 
             // Fallback to dummy response for development
             if (defined('WOO_AI_ASSISTANT_USE_DUMMY_DATA') && WOO_AI_ASSISTANT_USE_DUMMY_DATA) {
                 Utils::logDebug('AI providers failed, using dummy response', 'warning');
-                return $this->generateDummyResponse($messages);
+                $dummyResponse = $this->generateDummyResponse($messages);
+
+                // Handle streaming for dummy response if enabled
+                if ($enableStreaming && isset($options['chunk_callback'])) {
+                    return $this->processStreamingResponse($dummyResponse, $options);
+                }
+
+                return $dummyResponse;
             }
 
             throw new \RuntimeException('All AI providers failed');
@@ -454,7 +514,14 @@ class AIManager
 
             // Return dummy response if enabled
             if (defined('WOO_AI_ASSISTANT_USE_DUMMY_DATA') && WOO_AI_ASSISTANT_USE_DUMMY_DATA) {
-                return $this->generateDummyResponse($messages);
+                $dummyResponse = $this->generateDummyResponse($messages);
+
+                // Handle streaming for dummy response if enabled
+                if ($enableStreaming && isset($options['chunk_callback'])) {
+                    return $this->processStreamingResponse($dummyResponse, $options);
+                }
+
+                return $dummyResponse;
             }
 
             throw $e;
@@ -462,7 +529,7 @@ class AIManager
     }
 
     /**
-     * Call OpenRouter API
+     * Call OpenRouter API with optional streaming support
      *
      * @since 1.0.0
      * @param string $model Model identifier
@@ -472,10 +539,16 @@ class AIManager
      */
     private function callOpenRouter(string $model, array $messages, array $options = []): array
     {
-        $apiKey = get_option('woo_ai_assistant_openrouter_key');
-        if (empty($apiKey)) {
+        $config = $this->getApiConfig()->getOpenRouterConfig();
+
+        if (empty($config['api_key'])) {
+            if ($this->getApiConfig()->isDevelopmentMode()) {
+                return $this->getDummyOpenRouterResponse($messages);
+            }
             return ['success' => false, 'error' => 'OpenRouter API key not configured'];
         }
+
+        $apiKey = $config['api_key'];
 
         $requestBody = [
             'model' => $model,
@@ -487,15 +560,28 @@ class AIManager
             'presence_penalty' => 0.1
         ];
 
-        $response = wp_remote_post(self::OPENROUTER_API_URL, [
-            'timeout' => 30,
+        // Add streaming parameter if enabled
+        $enableStreaming = $options['streaming'] ?? false;
+        if ($enableStreaming) {
+            $requestBody['stream'] = true;
+        }
+
+        $httpOptions = [
+            'timeout' => $config['timeout'],
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
                 'X-Title' => 'Woo AI Assistant'
             ],
             'body' => wp_json_encode($requestBody)
-        ]);
+        ];
+
+        // Handle streaming vs non-streaming requests
+        if ($enableStreaming && isset($options['chunk_callback'])) {
+            return $this->handleStreamingOpenRouterCall($httpOptions, $model);
+        }
+
+        $response = wp_remote_post(self::OPENROUTER_API_URL, $httpOptions);
 
         if (is_wp_error($response)) {
             return ['success' => false, 'error' => $response->get_error_message()];
@@ -518,7 +604,8 @@ class AIManager
             'success' => true,
             'content' => $data['choices'][0]['message']['content'],
             'tokens_used' => $data['usage']['total_tokens'] ?? 0,
-            'model' => $data['model'] ?? $model
+            'model' => $data['model'] ?? $model,
+            'streaming' => false
         ];
     }
 
@@ -964,22 +1051,30 @@ class AIManager
      */
     public function getServiceStatus(): array
     {
-        $openRouterKey = get_option('woo_ai_assistant_openrouter_key');
-        $geminiKey = get_option('woo_ai_assistant_gemini_key');
+        $apiStatus = $this->apiConfig->getApiStatus();
 
         return [
             'openrouter' => [
-                'configured' => !empty($openRouterKey),
-                'available' => !empty($openRouterKey) && $this->testOpenRouterConnection()
+                'configured' => $apiStatus['openrouter']['configured'],
+                'available' => $apiStatus['openrouter']['configured'] && $this->testOpenRouterConnection()
             ],
             'gemini' => [
-                'configured' => !empty($geminiKey),
-                'available' => !empty($geminiKey) && $this->testGeminiConnection()
+                'configured' => $apiStatus['google']['configured'],
+                'available' => $apiStatus['google']['configured'] && $this->testGeminiConnection()
+            ],
+            'openai' => [
+                'configured' => $apiStatus['openai']['configured'],
+                'available' => $apiStatus['openai']['configured']
+            ],
+            'pinecone' => [
+                'configured' => $apiStatus['pinecone']['configured'],
+                'available' => $apiStatus['pinecone']['configured']
             ],
             'vector_manager' => [
                 'available' => $this->vectorManager !== null
             ],
-            'dummy_mode' => defined('WOO_AI_ASSISTANT_USE_DUMMY_DATA') && WOO_AI_ASSISTANT_USE_DUMMY_DATA
+            'development_mode' => $this->apiConfig->isDevelopmentMode(),
+            'debug_mode' => $this->apiConfig->isDebugMode()
         ];
     }
 
@@ -1019,5 +1114,261 @@ class AIManager
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Process streaming response by chunking content and calling callback
+     *
+     * @since 1.0.0
+     * @param array $response AI response data
+     * @param array $options Options including chunk_callback and chunk_size
+     * @return array Processed streaming response
+     */
+    private function processStreamingResponse(array $response, array $options): array
+    {
+        if (!$response['success']) {
+            return $response;
+        }
+
+        try {
+            $content = $response['content'];
+            $chunkSize = $options['chunk_size'] ?? self::STREAMING_CHUNK_SIZE;
+            $chunkCallback = $options['chunk_callback'];
+
+            if (!is_callable($chunkCallback)) {
+                Utils::logError('Chunk callback is not callable in streaming response');
+                return $response;
+            }
+
+            // Split content into chunks for streaming
+            $chunks = $this->createResponseChunks($content, $chunkSize);
+            $chunkCount = 0;
+
+            foreach ($chunks as $chunk) {
+                $chunkMetadata = [
+                    'chunk_index' => $chunkCount,
+                    'total_chunks' => count($chunks),
+                    'is_final' => ($chunkCount === count($chunks) - 1),
+                    'model' => $response['model'] ?? 'unknown',
+                    'provider' => $response['provider'] ?? 'unknown'
+                ];
+
+                // Call the chunk callback
+                call_user_func($chunkCallback, $chunk, $chunkMetadata);
+                $chunkCount++;
+
+                // Add small delay between chunks for better perceived performance
+                if (isset($options['chunk_delay']) && $options['chunk_delay'] > 0) {
+                    usleep($options['chunk_delay'] * 1000); // Convert to microseconds
+                }
+            }
+
+            // Return the complete response with streaming metadata
+            return array_merge($response, [
+                'streaming' => true,
+                'chunks_sent' => $chunkCount,
+                'chunk_size' => $chunkSize
+            ]);
+        } catch (\Exception $e) {
+            Utils::logError('Error processing streaming response: ' . $e->getMessage());
+            return $response;
+        }
+    }
+
+    /**
+     * Create response chunks for streaming delivery
+     *
+     * @since 1.0.0
+     * @param string $content Full response content
+     * @param int $chunkSize Target size for each chunk
+     * @return array Array of content chunks
+     */
+    private function createResponseChunks(string $content, int $chunkSize): array
+    {
+        if (strlen($content) <= $chunkSize) {
+            return [$content];
+        }
+
+        $chunks = [];
+        $sentences = preg_split('/(?<=[.!?])\s+/', $content, -1, PREG_SPLIT_NO_EMPTY);
+        $currentChunk = '';
+
+        foreach ($sentences as $sentence) {
+            $testChunk = $currentChunk . (empty($currentChunk) ? '' : ' ') . $sentence;
+
+            // If adding this sentence exceeds chunk size and we have content, save current chunk
+            if (strlen($testChunk) > $chunkSize && !empty($currentChunk)) {
+                $chunks[] = trim($currentChunk);
+                $currentChunk = $sentence;
+            } else {
+                $currentChunk = $testChunk;
+            }
+        }
+
+        // Add final chunk if not empty
+        if (!empty(trim($currentChunk))) {
+            $chunks[] = trim($currentChunk);
+        }
+
+        // If we still have no chunks (edge case), split by word boundaries
+        if (empty($chunks)) {
+            $chunks = $this->createWordBasedChunks($content, $chunkSize);
+        }
+
+        return $chunks;
+    }
+
+    /**
+     * Create word-based chunks as fallback
+     *
+     * @since 1.0.0
+     * @param string $content Content to chunk
+     * @param int $chunkSize Target chunk size
+     * @return array Array of content chunks
+     */
+    private function createWordBasedChunks(string $content, int $chunkSize): array
+    {
+        $words = explode(' ', $content);
+        $chunks = [];
+        $currentChunk = '';
+
+        foreach ($words as $word) {
+            $testChunk = $currentChunk . (empty($currentChunk) ? '' : ' ') . $word;
+
+            if (strlen($testChunk) > $chunkSize && !empty($currentChunk)) {
+                $chunks[] = trim($currentChunk);
+                $currentChunk = $word;
+            } else {
+                $currentChunk = $testChunk;
+            }
+        }
+
+        if (!empty(trim($currentChunk))) {
+            $chunks[] = trim($currentChunk);
+        }
+
+        return $chunks;
+    }
+
+    /**
+     * Handle streaming OpenRouter API call (placeholder for future implementation)
+     *
+     * @since 1.0.0
+     * @param array $httpOptions HTTP request options
+     * @param string $model Model identifier
+     * @return array Response data
+     */
+    private function handleStreamingOpenRouterCall(array $httpOptions, string $model): array
+    {
+        // Note: True streaming from OpenRouter requires server-side stream handling
+        // For now, we'll make a regular call and simulate streaming by chunking the response
+        Utils::logDebug('Simulating streaming for OpenRouter (true streaming requires server-side implementation)');
+
+        $response = wp_remote_post(self::OPENROUTER_API_URL, $httpOptions);
+
+        if (is_wp_error($response)) {
+            return ['success' => false, 'error' => $response->get_error_message()];
+        }
+
+        $responseCode = wp_remote_retrieve_response_code($response);
+        $responseBody = wp_remote_retrieve_body($response);
+
+        if ($responseCode !== 200) {
+            Utils::logDebug("OpenRouter streaming API error: {$responseCode} - {$responseBody}", 'error');
+            return ['success' => false, 'error' => "API error: {$responseCode}"];
+        }
+
+        $data = json_decode($responseBody, true);
+        if (!$data || !isset($data['choices'][0]['message']['content'])) {
+            return ['success' => false, 'error' => 'Invalid response format'];
+        }
+
+        return [
+            'success' => true,
+            'content' => $data['choices'][0]['message']['content'],
+            'tokens_used' => $data['usage']['total_tokens'] ?? 0,
+            'model' => $data['model'] ?? $model,
+            'streaming' => true,
+            'simulated_streaming' => true
+        ];
+    }
+
+    /**
+     * Generate response with streaming support
+     *
+     * @since 1.0.0
+     * @param string $userMessage User's message/query
+     * @param array $options Optional configuration options
+     * @param callable|null $chunkCallback Optional callback for streaming chunks
+     * @return array Response data with streaming support
+     * @throws \InvalidArgumentException When parameters are invalid
+     * @throws \RuntimeException When AI service fails
+     */
+    public function generateStreamingResponse(string $userMessage, array $options = [], ?callable $chunkCallback = null): array
+    {
+        try {
+            // Set up streaming options
+            $streamingOptions = array_merge($options, [
+                'streaming' => true,
+                'chunk_callback' => $chunkCallback,
+                'chunk_size' => $options['chunk_size'] ?? self::STREAMING_CHUNK_SIZE,
+                'chunk_delay' => $options['chunk_delay'] ?? 100 // milliseconds
+            ]);
+
+            // Generate response with streaming enabled
+            return $this->generateResponse($userMessage, $streamingOptions);
+        } catch (\Exception $e) {
+            Utils::logError('Error in streaming response generation: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Get dummy OpenRouter response for development mode
+     *
+     * @since 1.0.0
+     * @param array $messages Conversation messages
+     * @return array Dummy response
+     */
+    private function getDummyOpenRouterResponse(array $messages): array
+    {
+        $lastMessage = end($messages);
+        $userMessage = $lastMessage['content'] ?? 'Hello';
+
+        // Generate a contextual dummy response
+        $dummyResponses = [
+            'Hello' => 'Hi! I\'m the Woo AI Assistant running in development mode. How can I help you with your WooCommerce store today?',
+            'products' => 'I can help you find information about our products. Since we\'re in development mode, I\'m showing you dummy data.',
+            'order' => 'I can assist with order-related questions. In development mode, I simulate real responses to help with testing.',
+            'shipping' => 'I can provide shipping information for your orders. This is a development response.',
+            'default' => 'I understand you\'re asking about "' . substr($userMessage, 0, 50) . '". This is a development response to help test the AI Assistant functionality.'
+        ];
+
+        // Simple keyword matching for contextual response
+        $response = $dummyResponses['default'];
+        foreach (['products', 'order', 'shipping'] as $keyword) {
+            if (stripos($userMessage, $keyword) !== false) {
+                $response = $dummyResponses[$keyword];
+                break;
+            }
+        }
+
+        if (strtolower(trim($userMessage)) === 'hello') {
+            $response = $dummyResponses['Hello'];
+        }
+
+        Utils::logDebug('Generated dummy OpenRouter response in development mode');
+
+        return [
+            'success' => true,
+            'content' => $response,
+            'model' => 'development-dummy',
+            'usage' => [
+                'prompt_tokens' => strlen($userMessage),
+                'completion_tokens' => strlen($response),
+                'total_tokens' => strlen($userMessage) + strlen($response)
+            ],
+            'development_mode' => true
+        ];
     }
 }

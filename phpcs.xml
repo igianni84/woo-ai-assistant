@@ -17,6 +17,10 @@
         <exclude name="Generic.Files.LineLength"/>
         <!-- Allow constants without visibility for backward compatibility -->
         <exclude name="PSR12.Properties.ConstantVisibility"/>
+        <!-- Allow multiple classes in one file for closely related classes -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
+        <!-- Allow WordPress method naming conventions for overrides -->
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
     </rule>
     
     <!-- Show progress -->

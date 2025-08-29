@@ -18,6 +18,10 @@ namespace WooAiAssistant\Admin;
 
 use WooAiAssistant\Common\Utils;
 use WooAiAssistant\Common\Traits\Singleton;
+use WooAiAssistant\Admin\Pages\DashboardPage;
+use WooAiAssistant\Admin\Pages\SettingsPage;
+use WooAiAssistant\Admin\Pages\ConversationsLogPage;
+use WooAiAssistant\Admin\Pages\KnowledgeBaseStatusPage;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -209,12 +213,12 @@ class AdminMenu
         }
 
         $assetVersion = WOO_AI_ASSISTANT_VERSION;
-        $plugin_url = WOO_AI_ASSISTANT_URL;
+        $pluginUrl = WOO_AI_ASSISTANT_URL;
 
         // Enqueue CSS
         wp_enqueue_style(
             'woo-ai-assistant-admin',
-            $plugin_url . 'assets/css/admin.css',
+            $pluginUrl . 'assets/css/admin.css',
             ['wp-admin', 'dashicons'],
             $assetVersion
         );
@@ -222,7 +226,7 @@ class AdminMenu
         // Enqueue JavaScript
         wp_enqueue_script(
             'woo-ai-assistant-admin',
-            $plugin_url . 'assets/js/admin.js',
+            $pluginUrl . 'assets/js/admin.js',
             ['jquery', 'wp-api-fetch', 'wp-i18n'],
             $assetVersion,
             true
@@ -384,17 +388,43 @@ class AdminMenu
     /**
      * Render Dashboard page
      *
+     * Delegates dashboard rendering to the specialized DashboardPage class
+     * for comprehensive KPI display and analytics.
+     *
      * @since 1.0.0
      * @return void
      */
     public function renderDashboard(): void
     {
+        try {
+            $dashboardPage = DashboardPage::getInstance();
+            $dashboardPage->renderDashboard();
+        } catch (\Exception $e) {
+            Utils::logError('Failed to render dashboard: ' . $e->getMessage());
+
+            // Fallback to basic dashboard display
+            $this->renderFallbackDashboard();
+        }
+    }
+
+    /**
+     * Render fallback dashboard when DashboardPage fails
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    private function renderFallbackDashboard(): void
+    {
         $this->renderPageHeader(__('Dashboard', 'woo-ai-assistant'), __('Welcome to Woo AI Assistant', 'woo-ai-assistant'));
 
         echo '<div class="wrap">';
+        echo '<div class="notice notice-warning">';
+        echo '<p>' . esc_html__('Dashboard data is temporarily unavailable. Please try refreshing the page.', 'woo-ai-assistant') . '</p>';
+        echo '</div>';
+
         echo '<div class="woo-ai-assistant-dashboard-grid">';
 
-        // KPI Cards
+        // Basic KPI Cards (static placeholders)
         $this->renderKpiCards();
 
         // Recent Activity
@@ -415,27 +445,9 @@ class AdminMenu
      */
     public function renderSettings(): void
     {
-        $this->renderPageHeader(__('Settings', 'woo-ai-assistant'), __('Configure your AI Assistant', 'woo-ai-assistant'));
-
-        echo '<div class="wrap">';
-        echo '<form method="post" action="">';
-
-        wp_nonce_field('woo_ai_assistant_admin', 'nonce');
-        echo '<input type="hidden" name="woo_ai_assistant_action" value="save_settings">';
-
-        // General Settings
-        $this->renderGeneralSettings();
-
-        // Chatbot Settings
-        $this->renderChatbotSettings();
-
-        // Advanced Settings
-        $this->renderAdvancedSettings();
-
-        submit_button(__('Save Settings', 'woo-ai-assistant'));
-
-        echo '</form>';
-        echo '</div>';
+        // Use the new SettingsPage class for comprehensive settings management
+        $settingsPage = SettingsPage::getInstance();
+        $settingsPage->render();
     }
 
     /**
@@ -446,17 +458,9 @@ class AdminMenu
      */
     public function renderConversations(): void
     {
-        $this->renderPageHeader(__('Conversations', 'woo-ai-assistant'), __('View and manage customer conversations', 'woo-ai-assistant'));
-
-        echo '<div class="wrap">';
-
-        // Conversation filters
-        $this->renderConversationFilters();
-
-        // Conversations table
-        $this->renderConversationsTable();
-
-        echo '</div>';
+        // Use the new comprehensive ConversationsLogPage
+        $conversationsPage = ConversationsLogPage::getInstance();
+        $conversationsPage->renderConversationsLog();
     }
 
     /**
@@ -467,20 +471,9 @@ class AdminMenu
      */
     public function renderKnowledgeBase(): void
     {
-        $this->renderPageHeader(__('Knowledge Base', 'woo-ai-assistant'), __('Manage your AI knowledge base', 'woo-ai-assistant'));
-
-        echo '<div class="wrap">';
-
-        // KB Health Score
-        $this->renderKbHealthScore();
-
-        // Content Sources
-        $this->renderContentSources();
-
-        // Manual Actions
-        $this->renderKbActions();
-
-        echo '</div>';
+        // Use the new comprehensive KnowledgeBaseStatusPage
+        $kbPage = KnowledgeBaseStatusPage::getInstance();
+        $kbPage->renderPage();
     }
 
     /**

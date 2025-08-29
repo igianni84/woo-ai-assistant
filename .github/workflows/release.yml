@@ -1,0 +1,406 @@
+name: 🚀 Release Deployment
+
+# This workflow handles automated release deployment for the Woo AI Assistant plugin.
+# It builds, tests, and deploys releases to WordPress.org and creates GitHub releases.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-rc*'
+      - 'v*.*.*-beta*'
+      - 'v*.*.*-alpha*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.2.0)'
+        required: true
+        type: string
+      deploy_wordpress_org:
+        description: 'Deploy to WordPress.org'
+        required: true
+        type: boolean
+        default: true
+      create_github_release:
+        description: 'Create GitHub release'
+        required: true
+        type: boolean
+        default: true
+      skip_tests:
+        description: 'Skip tests (emergency deployment only)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PLUGIN_SLUG: woo-ai-assistant
+  NODE_VERSION: '18'
+  PHP_VERSION: '8.2'
+
+jobs:
+  # =============================================================================
+  # PREPARATION AND VALIDATION
+  # =============================================================================
+  prepare:
+    name: 🔍 Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+      should_deploy_wporg: ${{ steps.conditions.outputs.deploy_wporg }}
+      should_create_github_release: ${{ steps.conditions.outputs.github_release }}
+      skip_tests: ${{ steps.conditions.outputs.skip_tests }}
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🔢 Extract version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if prerelease
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "📋 Release version: $VERSION"
+      
+      - name: ⚙️ Set deployment conditions
+        id: conditions
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Tag push - use default behavior
+            echo "deploy_wporg=true" >> $GITHUB_OUTPUT
+            echo "github_release=true" >> $GITHUB_OUTPUT
+            echo "skip_tests=false" >> $GITHUB_OUTPUT
+          else
+            # Manual dispatch - use inputs
+            echo "deploy_wporg=${{ github.event.inputs.deploy_wordpress_org }}" >> $GITHUB_OUTPUT
+            echo "github_release=${{ github.event.inputs.create_github_release }}" >> $GITHUB_OUTPUT
+            echo "skip_tests=${{ github.event.inputs.skip_tests }}" >> $GITHUB_OUTPUT
+          fi
+
+  # =============================================================================
+  # QUALITY ASSURANCE
+  # =============================================================================
+  quality_gates:
+    name: 🧪 Quality Gates
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.skip_tests != 'true'
+    
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+        wordpress-version: ['6.0', '6.4', 'latest']
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+          coverage: xdebug
+      
+      - name: 📦 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
+      
+      - name: 🎵 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Install PHP dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+      
+      - name: 📦 Install Node.js dependencies
+        run: npm ci
+      
+      - name: 🔍 PHP CodeSniffer
+        run: composer run phpcs
+      
+      - name: 🔍 PHPStan Analysis
+        run: composer run phpstan
+      
+      - name: 🧪 PHP Unit Tests
+        run: composer run test -- --coverage-clover=coverage.xml
+      
+      - name: 🧪 JavaScript Tests
+        run: npm test -- --coverage --watchAll=false
+      
+      - name: 📊 Upload coverage to Codecov
+        if: matrix.php-version == '8.2' && matrix.wordpress-version == 'latest'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+      
+      - name: 🔐 Security Scan
+        if: matrix.php-version == '8.2' && matrix.wordpress-version == 'latest'
+        run: |
+          if [ -f "scripts/security-scan.sh" ]; then
+            bash scripts/security-scan.sh
+          fi
+
+  # =============================================================================
+  # BUILD PROCESS
+  # =============================================================================
+  build:
+    name: 🏗️ Build Release
+    runs-on: ubuntu-latest
+    needs: [prepare, quality_gates]
+    if: always() && (needs.quality_gates.result == 'success' || needs.prepare.outputs.skip_tests == 'true')
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip
+      
+      - name: 🎵 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction
+          npm ci
+      
+      - name: 🏗️ Build production assets
+        run: npm run build
+      
+      - name: 📝 Generate changelog
+        run: |
+          if [ -f "scripts/generate-changelog.php" ]; then
+            php scripts/generate-changelog.php update "${{ needs.prepare.outputs.version }}"
+          fi
+      
+      - name: 🎯 Update version
+        run: |
+          if [ -f "scripts/version-bump.php" ]; then
+            php scripts/version-bump.php set "${{ needs.prepare.outputs.version }}" --no-tag
+          fi
+      
+      - name: 📦 Create release package
+        run: bash scripts/build-release.sh --version "${{ needs.prepare.outputs.version }}"
+      
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-package
+          path: build/releases/
+          retention-days: 30
+      
+      - name: 📤 Upload build manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-manifest
+          path: build/build-manifest.json
+          retention-days: 30
+
+  # =============================================================================
+  # WORDPRESS.ORG DEPLOYMENT
+  # =============================================================================
+  deploy_wordpress_org:
+    name: 🌐 Deploy to WordPress.org
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    if: needs.prepare.outputs.should_deploy_wporg == 'true'
+    environment: wordpress-org
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-package
+          path: build/releases/
+      
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+      
+      - name: 🔐 Setup SVN credentials
+        run: |
+          mkdir -p ~/.subversion
+          echo "[global]" > ~/.subversion/config
+          echo "store-passwords = no" >> ~/.subversion/config
+          echo "store-plaintext-passwords = no" >> ~/.subversion/config
+      
+      - name: 📦 Prepare SVN deployment
+        env:
+          WP_ORG_USERNAME: ${{ secrets.WP_ORG_USERNAME }}
+          WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+        run: |
+          bash scripts/prepare-svn.sh prepare "${{ needs.prepare.outputs.version }}"
+      
+      - name: 🚀 Deploy to WordPress.org
+        env:
+          WP_ORG_USERNAME: ${{ secrets.WP_ORG_USERNAME }}
+          WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+        run: |
+          bash scripts/prepare-svn.sh commit "${{ needs.prepare.outputs.version }}" --no-confirm -m "Release version ${{ needs.prepare.outputs.version }}"
+
+  # =============================================================================
+  # GITHUB RELEASE
+  # =============================================================================
+  create_github_release:
+    name: 🎉 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build, deploy_wordpress_org]
+    if: always() && needs.prepare.outputs.should_create_github_release == 'true' && (needs.deploy_wordpress_org.result == 'success' || needs.deploy_wordpress_org.result == 'skipped')
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-package
+          path: build/releases/
+      
+      - name: 📥 Download build manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: build-manifest
+          path: build/
+      
+      - name: 📝 Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          
+          # Get changelog entry if available
+          if [ -f "CHANGELOG.md" ]; then
+            CHANGELOG=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | head -n -1 | tail -n +2)
+          fi
+          
+          # Fallback release notes
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release version $VERSION
+          
+          See the full changelog at: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md"
+          fi
+          
+          # Add build information
+          if [ -f "build/build-manifest.json" ]; then
+            BUILD_DATE=$(jq -r '.build_date' build/build-manifest.json)
+            GIT_COMMIT=$(jq -r '.git_commit' build/build-manifest.json)
+            
+            CHANGELOG="$CHANGELOG
+          
+          **Build Information:**
+          - Build Date: $BUILD_DATE
+          - Git Commit: \`$GIT_COMMIT\`
+          - WordPress Compatibility: 6.0+
+          - WooCommerce Compatibility: 7.0+
+          - PHP Compatibility: 8.2+"
+          fi
+          
+          # Save to file for multi-line output
+          echo "$CHANGELOG" > release_notes.md
+          echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
+      
+      - name: 🎉 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: Release v${{ needs.prepare.outputs.version }}
+          body_path: ${{ steps.release_notes.outputs.release_notes_file }}
+          files: build/releases/*
+          prerelease: ${{ needs.prepare.outputs.is_prerelease }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # =============================================================================
+  # POST-DEPLOYMENT NOTIFICATIONS
+  # =============================================================================
+  notify:
+    name: 📢 Post-deployment Notifications
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy_wordpress_org, create_github_release]
+    if: always()
+    
+    steps:
+      - name: 📊 Deployment Summary
+        run: |
+          echo "## 🚀 Release Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Pre-release:** ${{ needs.prepare.outputs.is_prerelease }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.deploy_wordpress_org.result }}" == "success" ]]; then
+            echo "- ✅ WordPress.org deployment: **Success**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.deploy_wordpress_org.result }}" == "skipped" ]]; then
+            echo "- ⏭️ WordPress.org deployment: **Skipped**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ WordPress.org deployment: **Failed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.create_github_release.result }}" == "success" ]]; then
+            echo "- ✅ GitHub release: **Success**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.create_github_release.result }}" == "skipped" ]]; then
+            echo "- ⏭️ GitHub release: **Skipped**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ GitHub release: **Failed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [WordPress.org Plugin Page](https://wordpress.org/plugins/${{ env.PLUGIN_SLUG }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Releases](https://github.com/${{ github.repository }}/releases)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Plugin Stats](https://wordpress.org/plugins/${{ env.PLUGIN_SLUG }}/stats/)" >> $GITHUB_STEP_SUMMARY
+
+# =============================================================================
+# WORKFLOW CONFIGURATION
+# =============================================================================
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: read

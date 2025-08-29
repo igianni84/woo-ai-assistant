@@ -114,6 +114,21 @@
         "test:integration": [
             "phpunit --configuration phpunit.xml --testsuite integration"
         ],
+        "test:compatibility": [
+            "phpunit --configuration phpunit.xml --testsuite compatibility"
+        ],
+        "test:security": [
+            "phpunit --configuration phpunit.xml --testsuite security"
+        ],
+        "test:performance": [
+            "phpunit --configuration phpunit.xml --testsuite performance"
+        ],
+        "test:multisite": [
+            "phpunit --configuration phpunit.xml --testsuite multisite"
+        ],
+        "test:all-php": [
+            "phpunit --configuration phpunit.xml --testsuite all"
+        ],
         "test:coverage": [
             "phpunit --configuration phpunit.xml --coverage-html coverage/html --coverage-clover coverage/clover.xml --coverage-text"
         ],

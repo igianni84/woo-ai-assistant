@@ -191,20 +191,20 @@ class CronManager
 
         // Daily maintenance
         if (!wp_next_scheduled('woo_ai_assistant_daily_maintenance')) {
-            $daily_time = strtotime('02:00:00'); // 2 AM local time
-            if ($daily_time <= time()) {
-                $daily_time += DAY_IN_SECONDS; // Next day if time has passed
+            $dailyTime = strtotime('02:00:00'); // 2 AM local time
+            if ($dailyTime <= time()) {
+                $dailyTime += DAY_IN_SECONDS; // Next day if time has passed
             }
-            wp_schedule_event($daily_time, 'daily', 'woo_ai_assistant_daily_maintenance');
+            wp_schedule_event($dailyTime, 'daily', 'woo_ai_assistant_daily_maintenance');
         }
 
         // Weekly cleanup
         if (!wp_next_scheduled('woo_ai_assistant_weekly_cleanup')) {
-            $weekly_time = strtotime('Sunday 03:00:00'); // Sunday 3 AM
-            if ($weekly_time <= time()) {
-                $weekly_time += WEEK_IN_SECONDS; // Next week if time has passed
+            $weeklyTime = strtotime('Sunday 03:00:00'); // Sunday 3 AM
+            if ($weeklyTime <= time()) {
+                $weeklyTime += WEEK_IN_SECONDS; // Next week if time has passed
             }
-            wp_schedule_event($weekly_time, 'weekly', 'woo_ai_assistant_weekly_cleanup');
+            wp_schedule_event($weeklyTime, 'weekly', 'woo_ai_assistant_weekly_cleanup');
         }
 
         Utils::logDebug('Recurring jobs scheduled');
@@ -734,11 +734,11 @@ class CronManager
      */
     private function cleanupTemporaryFiles(): void
     {
-        $upload_dir = wp_upload_dir();
-        $temp_dir = $upload_dir['basedir'] . '/woo-ai-assistant/temp/';
+        $uploadDir = wp_upload_dir();
+        $tempDir = $uploadDir['basedir'] . '/woo-ai-assistant/temp/';
 
-        if (is_dir($temp_dir)) {
-            $files = glob($temp_dir . '*');
+        if (is_dir($tempDir)) {
+            $files = glob($tempDir . '*');
             $weekAgo = time() - WEEK_IN_SECONDS;
 
             foreach ($files as $file) {
