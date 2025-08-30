@@ -480,12 +480,14 @@ $results = $wpdb->get_results($wpdb->prepare(
 ### 9.3 Database Schema Requirements
 
 #### 9.3.1 Core Tables (6 total)
-1. **woo_ai_conversations** - Conversation tracking
-2. **woo_ai_knowledge_base** - Indexed content
-3. **woo_ai_settings** - Plugin configuration
-4. **woo_ai_logs** - Action audit trail
-5. **woo_ai_analytics** - Performance metrics
-6. **woo_ai_user_sessions** - Session management
+1. **woo_ai_conversations** - Conversation tracking (id, user_id, session_id, created_at, updated_at, status, rating)
+2. **woo_ai_messages** - Individual messages (id, conversation_id, role, content, metadata, created_at)
+3. **woo_ai_knowledge_base** - Indexed content (id, content_type, content_id, chunk_text, embedding, metadata, updated_at)
+4. **woo_ai_settings** - Plugin configuration (id, setting_key, setting_value, autoload)
+5. **woo_ai_analytics** - Performance metrics (id, metric_type, metric_value, context, created_at)
+6. **woo_ai_action_logs** - Audit trail (id, action_type, user_id, details, created_at)
+
+**Note:** This schema matches the implementation specification in ROADMAP.md Task 1.3 for consistency.
 
 #### 9.3.2 Indexing Strategy
 - Proper database indexes for all query patterns

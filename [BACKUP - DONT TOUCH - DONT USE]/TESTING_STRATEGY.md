@@ -19,6 +19,31 @@
 
 **CRITICAL:** Tests evolve WITH the code, not BEFORE it exists!
 
+### 🐳 Docker Testing Environment
+
+All tests should be run in the Docker environment for consistency and isolation. The testing environment includes:
+
+- **Isolated test containers**: Separate from development containers
+- **Test database**: Clean database for each test run
+- **PHPUnit**: For PHP backend testing
+- **Jest**: For React frontend testing
+- **Quality gates**: Automated code quality checks
+
+#### Quick Docker Testing Commands
+```bash
+# Run all tests
+./scripts/docker-test.sh
+
+# Run specific test types
+./scripts/docker-test.sh php      # PHP/PHPUnit tests only
+./scripts/docker-test.sh js       # JavaScript/Jest tests only  
+./scripts/docker-test.sh quality  # Quality gates only
+
+# Manual testing commands
+docker-compose --profile testing run --rm test-runner composer test
+docker-compose --profile development run --rm node-dev npm test
+```
+
 ### Core Principles
 1. **Test what exists** - Never test classes that haven't been created yet
 2. **Progressive coverage** - Start with 0%, build to 90% gradually
@@ -456,4 +481,107 @@ This allows running phase-appropriate tests only.
 
 ---
 
-*Last Updated: 2025-01-30 | Version: 2.0.0 - Progressive Testing*
+## 📋 Test-to-Task Mapping Table
+
+### Complete Task-Test Mapping Matrix
+
+| Phase | Task | Test File | Test Type | Dependencies | Coverage Target |
+|-------|------|-----------|-----------|--------------|-----------------|
+| **Phase 0** | | | | | **30%** |
+| 0 | 0.1 Plugin Skeleton | `tests/unit/PluginActivationTest.php` | Unit | None | Basic structure |
+| 0 | 0.1 Main Class | `tests/unit/MainTest.php` | Unit | Plugin file | Singleton pattern |
+| 0 | 0.2 Config | `tests/unit/Config/DevelopmentConfigTest.php` | Unit | Main class | Environment detection |
+| 0 | 0.3 Testing Infrastructure | `tests/bootstrap.php` | Infrastructure | All above | Test setup |
+| 0 | 0.4 CI/CD | `.github/workflows/test.yml` | Pipeline | Test infrastructure | Automation |
+| 0 | 0.5 Database Migrations | `tests/unit/Database/MigrationsTest.php` | Unit | All above | Schema creation |
+| **Phase 1** | | | | | **50%** |
+| 1 | 1.1 AdminMenu | `tests/unit/Admin/AdminMenuTest.php` | Unit | Phase 0 complete | Menu registration |
+| 1 | 1.2 RestController | `tests/unit/RestApi/RestControllerTest.php` | Unit | AdminMenu | Endpoint registration |
+| 1 | 1.3 Database Schema | `tests/unit/Setup/ActivatorTest.php` | Integration | Migrations | Table creation |
+| **Phase 2** | | | | | **70%** |
+| 2 | 2.1 Scanner | `tests/unit/KnowledgeBase/ScannerTest.php` | Unit | Phase 1 complete | Content extraction |
+| 2 | 2.2 Indexer | `tests/unit/KnowledgeBase/IndexerTest.php` | Unit | Scanner | Data processing |
+| 2 | 2.2 ChunkingStrategy | `tests/unit/KnowledgeBase/ChunkingStrategyTest.php` | Unit | Indexer | Text chunking |
+| 2 | 2.3 VectorManager | `tests/unit/KnowledgeBase/VectorManagerTest.php` | Mock | ChunkingStrategy | Vector operations |
+| 2 | 2.3 EmbeddingGenerator | `tests/unit/KnowledgeBase/EmbeddingGeneratorTest.php` | Mock | VectorManager | Embedding creation |
+| 2 | 2.4 AIManager | `tests/unit/KnowledgeBase/AIManagerTest.php` | Mock | EmbeddingGenerator | AI integration |
+| 2 | 2.4 PromptBuilder | `tests/unit/KnowledgeBase/PromptBuilderTest.php` | Unit | AIManager | Prompt construction |
+| 2 | 2.5 KB Integration | `tests/integration/KnowledgeBase/FullKBTest.php` | Integration | All KB components | End-to-end KB |
+| **Phase 3** | | | | | **75%** |
+| 3 | 3.1 ServerClient | `tests/unit/Api/IntermediateServerClientTest.php` | Mock | Phase 2 complete | API communication |
+| 3 | 3.2 LicenseManager | `tests/unit/Api/LicenseManagerTest.php` | Mock | ServerClient | License validation |
+| 3 | 3.3 API Config | `tests/unit/Config/ApiConfigurationTest.php` | Unit | LicenseManager | Config management |
+| **Phase 4** | | | | | **80%** |
+| 4 | 4.1 React App | `widget-src/src/App.test.js` | React | Phase 3 complete | Component structure |
+| 4 | 4.2 ChatWindow | `widget-src/src/components/ChatWindow.test.js` | React | App | Chat interface |
+| 4 | 4.2 Message Component | `widget-src/src/components/Message.test.js` | React | ChatWindow | Message display |
+| 4 | 4.3 ApiService | `widget-src/src/services/ApiService.test.js` | React | Message | API communication |
+| 4 | 4.4 ProductCard | `widget-src/src/components/ProductCard.test.js` | React | ApiService | Product display |
+| 4 | 4.4 QuickAction | `widget-src/src/components/QuickAction.test.js` | React | ProductCard | Action buttons |
+| 4 | 4.5 WidgetLoader | `tests/unit/Frontend/WidgetLoaderTest.php` | Unit | All React | PHP-JS integration |
+| **Phase 5** | | | | | **85%** |
+| 5 | 5.1 ConversationHandler | `tests/unit/Chatbot/ConversationHandlerTest.php` | Unit | Phase 4 complete | Conversation logic |
+| 5 | 5.2 ChatEndpoint | `tests/unit/RestApi/Endpoints/ChatEndpointTest.php` | Integration | ConversationHandler | Chat API |
+| 5 | 5.3 ActionEndpoint | `tests/unit/RestApi/Endpoints/ActionEndpointTest.php` | Integration | ChatEndpoint | Action execution |
+| 5 | 5.4 RatingEndpoint | `tests/unit/RestApi/Endpoints/RatingEndpointTest.php` | Integration | ActionEndpoint | Feedback system |
+| 5 | 5.x Full Chat Flow | `tests/integration/Chat/FullChatFlowTest.php` | End-to-End | All endpoints | Complete workflow |
+| **Phase 6** | | | | | **87%** |
+| 6 | 6.1 CouponHandler | `tests/unit/Chatbot/CouponHandlerTest.php` | Unit | Phase 5 complete | Coupon logic |
+| 6 | 6.2 ProactiveTriggers | `tests/unit/Chatbot/ProactiveTriggersTest.php` | Unit | CouponHandler | Trigger logic |
+| 6 | 6.3 Handoff | `tests/unit/Chatbot/HandoffTest.php` | Unit | ProactiveTriggers | Human takeover |
+| **Phase 7** | | | | | **89%** |
+| 7 | 7.1 DashboardPage | `tests/unit/Admin/pages/DashboardPageTest.php` | Unit | Phase 6 complete | Admin dashboard |
+| 7 | 7.2 SettingsPage | `tests/unit/Admin/pages/SettingsPageTest.php` | Unit | DashboardPage | Settings interface |
+| 7 | 7.3 ConversationsLog | `tests/unit/Admin/pages/ConversationsLogPageTest.php` | Unit | SettingsPage | Log management |
+| **Phase 8** | | | | | **90%+** |
+| 8 | 8.1 Performance | `tests/performance/LoadTest.php` | Performance | Phase 7 complete | Speed optimization |
+| 8 | 8.2 Security | `tests/security/SecurityTest.php` | Security | Performance | Security hardening |
+| 8 | 8.3 Documentation | `tests/integration/E2E/FullPluginTest.php` | End-to-End | Security | Complete testing |
+
+### Test Execution Commands by Phase
+
+```bash
+# Phase 0 - Foundation Tests
+./scripts/run-phase-tests.sh 0
+
+# Phase 1 - Core Infrastructure Tests  
+./scripts/run-phase-tests.sh 1
+
+# Phase 2 - Knowledge Base Tests
+./scripts/run-phase-tests.sh 2
+
+# Phase 3 - Server Integration Tests
+./scripts/run-phase-tests.sh 3
+
+# Phase 4 - Frontend Tests
+./scripts/run-phase-tests.sh 4
+
+# Phase 5 - Chat Logic Tests
+./scripts/run-phase-tests.sh 5
+
+# Phase 6-8 - Advanced Feature Tests
+./scripts/run-phase-tests.sh 6
+./scripts/run-phase-tests.sh 7 
+./scripts/run-phase-tests.sh 8
+
+# All tests for completed phases
+./scripts/run-phase-tests.sh all
+```
+
+### Quality Gates by Phase
+
+| Phase | Must Pass Before Completion |
+|-------|----------------------------|
+| 0 | Plugin activation, basic structure tests |
+| 1 | Admin menu, database schema, REST endpoints |
+| 2 | Knowledge Base unit tests with mocks |
+| 3 | API integration tests with mocks |
+| 4 | React component tests, widget loading |
+| 5 | Chat flow integration tests |
+| 6 | Advanced feature unit tests |
+| 7 | Admin interface tests |
+| 8 | Performance, security, E2E tests |
+
+---
+
+*Last Updated: 2025-08-30 | Version: 2.1.0 - Progressive Testing with Task Mapping*

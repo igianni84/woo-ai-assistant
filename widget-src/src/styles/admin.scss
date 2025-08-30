@@ -1,0 +1,361 @@
+/**
+ * Admin SCSS Styles
+ * 
+ * Stylesheet for React components used in the WordPress admin interface.
+ * This file imports the base admin CSS and adds component-specific styles.
+ * 
+ * @package WooAiAssistant
+ * @subpackage Styles
+ * @since 1.0.0
+ */
+
+// Import the base CSS file
+@import '../../../assets/css/admin.css';
+
+// Variables
+$wp-primary: #2271b1;
+$wp-primary-hover: #135e96;
+$wp-success: #00a32a;
+$wp-error: #d63638;
+$wp-warning: #dba617;
+$wp-text: #1d2327;
+$wp-text-light: #646970;
+$wp-border: #c3c4c7;
+$wp-bg: #f0f0f1;
+$wp-white: #fff;
+
+// React component specific styles
+.woo-ai-kb-status {
+  background: $wp-white;
+  border: 1px solid $wp-border;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 16px 0;
+  
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $wp-error;
+      
+      &.active {
+        background: $wp-success;
+        animation: pulse 2s infinite;
+      }
+      
+      &.processing {
+        background: $wp-warning;
+        animation: pulse 1s infinite;
+      }
+    }
+  }
+  
+  .kb-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    
+    .stat {
+      padding: 8px;
+      background: $wp-bg;
+      border-radius: 3px;
+      text-align: center;
+      font-size: 13px;
+      
+      strong {
+        display: block;
+        color: $wp-text;
+        margin-bottom: 4px;
+      }
+    }
+  }
+}
+
+.woo-ai-settings-manager {
+  .settings-section {
+    background: $wp-white;
+    border: 1px solid $wp-border;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 16px 0;
+    
+    h3 {
+      margin: 0 0 12px 0;
+      color: $wp-text;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    p {
+      color: $wp-text-light;
+      margin: 0 0 16px 0;
+      line-height: 1.5;
+    }
+    
+    .connection-status {
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: 600;
+        
+        &.active {
+          background: #d1e7dd;
+          color: #0f5132;
+        }
+        
+        &.inactive {
+          background: #f8d7da;
+          color: #721c24;
+        }
+        
+        &.processing {
+          background: #fff3cd;
+          color: #856404;
+        }
+      }
+    }
+  }
+}
+
+.woo-ai-dashboard-stats {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    padding: 0;
+    
+    .stat-item {
+      text-align: center;
+      padding: 16px 8px;
+      background: $wp-white;
+      border: 1px solid $wp-border;
+      border-radius: 4px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .stat-number {
+        font-size: 24px;
+        font-weight: 600;
+        color: $wp-primary;
+        display: block;
+        margin-bottom: 4px;
+        
+        &.loading {
+          &::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid $wp-border;
+            border-top-color: $wp-primary;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+          }
+        }
+      }
+      
+      .stat-label {
+        font-size: 12px;
+        color: $wp-text-light;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Enhanced form components
+.woo-ai-form-component {
+  .form-field {
+    margin-bottom: 20px;
+    
+    label {
+      display: block;
+      font-weight: 600;
+      color: $wp-text;
+      margin-bottom: 6px;
+      
+      .required {
+        color: $wp-error;
+        margin-left: 4px;
+      }
+    }
+    
+    .field-description {
+      color: $wp-text-light;
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    
+    .field-error {
+      color: $wp-error;
+      font-size: 12px;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba($wp-error, 0.1);
+      border-radius: 3px;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      max-width: 400px;
+      padding: 8px 12px;
+      border: 1px solid $wp-border;
+      border-radius: 3px;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      
+      &:focus {
+        border-color: $wp-primary;
+        box-shadow: 0 0 0 1px $wp-primary;
+        outline: none;
+      }
+      
+      &.error {
+        border-color: $wp-error;
+        
+        &:focus {
+          border-color: $wp-error;
+          box-shadow: 0 0 0 1px $wp-error;
+        }
+      }
+    }
+    
+    .checkbox-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      
+      input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      
+      label {
+        margin: 0;
+        font-weight: 400;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+// Loading states
+.woo-ai-loading {
+  &.overlay {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba($wp-white, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border: 3px solid $wp-border;
+      border-top-color: $wp-primary;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 11;
+    }
+  }
+}
+
+// Animations
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Progress indicators
+.woo-ai-progress {
+  width: 100%;
+  height: 6px;
+  background: $wp-border;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 12px 0;
+  
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, $wp-primary 0%, #3582c4 100%); // Manual color adjustment instead of lighten()
+    transition: width 0.3s ease;
+    border-radius: 3px;
+    
+    &.indeterminate {
+      width: 30%;
+      animation: indeterminateProgress 2s infinite linear;
+    }
+  }
+}
+
+@keyframes indeterminateProgress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(333%);
+  }
+}
+
+// Responsive design
+@media screen and (max-width: 782px) {
+  .woo-ai-dashboard-stats .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .woo-ai-kb-status .kb-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+// WordPress color scheme compatibility
+// Color scheme adjustments can be added here if needed in the future

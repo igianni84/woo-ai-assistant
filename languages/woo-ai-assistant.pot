@@ -1,0 +1,508 @@
+# Copyright (C) 2025 Woo AI Assistant
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Woo AI Assistant 1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/woo-ai-assistant/woo-ai-assistant/issues\n"
+"POT-Creation-Date: 2025-08-30 18:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WP-CLI 2.10.0\n"
+"X-Domain: woo-ai-assistant\n"
+
+#. Plugin Name of the plugin
+msgid "Woo AI Assistant"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://github.com/woo-ai-assistant/woo-ai-assistant"
+msgstr ""
+
+#. Description of the plugin
+msgid "AI-powered chatbot for WooCommerce with zero-config knowledge base and 24/7 customer support."
+msgstr ""
+
+#. Author of the plugin
+msgid "Claude Code Assistant"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://claude.ai/code"
+msgstr ""
+
+# Main plugin strings
+msgid "AI Assistant"
+msgstr ""
+
+msgid "Chat with AI"
+msgstr ""
+
+msgid "How can I help you today?"
+msgstr ""
+
+msgid "Type your message..."
+msgstr ""
+
+msgid "Send"
+msgstr ""
+
+msgid "Close chat"
+msgstr ""
+
+msgid "Minimize chat"
+msgstr ""
+
+msgid "Maximize chat"
+msgstr ""
+
+# Admin interface strings
+msgid "Woo AI Assistant Settings"
+msgstr ""
+
+msgid "General Settings"
+msgstr ""
+
+msgid "Knowledge Base"
+msgstr ""
+
+msgid "Conversations"
+msgstr ""
+
+msgid "Analytics"
+msgstr ""
+
+msgid "License"
+msgstr ""
+
+msgid "Enable AI Assistant"
+msgstr ""
+
+msgid "Enable the AI assistant chatbot on your store."
+msgstr ""
+
+msgid "Welcome Message"
+msgstr ""
+
+msgid "The message shown when users first open the chat."
+msgstr ""
+
+msgid "Chat Widget Position"
+msgstr ""
+
+msgid "Bottom Right"
+msgstr ""
+
+msgid "Bottom Left"
+msgstr ""
+
+msgid "Auto-open Chat"
+msgstr ""
+
+msgid "Automatically open the chat widget for new visitors."
+msgstr ""
+
+# Knowledge Base strings
+msgid "Knowledge Base Status"
+msgstr ""
+
+msgid "Last Updated"
+msgstr ""
+
+msgid "Total Items Indexed"
+msgstr ""
+
+msgid "Refresh Knowledge Base"
+msgstr ""
+
+msgid "Refreshing knowledge base..."
+msgstr ""
+
+msgid "Knowledge base updated successfully."
+msgstr ""
+
+msgid "Failed to update knowledge base."
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid "Pages"
+msgstr ""
+
+msgid "Posts"
+msgstr ""
+
+msgid "Categories"
+msgstr ""
+
+msgid "Never"
+msgstr ""
+
+# Conversation strings
+msgid "Recent Conversations"
+msgstr ""
+
+msgid "Total Conversations"
+msgstr ""
+
+msgid "Average Rating"
+msgstr ""
+
+msgid "Conversation History"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Assistant"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "Rating"
+msgstr ""
+
+msgid "View Details"
+msgstr ""
+
+msgid "Export Conversations"
+msgstr ""
+
+# AI Response strings
+msgid "I'm sorry, I don't have information about that. Would you like me to help you find what you're looking for?"
+msgstr ""
+
+msgid "Let me help you find the perfect product."
+msgstr ""
+
+msgid "Here are some products that might interest you:"
+msgstr ""
+
+msgid "Would you like to add this to your cart?"
+msgstr ""
+
+msgid "Add to Cart"
+msgstr ""
+
+msgid "View Product"
+msgstr ""
+
+msgid "Out of Stock"
+msgstr ""
+
+msgid "In Stock"
+msgstr ""
+
+# Coupon and discount strings
+msgid "I can offer you a special discount!"
+msgstr ""
+
+msgid "Here's a coupon code for you:"
+msgstr ""
+
+msgid "Apply Coupon"
+msgstr ""
+
+msgid "Copy Code"
+msgstr ""
+
+msgid "Coupon copied to clipboard!"
+msgstr ""
+
+msgid "Valid until"
+msgstr ""
+
+msgid "Minimum order"
+msgstr ""
+
+# Error messages
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+msgid "Unable to connect to AI service."
+msgstr ""
+
+msgid "Your message could not be sent. Please check your connection."
+msgstr ""
+
+msgid "This feature is not available in your current plan."
+msgstr ""
+
+msgid "Please enter a valid message."
+msgstr ""
+
+msgid "Chat session has expired. Please refresh the page."
+msgstr ""
+
+# License and plan strings
+msgid "License Status"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "Expired"
+msgstr ""
+
+msgid "Enter your license key"
+msgstr ""
+
+msgid "Activate License"
+msgstr ""
+
+msgid "Deactivate License"
+msgstr ""
+
+msgid "License activated successfully."
+msgstr ""
+
+msgid "Invalid license key."
+msgstr ""
+
+msgid "License expired. Please renew your subscription."
+msgstr ""
+
+msgid "Current Plan"
+msgstr ""
+
+msgid "Free"
+msgstr ""
+
+msgid "Starter"
+msgstr ""
+
+msgid "Professional"
+msgstr ""
+
+msgid "Enterprise"
+msgstr ""
+
+msgid "Upgrade Plan"
+msgstr ""
+
+msgid "Monthly conversations used"
+msgstr ""
+
+msgid "Knowledge base items"
+msgstr ""
+
+msgid "Advanced analytics"
+msgstr ""
+
+msgid "Priority support"
+msgstr ""
+
+# Notification strings
+msgid "New message from AI Assistant"
+msgstr ""
+
+msgid "Click to open chat"
+msgstr ""
+
+msgid "Chat is now available on your website!"
+msgstr ""
+
+msgid "AI Assistant has been updated."
+msgstr ""
+
+# Rating and feedback
+msgid "How was this conversation?"
+msgstr ""
+
+msgid "Rate this conversation"
+msgstr ""
+
+msgid "Very Poor"
+msgstr ""
+
+msgid "Poor"
+msgstr ""
+
+msgid "Fair"
+msgstr ""
+
+msgid "Good"
+msgstr ""
+
+msgid "Excellent"
+msgstr ""
+
+msgid "Leave feedback"
+msgstr ""
+
+msgid "Thank you for your feedback!"
+msgstr ""
+
+# Time and date formats
+msgid "just now"
+msgstr ""
+
+msgid "minute ago"
+msgstr ""
+
+msgid "minutes ago"
+msgstr ""
+
+msgid "hour ago"
+msgstr ""
+
+msgid "hours ago"
+msgstr ""
+
+msgid "day ago"
+msgstr ""
+
+msgid "days ago"
+msgstr ""
+
+msgid "Today at %s"
+msgstr ""
+
+msgid "Yesterday at %s"
+msgstr ""
+
+# Product recommendation strings
+msgid "Based on your interests, you might like:"
+msgstr ""
+
+msgid "Customers who viewed this item also viewed:"
+msgstr ""
+
+msgid "Frequently bought together:"
+msgstr ""
+
+msgid "On sale now:"
+msgstr ""
+
+msgid "New arrivals:"
+msgstr ""
+
+msgid "Best sellers:"
+msgstr ""
+
+# Search and filter strings
+msgid "Search products..."
+msgstr ""
+
+msgid "Filter by category"
+msgstr ""
+
+msgid "Filter by price"
+msgstr ""
+
+msgid "Sort by"
+msgstr ""
+
+msgid "Relevance"
+msgstr ""
+
+msgid "Price: Low to High"
+msgstr ""
+
+msgid "Price: High to Low"
+msgstr ""
+
+msgid "Customer Rating"
+msgstr ""
+
+msgid "Newest First"
+msgstr ""
+
+msgid "No products found."
+msgstr ""
+
+# Accessibility strings
+msgid "Chat widget"
+msgstr ""
+
+msgid "Open chat window"
+msgstr ""
+
+msgid "Close chat window"
+msgstr ""
+
+msgid "Chat messages"
+msgstr ""
+
+msgid "Message input field"
+msgstr ""
+
+msgid "Send message button"
+msgstr ""
+
+msgid "Typing indicator"
+msgstr ""
+
+msgid "AI Assistant is typing..."
+msgstr ""
+
+# Development and debug strings
+msgid "Development Mode Active"
+msgstr ""
+
+msgid "Debug Information"
+msgstr ""
+
+msgid "API Calls"
+msgstr ""
+
+msgid "Response Time"
+msgstr ""
+
+msgid "Cache Status"
+msgstr ""
+
+msgid "Knowledge Base Version"
+msgstr ""
+
+msgid "Test Connection"
+msgstr ""
+
+msgid "Connection successful"
+msgstr ""
+
+msgid "Connection failed"
+msgstr ""
+
+# GDPR and Privacy
+msgid "Privacy Settings"
+msgstr ""
+
+msgid "Data Processing Notice"
+msgstr ""
+
+msgid "We process your chat messages to provide AI assistance. Data is handled according to our privacy policy."
+msgstr ""
+
+msgid "Accept and Continue"
+msgstr ""
+
+msgid "Learn More"
+msgstr ""
+
+msgid "Data Retention"
+msgstr ""
+
+msgid "Export My Data"
+msgstr ""
+
+msgid "Delete My Data"
+msgstr ""
+
+msgid "Your data export is ready."
+msgstr ""
+
+msgid "Your data has been deleted."
+msgstr ""

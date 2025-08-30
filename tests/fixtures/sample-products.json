@@ -1,0 +1,91 @@
+[
+  {
+    "name": "Premium Wireless Headphones",
+    "slug": "premium-wireless-headphones",
+    "regular_price": "199.99",
+    "sale_price": "149.99",
+    "short_description": "High-quality wireless headphones with noise cancellation and premium sound quality.",
+    "description": "These premium wireless headphones feature advanced noise cancellation technology, superior sound quality with deep bass and clear treble, comfortable over-ear design with memory foam padding, and up to 30 hours of battery life. Perfect for music lovers, professionals, and frequent travelers who demand the best audio experience.",
+    "categories": ["Electronics", "Audio"],
+    "tags": ["wireless", "bluetooth", "noise-cancelling", "premium"],
+    "featured": true,
+    "manage_stock": true,
+    "stock_quantity": 50,
+    "attributes": {
+      "color": ["Black", "Silver", "Rose Gold"],
+      "battery_life": "30 hours",
+      "connectivity": "Bluetooth 5.0"
+    }
+  },
+  {
+    "name": "Organic Cotton T-Shirt",
+    "slug": "organic-cotton-t-shirt",
+    "regular_price": "29.99",
+    "short_description": "Soft and comfortable organic cotton t-shirt available in multiple colors.",
+    "description": "Made from 100% certified organic cotton, this comfortable t-shirt is perfect for everyday wear. The fabric is soft, breathable, and environmentally friendly. Features a classic fit that works for both casual and semi-formal occasions. Available in various colors and sizes from XS to XXL.",
+    "categories": ["Clothing", "T-Shirts"],
+    "tags": ["organic", "cotton", "eco-friendly", "comfortable"],
+    "featured": false,
+    "manage_stock": true,
+    "stock_quantity": 100,
+    "attributes": {
+      "size": ["XS", "S", "M", "L", "XL", "XXL"],
+      "color": ["White", "Black", "Navy", "Gray", "Red"],
+      "material": "100% Organic Cotton"
+    }
+  },
+  {
+    "name": "Smart Home Security Camera",
+    "slug": "smart-home-security-camera",
+    "regular_price": "79.99",
+    "short_description": "WiFi-enabled security camera with 1080p HD recording and mobile app control.",
+    "description": "Keep your home secure with this advanced WiFi security camera. Features include 1080p HD video recording, night vision capability, two-way audio communication, motion detection with instant alerts, cloud storage options, and easy setup through our mobile app. Compatible with iOS and Android devices. Perfect for monitoring your home, office, or any space that needs security surveillance.",
+    "categories": ["Electronics", "Security"],
+    "tags": ["security", "camera", "wifi", "smart-home", "1080p"],
+    "featured": true,
+    "manage_stock": true,
+    "stock_quantity": 25,
+    "attributes": {
+      "resolution": "1080p HD",
+      "connectivity": "WiFi 2.4GHz",
+      "storage": "Cloud & Local SD Card",
+      "night_vision": "Yes"
+    }
+  },
+  {
+    "name": "Yoga Mat - Eco Friendly",
+    "slug": "yoga-mat-eco-friendly",
+    "regular_price": "49.99",
+    "short_description": "Non-slip eco-friendly yoga mat made from natural rubber with perfect grip and cushioning.",
+    "description": "This premium yoga mat is crafted from natural rubber and features a non-slip surface that provides excellent grip during all types of yoga practice. The 6mm thickness offers perfect cushioning for joints while maintaining stability. The eco-friendly materials are biodegradable and free from harmful chemicals. Includes a carrying strap for easy transport to classes or outdoor sessions.",
+    "categories": ["Sports", "Fitness", "Yoga"],
+    "tags": ["yoga", "eco-friendly", "non-slip", "natural-rubber"],
+    "featured": false,
+    "manage_stock": true,
+    "stock_quantity": 75,
+    "attributes": {
+      "thickness": "6mm",
+      "material": "Natural Rubber",
+      "dimensions": "183cm x 61cm",
+      "weight": "2.5kg"
+    }
+  },
+  {
+    "name": "Artisan Coffee Beans - Dark Roast",
+    "slug": "artisan-coffee-beans-dark-roast",
+    "regular_price": "24.99",
+    "short_description": "Premium artisan coffee beans with rich dark roast flavor, ethically sourced from sustainable farms.",
+    "description": "Experience the perfect cup with our premium artisan coffee beans. These dark roast beans are carefully selected from sustainable farms in South America and expertly roasted to bring out rich, bold flavors with notes of chocolate and caramel. Each batch is roasted to order to ensure maximum freshness. Perfect for espresso, French press, or drip coffee. Fair trade certified and ethically sourced.",
+    "categories": ["Food", "Beverages", "Coffee"],
+    "tags": ["coffee", "dark-roast", "artisan", "fair-trade", "organic"],
+    "featured": true,
+    "manage_stock": true,
+    "stock_quantity": 40,
+    "attributes": {
+      "roast_level": "Dark",
+      "origin": "South America",
+      "weight": "1 lb (454g)",
+      "certification": "Fair Trade & Organic"
+    }
+  }
+]

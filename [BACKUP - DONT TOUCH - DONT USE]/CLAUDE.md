@@ -5,7 +5,7 @@
 **Project Name:** Woo AI Assistant  
 **Version:** 1.0  
 **Description:** AI-powered chatbot for WooCommerce with zero-config knowledge base and 24/7 customer support.  
-**Development Environment:** macOS with MAMP (PHP 8.2.20, Apache port 8888, MySQL port 8889)  
+**Development Environment:** Docker (Primary) + macOS MAMP (Alternative)  
 **Architecture:** See `ARCHITETTURA.md` for detailed system design  
 **Roadmap:** See `ROADMAP.md` for task progression and status  
 
@@ -180,7 +180,7 @@ woo-ai-assistant/
 - **Vector DB:** Pinecone via intermediate server
 - **Embeddings:** OpenAI text-embedding-3-small
 - **Payments:** Stripe integration
-- **Development Server:** MAMP (Apache 8888, MySQL 8889)
+- **Development Server:** Docker (WordPress 8080, MySQL 3306) + MAMP Alternative
 
 ## 📝 Coding Standards
 
@@ -433,6 +433,71 @@ describe('ChatWindow', () => {
 
 ## 🌍 Development Environment Setup
 
+### 🐳 Docker Development Environment (Primary)
+
+Docker provides the most consistent, isolated, and production-like development environment. This is now the **primary recommended setup** for all developers.
+
+#### Quick Docker Setup
+```bash
+# 1. Clone and navigate to project
+cd /path/to/woo-ai-assistant
+
+# 2. Run automated setup
+./scripts/docker-setup.sh
+
+# 3. Access your environment
+# WordPress: http://localhost:8080
+# Admin: http://localhost:8080/wp-admin (admin/password)
+# phpMyAdmin: http://localhost:8081
+# Mailhog: http://localhost:8025
+```
+
+#### Docker Services Overview
+- **WordPress**: Latest with PHP 8.2, pre-configured with WooCommerce
+- **MySQL**: 8.0 with optimized development settings
+- **phpMyAdmin**: Database management interface
+- **Mailhog**: Email testing and capture
+- **Redis**: Caching layer (optional)
+- **Node.js**: React widget development server
+- **Test Runner**: Isolated testing environment
+
+#### Docker Environment Commands
+```bash
+# Start environment
+docker-compose up -d
+
+# Stop environment  
+docker-compose down
+
+# View logs
+docker-compose logs -f [service]
+
+# Run WP-CLI commands
+docker-compose exec wordpress wp --allow-root [command]
+
+# Run Composer commands
+docker-compose exec wordpress composer [command]
+
+# Run tests
+./scripts/docker-test.sh
+
+# Complete reset
+./scripts/docker-reset.sh
+```
+
+#### Docker Development Benefits
+- ✅ **Consistent Environment**: Same setup across all machines
+- ✅ **Isolation**: No conflicts with host system
+- ✅ **Pre-configured**: WordPress + WooCommerce ready instantly
+- ✅ **Production-like**: Similar to actual deployment environment
+- ✅ **Easy Reset**: Complete environment reset in minutes
+- ✅ **Testing**: Isolated test containers
+- ✅ **Multiple PHP Versions**: Easy switching if needed
+
+### 💻 MAMP Alternative Setup (macOS)
+
+If you prefer MAMP or need to use it for compatibility, follow the setup below.
+
 ### ⚠️ CRITICAL: Production vs Development Architecture
 
 #### Production Architecture (What Users Get)
@@ -525,10 +590,15 @@ WOO_AI_DEV_API_TIMEOUT=10
 WOO_AI_DEV_CACHE_TTL=60
 WOO_AI_DEV_MAX_ITEMS=10
 
-# MAMP Configuration
+# MAMP Configuration (if using MAMP instead of Docker)
 DB_HOST=localhost:8889
 WP_HOME=http://localhost:8888/wp
 WP_SITEURL=http://localhost:8888/wp
+
+# Docker Configuration (if using Docker - default)
+DB_HOST=mysql:3306
+WP_HOME=http://localhost:8080
+WP_SITEURL=http://localhost:8080
 
 # Development License (any value accepted in dev mode)
 WOO_AI_DEVELOPMENT_LICENSE_KEY=dev-license-12345
@@ -877,26 +947,300 @@ cat .quality-gates-status  # Must show "QUALITY_GATES_STATUS=PASSED"
 - See `TESTING_STRATEGY.md` for progressive testing approach
 
 
+## 🚨 Error Handling Standards
+
+### PHP Error Handling Pattern
+
+#### 1. Exception Hierarchy
+```php
+// Base exception for all plugin errors
+class WooAiException extends Exception {}
+
+// Specific exceptions
+class ApiException extends WooAiException {}
+class ValidationException extends WooAiException {}
+class KnowledgeBaseException extends WooAiException {}
+```
+
+#### 2. Graceful Degradation Pattern
+```php
+// ✅ Correct - Always provide fallback
+public function getAIResponse($query) {
+    try {
+        return $this->callAI($query);
+    } catch (ApiException $e) {
+        error_log('AI API failed: ' . $e->getMessage());
+        return $this->getFallbackResponse();
+    } catch (Exception $e) {
+        error_log('Unexpected error: ' . $e->getMessage());
+        return $this->getDefaultResponse();
+    }
+}
+
+// ✅ Always check prerequisites
+public function processKnowledgeBase() {
+    if (!$this->isWooCommerceActive()) {
+        throw new ValidationException('WooCommerce is required');
+    }
+    
+    if (!$this->hasValidLicense()) {
+        return $this->runLimitedMode();
+    }
+    
+    // Continue with full processing
+}
+```
+
+#### 3. Logging Standards
+```php
+// Use WordPress error logging
+if (defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG) {
+    error_log('Woo AI Debug: ' . $message);
+}
+
+// Log errors with context
+Logger::error('Failed to index product', [
+    'product_id' => $productId,
+    'error' => $e->getMessage(),
+    'trace' => $e->getTraceAsString()
+]);
+```
+
+### React Error Boundaries
+```javascript
+// ✅ Wrap components with error boundaries
+class WidgetErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        console.error('Widget Error:', error, errorInfo);
+    }
+    
+    render() {
+        if (this.state.hasError) {
+            return <div>Chat unavailable. Please refresh.</div>;
+        }
+        return this.props.children;
+    }
+}
+```
+
+## 🚀 Deployment Guidelines
+
+### Pre-Deployment Checklist
+
+#### 1. Quality Gates (Mandatory)
+```bash
+# ALL must pass before deployment
+composer run quality-gates-enforce
+npm run test
+npm run build:production
+composer run security-scan
+```
+
+#### 2. Environment Validation
+```bash
+# Check WordPress/WooCommerce compatibility
+wp-env run phpunit tests/compatibility/
+
+# Verify database migrations
+php artisan migrate:status
+
+# Test plugin activation/deactivation
+wp plugin activate woo-ai-assistant
+wp plugin deactivate woo-ai-assistant
+```
+
+#### 3. Performance Verification
+```bash
+# Bundle size check
+npm run analyze  # Must be < 50KB gzipped
+
+# Database query optimization
+composer run query-analyzer
+
+# Cache warming
+wp-cli woo-ai warm-cache
+```
+
+### Deployment Environments
+
+#### Development → Staging
+1. **Code Review:** All PRs require approval
+2. **Automated Testing:** CI/CD pipeline must pass
+3. **Manual Testing:** Test core user flows
+4. **Performance Check:** Load testing with realistic data
+
+#### Staging → Production
+1. **Full QA Cycle:** Complete feature testing
+2. **Security Audit:** Penetration testing
+3. **Backup Verification:** Database and file backups
+4. **Rollback Plan:** Prepared and tested
+
+### Production Deployment Strategy
+
+#### 1. Blue-Green Deployment
+```bash
+# Deploy to green environment
+deploy-to-green.sh
+
+# Smoke tests on green
+test-green-environment.sh
+
+# Switch traffic to green
+switch-to-green.sh
+
+# Monitor for issues
+monitor-production.sh
+```
+
+#### 2. Feature Flags
+```php
+// Use feature flags for gradual rollout
+if (FeatureFlags::isEnabled('advanced_coupon_generation', $user)) {
+    return $this->advancedCouponLogic();
+}
+return $this->basicCouponLogic();
+```
+
+#### 3. Database Migration Safety
+```php
+// Always use safe, reversible migrations
+public function up() {
+    // Add column with default value
+    Schema::table('woo_ai_conversations', function (Blueprint $table) {
+        $table->string('sentiment')->default('neutral')->after('rating');
+    });
+}
+
+public function down() {
+    // Reversible operation
+    Schema::table('woo_ai_conversations', function (Blueprint $table) {
+        $table->dropColumn('sentiment');
+    });
+}
+```
+
+### Monitoring & Alerting
+
+#### 1. Health Check Endpoints
+```php
+// Health check for monitoring tools
+public function healthCheck() {
+    return [
+        'status' => 'healthy',
+        'database' => $this->checkDatabase(),
+        'api_connectivity' => $this->checkApiConnections(),
+        'license_status' => $this->checkLicense(),
+        'kb_freshness' => $this->checkKnowledgeBaseFreshness()
+    ];
+}
+```
+
+#### 2. Error Rate Monitoring
+```php
+// Track error rates
+Analytics::increment('api.errors', [
+    'endpoint' => 'chat',
+    'error_type' => get_class($exception)
+]);
+
+// Alert on high error rates
+if ($errorRate > 0.05) { // 5% threshold
+    Alert::critical('High error rate detected', $context);
+}
+```
+
+### Rollback Procedures
+
+#### 1. Immediate Rollback Triggers
+- Error rate > 10%
+- Response time > 5 seconds
+- Critical functionality broken
+- Security vulnerability discovered
+
+#### 2. Rollback Process
+```bash
+# Quick rollback script
+rollback-to-previous.sh
+
+# Verify rollback success
+verify-rollback.sh
+
+# Notify team
+notify-rollback-complete.sh
+```
+
 ## 🔄 Git Workflow
 
-### Branch Naming
+### Branch Strategy
 ```
-feature/kb-scanner-implementation
+main                    # Branch principale per sviluppo
+├── feature/phase-0-*   # Branch per Phase 0 tasks
+├── feature/phase-1-*   # Branch per Phase 1 tasks
+└── feature/phase-2-*   # Branch per Phase 2 tasks, etc.
+```
+
+### Branch Naming Examples
+```
+feature/task-0.1-plugin-skeleton
+feature/task-0.2-development-environment
 bugfix/conversation-handler-memory-leak
 hotfix/security-vulnerability-fix
 ```
 
-### Commit Messages
-```
-feat(kb): implement product content scanning
+### ⚠️ MANDATORY: Push After Each Task Completion
 
-- Add KnowledgeBaseScanner class with product indexing
-- Include unit tests for scanner functionality  
-- Add documentation for scanning methods
-- Implement caching for improved performance
+**CRITICAL RULE:** Ogni task completato con successo DEVE essere pushato su GitHub.
+
+#### Workflow Obbligatorio per Ogni Task:
+```bash
+# 1. Dopo che qa-testing-specialist conferma QUALITY_GATES_STATUS=PASSED
+# 2. Dopo che roadmap-project-manager ha aggiornato ROADMAP.md come "completed"
+
+# Aggiungi tutti i file modificati
+git add .
+
+# Crea commit con messaggio descrittivo
+git commit -m "feat(phase-0): complete Task 0.1 - Plugin Skeleton
+
+- Create main plugin file with constants
+- Implement PSR-4 autoloader via composer
+- Create Main.php singleton orchestrator
+- Add Common utilities and traits
+- Setup activation/deactivation hooks
+- Quality gates: PASSED
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# Push al repository
+git push origin main  # O al branch feature se stai usando branch separati
+
+# Verifica push riuscito
+git log --oneline -1
+```
+
+### Commit Messages Format
+```
+<type>(<scope>): complete Task X.X - <task-name>
+
+- <key-achievement-1>
+- <key-achievement-2>
+- <key-achievement-3>
+- Quality gates: PASSED|FAILED
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+**Types:** feat, fix, docs, style, refactor, test, chore
+**Scope:** phase-0, phase-1, kb, widget, admin, etc.
 
 ## 📞 Support and Resources
 

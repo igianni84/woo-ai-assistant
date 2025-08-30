@@ -1,0 +1,523 @@
+# Security Scanning Workflow for Woo AI Assistant
+#
+# Comprehensive security scanning pipeline that runs vulnerability scans,
+# dependency checks, static analysis, and security best practices validation.
+#
+# @package WooAiAssistant
+# @subpackage CI/CD Security
+# @since 1.0.0
+# @author Claude Code Assistant
+
+name: 🔒 Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily security scan at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan to perform'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - dependencies
+          - static-analysis
+          - secrets
+          - docker
+      severity_threshold:
+        description: 'Minimum severity level to report'
+        required: false
+        default: 'medium'
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - critical
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '18'
+  SECURITY_SCAN_TIMEOUT: '30'
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==============================================================================
+  # DEPENDENCY VULNERABILITY SCANNING
+  # ==============================================================================
+  dependency-scan:
+    name: 📦 Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'dependencies' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scanner: [composer, npm, trivy]
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        if: matrix.scanner == 'composer' || matrix.scanner == 'trivy'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+
+      - name: 🔧 Setup Node.js
+        if: matrix.scanner == 'npm' || matrix.scanner == 'trivy'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: |
+          if [[ "${{ matrix.scanner }}" == "composer" || "${{ matrix.scanner }}" == "trivy" ]]; then
+            composer install --no-dev --prefer-dist --optimize-autoloader
+          fi
+          if [[ "${{ matrix.scanner }}" == "npm" || "${{ matrix.scanner }}" == "trivy" ]]; then
+            npm ci --only=production
+          fi
+
+      - name: 🔍 Composer Security Audit
+        if: matrix.scanner == 'composer'
+        run: |
+          echo "🔍 Running Composer security audit..."
+          composer audit --format=json > composer-audit.json || true
+          
+          # Check if vulnerabilities were found
+          if [ -s composer-audit.json ] && [ "$(jq '.advisories | length' composer-audit.json)" -gt 0 ]; then
+            echo "⚠️ PHP dependency vulnerabilities found:"
+            jq -r '.advisories[] | "- \(.title) (\(.cve // "No CVE")) - Severity: \(.severity)"' composer-audit.json
+            
+            # Count critical/high severity issues
+            critical_count=$(jq '[.advisories[] | select(.severity == "critical")] | length' composer-audit.json)
+            high_count=$(jq '[.advisories[] | select(.severity == "high")] | length' composer-audit.json)
+            
+            if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+              echo "❌ Found $critical_count critical and $high_count high severity vulnerabilities"
+              exit 1
+            fi
+          else
+            echo "✅ No PHP dependency vulnerabilities found"
+          fi
+
+      - name: 🔍 npm Security Audit
+        if: matrix.scanner == 'npm'
+        run: |
+          echo "🔍 Running npm security audit..."
+          
+          # Run npm audit and capture output
+          if npm audit --audit-level=moderate --json > npm-audit.json 2>&1; then
+            echo "✅ No npm dependency vulnerabilities found"
+          else
+            echo "⚠️ npm dependency vulnerabilities found:"
+            
+            # Parse and display vulnerabilities
+            if [ -s npm-audit.json ] && jq -e '.vulnerabilities' npm-audit.json > /dev/null 2>&1; then
+              jq -r '.vulnerabilities | to_entries[] | "- \(.key): \(.value.severity) severity (\(.value.via | if type == "array" then map(.title // .) | join(", ") else . end))"' npm-audit.json
+              
+              # Count high/critical vulnerabilities
+              high_count=$(jq '[.vulnerabilities | to_entries[] | select(.value.severity == "high")] | length' npm-audit.json)
+              critical_count=$(jq '[.vulnerabilities | to_entries[] | select(.value.severity == "critical")] | length' npm-audit.json)
+              
+              if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+                echo "❌ Found $critical_count critical and $high_count high severity vulnerabilities"
+                exit 1
+              fi
+            fi
+          fi
+
+      - name: 🔧 Setup Trivy
+        if: matrix.scanner == 'trivy'
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+
+      - name: 🔍 Trivy Vulnerability Scan
+        if: matrix.scanner == 'trivy'
+        run: |
+          echo "🔍 Running Trivy vulnerability scan..."
+          
+          # Scan filesystem for vulnerabilities
+          trivy fs --format json --output trivy-results.json .
+          
+          # Check results
+          if [ -s trivy-results.json ]; then
+            vulnerabilities=$(jq '.Results[]?.Vulnerabilities // [] | length' trivy-results.json | awk '{sum += $1} END {print sum}')
+            
+            if [ "$vulnerabilities" -gt 0 ]; then
+              echo "⚠️ Found $vulnerabilities vulnerabilities with Trivy:"
+              trivy fs --format table .
+              
+              # Count high/critical
+              critical_count=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+              high_count=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+              
+              if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+                echo "❌ Found $critical_count critical and $high_count high severity vulnerabilities"
+                exit 1
+              fi
+            else
+              echo "✅ No vulnerabilities found with Trivy"
+            fi
+          fi
+
+      - name: 📤 Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-scan-${{ matrix.scanner }}
+          path: |
+            composer-audit.json
+            npm-audit.json
+            trivy-results.json
+          retention-days: 30
+
+  # ==============================================================================
+  # STATIC SECURITY ANALYSIS
+  # ==============================================================================
+  static-security-analysis:
+    name: 🔬 Static Security Analysis
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'static-analysis' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+
+      - name: 📦 Install PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader
+
+      - name: 🔍 PHPStan Security Analysis
+        run: |
+          echo "🔍 Running PHPStan with security rules..."
+          
+          # Run PHPStan with security-focused configuration
+          vendor/bin/phpstan analyse src/ \
+            --level=max \
+            --error-format=json \
+            --no-progress \
+            > phpstan-security.json || true
+          
+          # Check for security-related issues
+          if [ -s phpstan-security.json ]; then
+            error_count=$(jq '.totals.errors // 0' phpstan-security.json)
+            if [ "$error_count" -gt 0 ]; then
+              echo "⚠️ PHPStan found $error_count potential security issues:"
+              jq -r '.files[].messages[]? | "- \(.file):\(.line) - \(.message)"' phpstan-security.json
+            else
+              echo "✅ No PHPStan security issues found"
+            fi
+          fi
+
+      - name: 🔍 Custom Security Pattern Scan
+        run: |
+          echo "🔍 Scanning for common security vulnerabilities..."
+          
+          security_issues=0
+          
+          # Check for potential SQL injection vulnerabilities
+          echo "Checking for SQL injection risks..."
+          if grep -r "wpdb->query\|wpdb->get_" --include="*.php" src/ | grep -v "prepare\|esc_sql"; then
+            echo "❌ Potential SQL injection vulnerability found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          # Check for XSS vulnerabilities
+          echo "Checking for XSS risks..."
+          if grep -r "echo \$\|print \$" --include="*.php" src/ | grep -v "esc_\|wp_kses\|sanitize_"; then
+            echo "⚠️ Potential XSS vulnerability found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          # Check for file inclusion vulnerabilities
+          echo "Checking for file inclusion risks..."
+          if grep -r "include\|require" --include="*.php" src/ | grep "\$" | grep -v "plugin_dir_path\|ABSPATH"; then
+            echo "⚠️ Potential file inclusion vulnerability found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          # Check for unsafe deserialization
+          echo "Checking for unsafe deserialization..."
+          if grep -r "unserialize\|eval" --include="*.php" src/; then
+            echo "❌ Unsafe deserialization/eval found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          # Check for hardcoded credentials
+          echo "Checking for hardcoded credentials..."
+          if grep -r "password.*=.*['\"][^'\"]*['\"]" --include="*.php" src/ | grep -v "placeholder\|example\|test"; then
+            echo "❌ Potential hardcoded credentials found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          # Check for debug information exposure
+          echo "Checking for debug information exposure..."
+          if grep -r "var_dump\|print_r\|error_reporting.*E_ALL" --include="*.php" src/; then
+            echo "⚠️ Debug information exposure found"
+            security_issues=$((security_issues + 1))
+          fi
+          
+          if [ $security_issues -eq 0 ]; then
+            echo "✅ No common security vulnerabilities detected"
+          else
+            echo "❌ Found $security_issues potential security issues"
+            if [ $security_issues -ge 3 ]; then
+              exit 1
+            fi
+          fi
+
+      - name: 🔍 WordPress Security Best Practices
+        run: |
+          echo "🔍 Checking WordPress security best practices..."
+          
+          wp_issues=0
+          
+          # Check for direct file access protection
+          echo "Checking for direct access protection..."
+          find src/ -name "*.php" -exec grep -L "ABSPATH.*exit" {} \; > unprotected_files.txt || true
+          if [ -s unprotected_files.txt ]; then
+            echo "⚠️ Files without direct access protection:"
+            cat unprotected_files.txt
+            wp_issues=$((wp_issues + 1))
+          fi
+          
+          # Check for nonce verification
+          echo "Checking for nonce verification in forms..."
+          if grep -r "wp_nonce_field\|wp_create_nonce" --include="*.php" src/ > /dev/null; then
+            echo "✅ Nonce usage detected"
+          else
+            echo "⚠️ No nonce usage detected - ensure forms are protected"
+            wp_issues=$((wp_issues + 1))
+          fi
+          
+          # Check for capability checks
+          echo "Checking for capability checks..."
+          if grep -r "current_user_can\|user_can" --include="*.php" src/ > /dev/null; then
+            echo "✅ Capability checks detected"
+          else
+            echo "⚠️ No capability checks detected"
+            wp_issues=$((wp_issues + 1))
+          fi
+          
+          # Check for input sanitization
+          echo "Checking for input sanitization..."
+          if grep -r "sanitize_\|wp_kses" --include="*.php" src/ > /dev/null; then
+            echo "✅ Input sanitization detected"
+          else
+            echo "⚠️ No input sanitization detected"
+            wp_issues=$((wp_issues + 1))
+          fi
+          
+          if [ $wp_issues -eq 0 ]; then
+            echo "✅ WordPress security best practices followed"
+          else
+            echo "⚠️ Found $wp_issues WordPress security concerns"
+          fi
+
+  # ==============================================================================
+  # SECRETS SCANNING
+  # ==============================================================================
+  secrets-scan:
+    name: 🔐 Secrets Detection
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'secrets' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for comprehensive scan
+
+      - name: 🔧 Setup TruffleHog
+        run: |
+          curl -sSfL https://github.com/trufflesecurity/trufflehog/releases/download/v3.63.2/trufflehog_3.63.2_linux_amd64.tar.gz | tar -xzf - -C /usr/local/bin
+
+      - name: 🔍 TruffleHog Secrets Scan
+        run: |
+          echo "🔍 Scanning for secrets with TruffleHog..."
+          
+          # Run TruffleHog on the repository
+          trufflehog git file://. --json --no-verification > trufflehog-results.json || true
+          
+          # Check results
+          if [ -s trufflehog-results.json ]; then
+            secrets_count=$(jq 'select(.Verified == true) | .DetectorName' trufflehog-results.json | wc -l)
+            
+            if [ "$secrets_count" -gt 0 ]; then
+              echo "❌ Found $secrets_count verified secrets:"
+              jq -r 'select(.Verified == true) | "- \(.DetectorName): \(.SourceMetadata.Data.Filesystem.file):\(.SourceMetadata.Data.Filesystem.line)"' trufflehog-results.json
+              exit 1
+            else
+              unverified_count=$(jq '. | length' trufflehog-results.json)
+              if [ "$unverified_count" -gt 0 ]; then
+                echo "⚠️ Found $unverified_count potential secrets (unverified)"
+                jq -r '"- \(.DetectorName): \(.SourceMetadata.Data.Filesystem.file):\(.SourceMetadata.Data.Filesystem.line)"' trufflehog-results.json
+              else
+                echo "✅ No secrets detected"
+              fi
+            fi
+          else
+            echo "✅ No secrets detected"
+          fi
+
+      - name: 🔍 Manual Secrets Pattern Check
+        run: |
+          echo "🔍 Manual secrets pattern check..."
+          
+          secrets_found=0
+          
+          # Check for API keys
+          if grep -r "api[_-]key.*=.*['\"][a-zA-Z0-9]{20,}['\"]" --include="*.php" --include="*.js" . --exclude-dir=node_modules --exclude-dir=vendor | grep -v ".env.example"; then
+            echo "❌ Potential API keys found"
+            secrets_found=$((secrets_found + 1))
+          fi
+          
+          # Check for AWS keys
+          if grep -r "AKIA[0-9A-Z]{16}" --include="*.php" --include="*.js" . --exclude-dir=node_modules --exclude-dir=vendor; then
+            echo "❌ AWS access keys found"
+            secrets_found=$((secrets_found + 1))
+          fi
+          
+          # Check for private keys
+          if grep -r "BEGIN.*PRIVATE KEY" . --exclude-dir=node_modules --exclude-dir=vendor; then
+            echo "❌ Private keys found"
+            secrets_found=$((secrets_found + 1))
+          fi
+          
+          # Check for database passwords (not in .env files)
+          if grep -r "DB_PASSWORD.*=.*['\"][^'\"]*['\"]" --include="*.php" . | grep -v ".env"; then
+            echo "❌ Database passwords in code"
+            secrets_found=$((secrets_found + 1))
+          fi
+          
+          if [ $secrets_found -eq 0 ]; then
+            echo "✅ No manual secrets patterns detected"
+          else
+            echo "❌ Found $secrets_found potential secrets"
+            exit 1
+          fi
+
+      - name: 📤 Upload secrets scan results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: secrets-scan-results
+          path: trufflehog-results.json
+          retention-days: 30
+
+  # ==============================================================================
+  # DOCKER SECURITY SCAN
+  # ==============================================================================
+  docker-security-scan:
+    name: 🐳 Docker Security Scan
+    runs-on: ubuntu-latest
+    if: (github.event.inputs.scan_type == 'docker' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == '') && hashFiles('docker/**', 'Dockerfile*', 'docker-compose*') != ''
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: 🔍 Scan Docker files with Hadolint
+        run: |
+          echo "🔍 Scanning Dockerfiles with Hadolint..."
+          
+          # Install Hadolint
+          curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o hadolint
+          chmod +x hadolint
+          sudo mv hadolint /usr/local/bin/
+          
+          # Scan all Dockerfiles
+          find . -name "Dockerfile*" -not -path "./node_modules/*" -not -path "./vendor/*" | while read -r dockerfile; do
+            echo "Scanning $dockerfile"
+            hadolint "$dockerfile" || true
+          done
+
+      - name: 🔍 Scan docker-compose files
+        run: |
+          echo "🔍 Checking docker-compose security..."
+          
+          if [ -f "docker-compose.yml" ]; then
+            # Check for security issues in docker-compose
+            if grep -q "privileged.*true" docker-compose.yml; then
+              echo "❌ Privileged containers detected"
+            fi
+            
+            if grep -q "network_mode.*host" docker-compose.yml; then
+              echo "⚠️ Host network mode detected"
+            fi
+            
+            if grep -q ":latest" docker-compose.yml; then
+              echo "⚠️ Latest tags detected (consider pinning versions)"
+            fi
+            
+            echo "✅ docker-compose security check completed"
+          fi
+
+  # ==============================================================================
+  # SECURITY SUMMARY REPORT
+  # ==============================================================================
+  security-summary:
+    name: 📊 Security Summary Report
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, static-security-analysis, secrets-scan, docker-security-scan]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Generate security report
+        run: |
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Type:** ${{ github.event.inputs.scan_type || 'full' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dependency Scan:** ${{ needs.dependency-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Static Analysis:** ${{ needs.static-security-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Secrets Detection:** ${{ needs.secrets-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Security:** ${{ needs.docker-security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: ✅ Security success
+        if: success()
+        run: |
+          echo "## ✅ Security Scan Passed!"
+          echo "All security scans completed successfully with no critical issues found."
+
+      - name: ❌ Security failure
+        if: failure()
+        run: |
+          echo "## ❌ Security Issues Detected!"
+          echo "One or more security scans detected critical issues that need immediate attention."
+          echo "Please review the scan results and address the identified vulnerabilities."

@@ -1,0 +1,142 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node modules (will be installed in container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Composer vendor (will be installed in container)
+vendor
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+coverage
+.nyc_output
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Environment files with secrets (keep templates)
+.env
+.env.local
+.env.production
+.env.staging
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache directories
+.cache
+.sass-cache
+.npm
+.eslintcache
+.parcel-cache
+.next
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp
+
+# Build artifacts (will be built in container)
+dist
+build
+out
+
+# Documentation (not needed in runtime)
+docs
+*.md
+CHANGELOG*
+LICENSE*
+
+# Test files (will be mounted separately for testing)
+tests
+test
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+__tests__
+
+# Development and build tools config
+.babelrc
+.eslintrc*
+.prettierrc*
+webpack.config.js
+rollup.config.js
+tsconfig.json
+jest.config.js
+phpunit.xml
+
+# PHP specific
+.phpunit.result.cache
+.php_cs.cache
+.phpstan.cache
+
+# WordPress specific
+wp-config.php
+.htaccess
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Other development files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+Makefile
+Vagrantfile
+.vagrant
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+
+# Package files
+*.deb
+*.rpm

@@ -1,0 +1,530 @@
+# Main CI/CD Pipeline for Woo AI Assistant
+#
+# This is the primary CI workflow that orchestrates all quality checks, tests,
+# and deployment processes. It's designed to be the single entry point for
+# continuous integration.
+#
+# @package WooAiAssistant
+# @subpackage CI/CD
+# @since 1.0.0
+# @author Claude Code Assistant
+
+name: 🚀 Main CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**', 'bugfix/**', 'hotfix/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip tests (emergency only)'
+        required: false
+        default: false
+        type: boolean
+      force_deploy:
+        description: 'Force deployment even with warnings'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '18'
+  WP_VERSION: 'latest'
+  WC_VERSION: 'latest'
+  COMPOSER_CACHE_DIR: ~/.cache/composer
+  NODE_CACHE_DIR: ~/.npm
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==============================================================================
+  # SETUP AND VALIDATION
+  # ==============================================================================
+  setup:
+    name: 🔧 Setup & Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      php-version: ${{ env.PHP_VERSION }}
+      node-version: ${{ env.NODE_VERSION }}
+      should-deploy: ${{ steps.deploy-check.outputs.should-deploy }}
+      environment: ${{ steps.deploy-check.outputs.environment }}
+      cache-key-php: ${{ steps.cache-keys.outputs.php }}
+      cache-key-node: ${{ steps.cache-keys.outputs.node }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Need history for changed files detection
+
+      - name: 🔍 Detect changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            php:
+              - '**/*.php'
+              - 'composer.json'
+              - 'composer.lock'
+              - 'phpunit.xml'
+              - 'phpunit-simple.xml'
+            javascript:
+              - 'widget-src/**/*.js'
+              - 'widget-src/**/*.jsx'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'webpack.config.js'
+              - '.babelrc'
+              - 'jest.config.js'
+            docs:
+              - '**/*.md'
+              - 'languages/**'
+            config:
+              - '.github/**'
+              - 'scripts/**'
+              - 'docker/**'
+              - '.env*'
+
+      - name: 🗝️ Generate cache keys
+        id: cache-keys
+        run: |
+          echo "php=${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}" >> $GITHUB_OUTPUT
+          echo "node=${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
+
+      - name: 🎯 Determine deployment strategy
+        id: deploy-check
+        run: |
+          SHOULD_DEPLOY=false
+          ENVIRONMENT="development"
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
+            SHOULD_DEPLOY=true
+            ENVIRONMENT="production"
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
+            SHOULD_DEPLOY=true
+            ENVIRONMENT="staging"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            SHOULD_DEPLOY=true
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+          fi
+          
+          echo "should-deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "🎯 Deployment: $SHOULD_DEPLOY to $ENVIRONMENT"
+
+      - name: 📊 Pipeline summary
+        run: |
+          echo "## 🚀 CI Pipeline Started" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ steps.deploy-check.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy:** ${{ steps.deploy-check.outputs.should-deploy }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Detected:" >> $GITHUB_STEP_SUMMARY
+          echo "- **PHP:** ${{ steps.changes.outputs.php == 'true' && '✅' || '⏭️' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **JavaScript:** ${{ steps.changes.outputs.javascript == 'true' && '✅' || '⏭️' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Config:** ${{ steps.changes.outputs.config == 'true' && '✅' || '⏭️' }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # PHP QUALITY CHECKS
+  # ==============================================================================
+  php-quality:
+    name: 🔧 PHP Quality Gates
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.php-version != '' && !github.event.inputs.skip_tests
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+        include:
+          - php-version: '8.2'
+            coverage: true
+            static-analysis: true
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+          tools: composer:v2
+
+      - name: 🗃️ Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: ${{ needs.setup.outputs.cache-key-php }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: 📦 Install PHP dependencies
+        run: |
+          composer validate --strict
+          composer install --prefer-dist --no-progress --optimize-autoloader
+
+      - name: 🔍 PHP Code Standards (PSR-12)
+        run: composer run phpcs
+        continue-on-error: ${{ matrix.php-version != '8.2' }}
+
+      - name: 🔬 Static Analysis (PHPStan)
+        if: matrix.static-analysis
+        run: composer run phpstan
+
+      - name: 🌐 Setup WordPress Test Environment
+        run: |
+          if [ -f "scripts/docker-setup.sh" ]; then
+            bash scripts/docker-setup.sh --test-only
+          else
+            # Fallback to manual setup
+            bash bin/install-wp-tests.sh wordpress_test root root localhost latest
+          fi
+
+      - name: 🧪 PHPUnit Tests
+        run: |
+          if [ "${{ matrix.coverage }}" == "true" ]; then
+            composer run test:coverage
+          else
+            composer run test
+          fi
+
+      - name: 📊 Upload Coverage to Codecov
+        if: matrix.coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/clover.xml
+          flags: php
+          name: PHP ${{ matrix.php-version }}
+          fail_ci_if_error: false
+
+      - name: 🚪 Quality Gates Check
+        if: matrix.php-version == '8.2'
+        run: composer run quality-gates-enforce
+
+  # ==============================================================================
+  # JAVASCRIPT QUALITY CHECKS
+  # ==============================================================================
+  javascript-quality:
+    name: ⚛️ JavaScript Quality Gates
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.node-version != '' && !github.event.inputs.skip_tests
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js ${{ needs.setup.outputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install Node dependencies
+        run: npm ci
+
+      - name: 🔍 ESLint Check
+        run: npm run lint
+
+      - name: 🧪 Jest Tests
+        run: npm run test:coverage
+
+      - name: 🏗️ Build Assets
+        run: npm run build
+
+      - name: 📏 Bundle Size Check
+        run: npm run check:bundle-size
+
+      - name: 📊 Upload Coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: javascript
+          name: JavaScript Tests
+          fail_ci_if_error: false
+
+      - name: 📦 Cache Built Assets
+        uses: actions/cache@v3
+        with:
+          path: |
+            assets/js
+            assets/css
+          key: ${{ runner.os }}-assets-${{ github.sha }}
+
+  # ==============================================================================
+  # SECURITY SCANNING
+  # ==============================================================================
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: setup
+    if: github.event_name == 'schedule' || github.event.inputs.run_security_scan == 'true' || contains(github.event.head_commit.message, '[security-scan]')
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: |
+          composer install --no-dev --prefer-dist --optimize-autoloader
+          npm ci --only=production
+
+      - name: 🔍 PHP Security Audit
+        run: composer audit
+
+      - name: 🔍 Node.js Security Audit
+        run: npm audit --audit-level=moderate
+
+      - name: 🛡️ Scan for sensitive data
+        run: |
+          echo "🔍 Scanning for potential security issues..."
+          
+          # Check for hardcoded API keys
+          if grep -r "sk_live_" --include="*.php" --include="*.js" . | grep -v ".env.example"; then
+            echo "❌ Found live API keys in code"
+            exit 1
+          fi
+          
+          # Check for unescaped outputs
+          if grep -r "\$_GET\[" --include="*.php" src/ | grep -v "esc_\|sanitize_"; then
+            echo "⚠️ Found potentially unescaped GET parameters"
+          fi
+          
+          # Check for direct POST usage
+          if grep -r "\$_POST\[" --include="*.php" src/ | grep -v "sanitize_\|wp_verify_nonce"; then
+            echo "⚠️ Found potentially unvalidated POST parameters"
+          fi
+          
+          echo "✅ Security scan completed"
+
+  # ==============================================================================
+  # INTEGRATION TESTS
+  # ==============================================================================
+  integration-tests:
+    name: 🧪 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [setup, php-quality, javascript-quality]
+    if: needs.setup.outputs.should-deploy == 'true' && !github.event.inputs.skip_tests
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: 🗃️ Restore Cached Assets
+        uses: actions/cache@v3
+        with:
+          path: |
+            assets/js
+            assets/css
+          key: ${{ runner.os }}-assets-${{ github.sha }}
+
+      - name: 📦 Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress --optimize-autoloader
+          npm ci
+
+      - name: 🏗️ Build assets if cache miss
+        run: |
+          if [ ! -f "assets/js/widget.js" ]; then
+            npm run build
+          fi
+
+      - name: 🐳 Setup WordPress Environment
+        run: |
+          if [ -f "scripts/docker-setup.sh" ]; then
+            bash scripts/docker-setup.sh --integration-test
+          fi
+
+      - name: 🧪 Run Integration Tests
+        run: |
+          if [ -f "scripts/run-phase-tests.sh" ]; then
+            bash scripts/run-phase-tests.sh --type integration
+          else
+            composer run test
+          fi
+
+      - name: 📊 Generate Integration Test Report
+        if: always()
+        run: |
+          echo "## 🧪 Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f "integration-test-results.xml" ]; then
+            echo "Integration tests completed successfully ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No integration test results found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ==============================================================================
+  # DEPLOYMENT
+  # ==============================================================================
+  deploy:
+    name: 🚀 Deploy to ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [setup, php-quality, javascript-quality, integration-tests]
+    if: needs.setup.outputs.should-deploy == 'true' && (success() || github.event.inputs.force_deploy == 'true')
+    timeout-minutes: 15
+    environment: ${{ needs.setup.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.setup.outputs.node-version }}
+          cache: 'npm'
+
+      - name: 🗃️ Restore Cached Assets
+        uses: actions/cache@v3
+        with:
+          path: |
+            assets/js
+            assets/css
+          key: ${{ runner.os }}-assets-${{ github.sha }}
+
+      - name: 📦 Install and build
+        run: |
+          npm ci
+          if [ ! -f "assets/js/widget.js" ]; then
+            npm run build
+          fi
+
+      - name: 🚀 Run Deployment Script
+        run: |
+          if [ -f "scripts/deploy.sh" ]; then
+            bash scripts/deploy.sh --environment ${{ needs.setup.outputs.environment }}
+          else
+            echo "⚠️ No deployment script found, creating deployment package..."
+            bash scripts/create-deployment-package.sh
+          fi
+
+      - name: 📦 Create Release Package
+        run: |
+          zip -r woo-ai-assistant-${{ github.sha }}.zip . \
+            -x "node_modules/*" "tests/*" "*.git*" "*.md" "composer.json" "composer.lock" \
+            "package*.json" "webpack.config.js" ".babelrc" "jest.config.js" "jest.setup.js" \
+            "widget-src/*" ".github/*" "scripts/*" "tmp/*" "coverage/*" "*.log"
+
+      - name: 📤 Upload Deployment Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: plugin-${{ needs.setup.outputs.environment }}-${{ github.sha }}
+          path: woo-ai-assistant-${{ github.sha }}.zip
+          retention-days: 30
+
+      - name: 🎉 Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Package Contents:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ PHP Backend Code" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ JavaScript Widget" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ CSS Styles" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Language Files" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Plugin Assets" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # NOTIFICATION AND CLEANUP
+  # ==============================================================================
+  notify-completion:
+    name: 📬 Pipeline Completion
+    runs-on: ubuntu-latest
+    needs: [setup, php-quality, javascript-quality, integration-tests, deploy]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Final Pipeline Status
+        run: |
+          echo "## 📊 CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Duration:** ${{ github.event.head_commit.timestamp }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Setup:** ${{ needs.setup.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PHP Quality:** ${{ needs.php-quality.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **JavaScript Quality:** ${{ needs.javascript-quality.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Integration Tests:** ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment:** ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 💬 Success Notification
+        if: success()
+        run: |
+          echo "🎉 All quality gates passed and deployment completed successfully!"
+          echo "The Woo AI Assistant plugin is ready for production use."
+
+      - name: ⚠️ Failure Notification
+        if: failure()
+        run: |
+          echo "❌ Pipeline failed. Please check the logs and fix the issues before proceeding."
+          echo "Quality gates must pass before deployment can continue."

@@ -134,15 +134,16 @@ class Main
 
         Logger::info('Loading plugin modules');
 
-        // TODO: In future tasks, initialize modules here:
+        // Load Admin module (Task 1.1)
+        if (is_admin()) {
+            $this->loadAdminModule();
+        }
+
+        // TODO: In future tasks, initialize additional modules:
         // - Knowledge Base Manager
-        // - Admin Interface
         // - REST API Controller
         // - Frontend Widget Loader
         // - Chatbot Handler
-
-        // For now, just log that modules will be loaded
-        Logger::debug('Module loading placeholder - will be implemented in future tasks');
 
         // Apply filter to allow module registration by other code
         $this->modules = apply_filters('woo_ai_assistant_load_modules', $this->modules);
@@ -192,10 +193,37 @@ class Main
      */
     public function initAdmin(): void
     {
-        // TODO: Initialize admin interface in future tasks
-        Logger::debug('Admin initialization placeholder');
+        // Admin module will be loaded in loadModules method
+        Logger::debug('Admin initialization hook fired');
 
         do_action('woo_ai_assistant_admin_init');
+    }
+
+    /**
+     * Load admin module
+     *
+     * Initializes the admin interface including menu, pages, and assets.
+     *
+     * @return void
+     */
+    private function loadAdminModule(): void
+    {
+        try {
+            // Load admin menu and pages
+            $adminMenu = \WooAiAssistant\Admin\AdminMenu::getInstance();
+            $this->registerModule('admin_menu', $adminMenu);
+
+            // Load assets manager
+            $assets = \WooAiAssistant\Admin\Assets::getInstance();
+            $this->registerModule('admin_assets', $assets);
+
+            Logger::info('Admin module loaded successfully');
+        } catch (Exception $e) {
+            Logger::error('Failed to load admin module', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 
     /**

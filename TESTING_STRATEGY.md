@@ -19,6 +19,31 @@
 
 **CRITICAL:** Tests evolve WITH the code, not BEFORE it exists!
 
+### 🐳 Docker Testing Environment
+
+All tests should be run in the Docker environment for consistency and isolation. The testing environment includes:
+
+- **Isolated test containers**: Separate from development containers
+- **Test database**: Clean database for each test run
+- **PHPUnit**: For PHP backend testing
+- **Jest**: For React frontend testing
+- **Quality gates**: Automated code quality checks
+
+#### Quick Docker Testing Commands
+```bash
+# Run all tests
+./scripts/docker-test.sh
+
+# Run specific test types
+./scripts/docker-test.sh php      # PHP/PHPUnit tests only
+./scripts/docker-test.sh js       # JavaScript/Jest tests only  
+./scripts/docker-test.sh quality  # Quality gates only
+
+# Manual testing commands
+docker-compose --profile testing run --rm test-runner composer test
+docker-compose --profile development run --rm node-dev npm test
+```
+
 ### Core Principles
 1. **Test what exists** - Never test classes that haven't been created yet
 2. **Progressive coverage** - Start with 0%, build to 90% gradually

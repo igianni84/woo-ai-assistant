@@ -1,0 +1,93 @@
+{
+  "development_config": {
+    "api_keys": {
+      "openrouter_api_key": "test_openrouter_key_12345",
+      "openai_api_key": "test_openai_key_12345", 
+      "pinecone_api_key": "test_pinecone_key_12345",
+      "google_api_key": "test_google_key_12345"
+    },
+    "development_mode": true,
+    "debug_enabled": true,
+    "use_mock_api": true,
+    "use_dummy_embeddings": true,
+    "cache_ttl": 60,
+    "max_items_per_scan": 10,
+    "development_license_key": "dev-license-test-12345"
+  },
+  "production_config": {
+    "license_key": "prod-license-12345",
+    "intermediate_server_url": "https://api.woo-ai-assistant.com",
+    "development_mode": false,
+    "debug_enabled": false,
+    "use_mock_api": false,
+    "use_dummy_embeddings": false,
+    "cache_ttl": 3600,
+    "max_items_per_scan": 100
+  },
+  "ai_models": {
+    "gemini_flash": {
+      "model_id": "gemini-2.5-flash",
+      "provider": "openrouter",
+      "max_tokens": 4000,
+      "temperature": 0.7
+    },
+    "gemini_pro": {
+      "model_id": "gemini-2.5-pro", 
+      "provider": "openrouter",
+      "max_tokens": 8000,
+      "temperature": 0.5
+    },
+    "gpt_4": {
+      "model_id": "gpt-4o-mini",
+      "provider": "openai",
+      "max_tokens": 4000,
+      "temperature": 0.7
+    }
+  },
+  "embedding_config": {
+    "model": "text-embedding-3-small",
+    "provider": "openai",
+    "dimensions": 1536,
+    "batch_size": 100
+  },
+  "vector_database": {
+    "provider": "pinecone",
+    "index_name": "woo-ai-assistant-test",
+    "environment": "development",
+    "metric": "cosine",
+    "dimension": 1536
+  },
+  "knowledge_base_settings": {
+    "scan_products": true,
+    "scan_pages": true,
+    "scan_posts": false,
+    "scan_categories": true,
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "min_content_length": 50,
+    "excluded_post_types": ["revision", "nav_menu_item", "attachment"],
+    "excluded_meta_keys": ["_edit_lock", "_edit_last", "_wp_trash_meta"]
+  },
+  "chat_settings": {
+    "max_conversation_length": 10,
+    "response_timeout": 30,
+    "max_context_tokens": 8000,
+    "enable_conversation_memory": true,
+    "enable_product_recommendations": true,
+    "enable_coupon_generation": true
+  },
+  "rate_limits": {
+    "conversations_per_hour": 50,
+    "conversations_per_day": 200,
+    "api_calls_per_minute": 60,
+    "knowledge_base_updates_per_hour": 10
+  },
+  "ui_settings": {
+    "widget_position": "bottom-right",
+    "widget_color": "#007cba",
+    "welcome_message": "Hi! I'm your AI shopping assistant. How can I help you today?",
+    "placeholder_text": "Ask me anything about our products...",
+    "enable_typing_indicator": true,
+    "enable_sound_notifications": false
+  }
+}

@@ -30,6 +30,8 @@
     "scripts": {
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html coverage",
+        "test-simple": "phpunit --configuration phpunit-simple.xml",
+        "test-simple:coverage": "phpunit --configuration phpunit-simple.xml --coverage-html coverage/html-simple",
         "phpcs": "phpcs --standard=PSR12 --extensions=php src/",
         "phpcbf": "phpcbf --standard=PSR12 --extensions=php src/",
         "phpstan": "phpstan analyse src/ --level=5",

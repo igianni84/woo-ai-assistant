@@ -1,0 +1,223 @@
+version: '3.8'
+
+services:
+  # WordPress with pre-installed WooCommerce
+  wordpress:
+    build:
+      context: .
+      dockerfile: docker/wordpress/Dockerfile
+    container_name: woo-ai-wordpress
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME: ${DB_NAME:-woo_ai_dev}
+      WORDPRESS_DEBUG: ${WP_DEBUG:-true}
+      WORDPRESS_CONFIG_EXTRA: |
+        // Development constants
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+        define('WOO_AI_ASSISTANT_DEBUG', true);
+        define('WOO_AI_DEVELOPMENT_MODE', true);
+        define('WOO_AI_ASSISTANT_USE_DUMMY_DATA', true);
+        
+        // Memory and execution limits
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', 300);
+        
+        // Disable file editing in admin
+        define('DISALLOW_FILE_EDIT', false);
+        
+        // Enable multisite if needed
+        // define('WP_ALLOW_MULTISITE', true);
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/woo-ai-assistant
+      - ./docker/wordpress/init.sh:/docker-entrypoint-init.d/init.sh:ro
+      - ./logs:/var/log/wordpress
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: woo-ai-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-woo_ai_dev}
+      MYSQL_USER: ${DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=200
+      --innodb_buffer_pool_size=512M
+      --query_cache_type=1
+      --query_cache_size=128M
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5
+    container_name: woo-ai-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USER:-wordpress}
+      PMA_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      UPLOAD_LIMIT: 256M
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+
+  # WP-CLI for WordPress management
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: woo-ai-wpcli
+    user: "33:33" # www-data user
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/woo-ai-assistant
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME: ${DB_NAME:-woo_ai_dev}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      wordpress:
+        condition: service_healthy
+    networks:
+      - woo-ai-network
+    profiles:
+      - cli
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: woo-ai-mailhog
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+
+  # Redis for caching (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: woo-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # Node.js development container for React widget
+  node-dev:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: woo-ai-node-dev
+    working_dir: /app
+    volumes:
+      - ./widget-src:/app
+      - ./assets:/app/dist
+      - node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: true
+    ports:
+      - "3000:3000"  # Webpack dev server
+      - "3001:3001"  # Hot reload
+    networks:
+      - woo-ai-network
+    restart: unless-stopped
+    profiles:
+      - development
+    command: npm run watch
+
+  # Testing container for running PHPUnit and Jest
+  test-runner:
+    build:
+      context: .
+      dockerfile: docker/test/Dockerfile
+    container_name: woo-ai-test-runner
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./logs:/app/logs
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME: ${DB_NAME:-woo_ai_test}
+      WOO_AI_DEVELOPMENT_MODE: true
+      WOO_AI_ASSISTANT_DEBUG: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - woo-ai-network
+    profiles:
+      - testing
+
+volumes:
+  wordpress_data:
+    driver: local
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  node_modules:
+    driver: local
+
+networks:
+  woo-ai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

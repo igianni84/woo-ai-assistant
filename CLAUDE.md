@@ -5,7 +5,7 @@
 **Project Name:** Woo AI Assistant  
 **Version:** 1.0  
 **Description:** AI-powered chatbot for WooCommerce with zero-config knowledge base and 24/7 customer support.  
-**Development Environment:** macOS with MAMP (PHP 8.2.20, Apache port 8888, MySQL port 8889)  
+**Development Environment:** Docker (Primary) + macOS MAMP (Alternative)  
 **Architecture:** See `ARCHITETTURA.md` for detailed system design  
 **Roadmap:** See `ROADMAP.md` for task progression and status  
 
@@ -180,7 +180,7 @@ woo-ai-assistant/
 - **Vector DB:** Pinecone via intermediate server
 - **Embeddings:** OpenAI text-embedding-3-small
 - **Payments:** Stripe integration
-- **Development Server:** MAMP (Apache 8888, MySQL 8889)
+- **Development Server:** Docker (WordPress 8080, MySQL 3306) + MAMP Alternative
 
 ## 📝 Coding Standards
 
@@ -433,6 +433,71 @@ describe('ChatWindow', () => {
 
 ## 🌍 Development Environment Setup
 
+### 🐳 Docker Development Environment (Primary)
+
+Docker provides the most consistent, isolated, and production-like development environment. This is now the **primary recommended setup** for all developers.
+
+#### Quick Docker Setup
+```bash
+# 1. Clone and navigate to project
+cd /path/to/woo-ai-assistant
+
+# 2. Run automated setup
+./scripts/docker-setup.sh
+
+# 3. Access your environment
+# WordPress: http://localhost:8080
+# Admin: http://localhost:8080/wp-admin (admin/password)
+# phpMyAdmin: http://localhost:8081
+# Mailhog: http://localhost:8025
+```
+
+#### Docker Services Overview
+- **WordPress**: Latest with PHP 8.2, pre-configured with WooCommerce
+- **MySQL**: 8.0 with optimized development settings
+- **phpMyAdmin**: Database management interface
+- **Mailhog**: Email testing and capture
+- **Redis**: Caching layer (optional)
+- **Node.js**: React widget development server
+- **Test Runner**: Isolated testing environment
+
+#### Docker Environment Commands
+```bash
+# Start environment
+docker-compose up -d
+
+# Stop environment  
+docker-compose down
+
+# View logs
+docker-compose logs -f [service]
+
+# Run WP-CLI commands
+docker-compose exec wordpress wp --allow-root [command]
+
+# Run Composer commands
+docker-compose exec wordpress composer [command]
+
+# Run tests
+./scripts/docker-test.sh
+
+# Complete reset
+./scripts/docker-reset.sh
+```
+
+#### Docker Development Benefits
+- ✅ **Consistent Environment**: Same setup across all machines
+- ✅ **Isolation**: No conflicts with host system
+- ✅ **Pre-configured**: WordPress + WooCommerce ready instantly
+- ✅ **Production-like**: Similar to actual deployment environment
+- ✅ **Easy Reset**: Complete environment reset in minutes
+- ✅ **Testing**: Isolated test containers
+- ✅ **Multiple PHP Versions**: Easy switching if needed
+
+### 💻 MAMP Alternative Setup (macOS)
+
+If you prefer MAMP or need to use it for compatibility, follow the setup below.
+
 ### ⚠️ CRITICAL: Production vs Development Architecture
 
 #### Production Architecture (What Users Get)
@@ -525,10 +590,15 @@ WOO_AI_DEV_API_TIMEOUT=10
 WOO_AI_DEV_CACHE_TTL=60
 WOO_AI_DEV_MAX_ITEMS=10
 
-# MAMP Configuration
+# MAMP Configuration (if using MAMP instead of Docker)
 DB_HOST=localhost:8889
 WP_HOME=http://localhost:8888/wp
 WP_SITEURL=http://localhost:8888/wp
+
+# Docker Configuration (if using Docker - default)
+DB_HOST=mysql:3306
+WP_HOME=http://localhost:8080
+WP_SITEURL=http://localhost:8080
 
 # Development License (any value accepted in dev mode)
 WOO_AI_DEVELOPMENT_LICENSE_KEY=dev-license-12345

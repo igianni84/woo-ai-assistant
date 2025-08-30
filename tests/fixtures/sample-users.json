@@ -1,0 +1,76 @@
+[
+  {
+    "user_login": "test_customer_1",
+    "user_email": "customer1@example.com",
+    "user_pass": "password123",
+    "first_name": "John",
+    "last_name": "Doe",
+    "role": "customer",
+    "meta": {
+      "billing_first_name": "John",
+      "billing_last_name": "Doe",
+      "billing_email": "customer1@example.com",
+      "billing_phone": "+1-555-123-4567",
+      "billing_address_1": "123 Main Street",
+      "billing_city": "New York",
+      "billing_state": "NY",
+      "billing_postcode": "10001",
+      "billing_country": "US",
+      "shipping_first_name": "John",
+      "shipping_last_name": "Doe",
+      "shipping_address_1": "123 Main Street",
+      "shipping_city": "New York",
+      "shipping_state": "NY",
+      "shipping_postcode": "10001",
+      "shipping_country": "US"
+    }
+  },
+  {
+    "user_login": "test_customer_2",
+    "user_email": "customer2@example.com",
+    "user_pass": "password123",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "role": "customer",
+    "meta": {
+      "billing_first_name": "Jane",
+      "billing_last_name": "Smith",
+      "billing_email": "customer2@example.com",
+      "billing_phone": "+1-555-987-6543",
+      "billing_address_1": "456 Oak Avenue",
+      "billing_city": "Los Angeles",
+      "billing_state": "CA",
+      "billing_postcode": "90210",
+      "billing_country": "US",
+      "shipping_first_name": "Jane",
+      "shipping_last_name": "Smith",
+      "shipping_address_1": "456 Oak Avenue",
+      "shipping_city": "Los Angeles",
+      "shipping_state": "CA",
+      "shipping_postcode": "90210",
+      "shipping_country": "US"
+    }
+  },
+  {
+    "user_login": "test_shop_manager",
+    "user_email": "manager@example.com",
+    "user_pass": "password123",
+    "first_name": "Mike",
+    "last_name": "Manager",
+    "role": "shop_manager",
+    "meta": {
+      "description": "Test shop manager for plugin testing"
+    }
+  },
+  {
+    "user_login": "test_subscriber",
+    "user_email": "subscriber@example.com",
+    "user_pass": "password123",
+    "first_name": "Sara",
+    "last_name": "Subscriber",
+    "role": "subscriber",
+    "meta": {
+      "description": "Test subscriber for plugin testing"
+    }
+  }
+]

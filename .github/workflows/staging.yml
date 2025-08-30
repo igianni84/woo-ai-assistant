@@ -1,0 +1,483 @@
+# Staging Environment Workflow for Woo AI Assistant
+#
+# This workflow handles deployment and testing specifically for the staging environment.
+# It provides a safe environment to test features before production deployment.
+#
+# @package WooAiAssistant
+# @subpackage CI/CD
+# @since 1.0.0
+# @author Claude Code Assistant
+
+name: 🔄 Staging Environment
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      run_full_test_suite:
+        description: 'Run full test suite including E2E tests'
+        required: false
+        default: true
+        type: boolean
+      deploy_to_staging:
+        description: 'Deploy to staging server'
+        required: false
+        default: true
+        type: boolean
+      notification_level:
+        description: 'Notification level'
+        required: false
+        default: 'normal'
+        type: choice
+        options:
+          - minimal
+          - normal
+          - verbose
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '18'
+  STAGING_URL: 'https://staging.woo-ai-assistant.com'
+  WORDPRESS_VERSION: 'latest'
+  WOOCOMMERCE_VERSION: 'latest'
+
+# Limit concurrent staging deployments
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: false
+
+jobs:
+  # ==============================================================================
+  # STAGING PREPARATION
+  # ==============================================================================
+  prepare-staging:
+    name: 🔧 Prepare Staging Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should-run-e2e: ${{ steps.test-plan.outputs.run_e2e }}
+      should-deploy: ${{ steps.deploy-check.outputs.should_deploy }}
+      staging-url: ${{ env.STAGING_URL }}
+      commit-sha: ${{ github.sha }}
+      branch-name: ${{ github.ref_name }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🔍 Analyze changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            critical:
+              - 'src/Setup/**'
+              - 'src/KnowledgeBase/**'
+              - 'src/Chatbot/**'
+              - 'woo-ai-assistant.php'
+            frontend:
+              - 'widget-src/**'
+              - 'assets/**'
+            config:
+              - '.github/**'
+              - 'composer.json'
+              - 'package.json'
+              - 'docker/**'
+
+      - name: 📋 Determine test plan
+        id: test-plan
+        run: |
+          RUN_E2E=false
+          
+          if [[ "${{ steps.changes.outputs.critical }}" == "true" ]]; then
+            RUN_E2E=true
+            echo "🔍 Critical changes detected, full E2E tests required"
+          elif [[ "${{ github.event.inputs.run_full_test_suite }}" == "true" ]]; then
+            RUN_E2E=true
+            echo "🔍 Full test suite requested manually"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            RUN_E2E=true
+            echo "🔍 Manual trigger, running full tests"
+          fi
+          
+          echo "run_e2e=$RUN_E2E" >> $GITHUB_OUTPUT
+
+      - name: ✅ Deployment check
+        id: deploy-check
+        run: |
+          SHOULD_DEPLOY=true
+          
+          if [[ "${{ github.event.inputs.deploy_to_staging }}" == "false" ]]; then
+            SHOULD_DEPLOY=false
+            echo "📦 Deployment manually disabled"
+          fi
+          
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+
+      - name: 📊 Staging plan summary
+        run: |
+          echo "## 🔄 Staging Deployment Plan" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging URL:** ${{ env.STAGING_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Plan:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Unit Tests:** ✅ Always" >> $GITHUB_STEP_SUMMARY
+          echo "- **Integration Tests:** ✅ Always" >> $GITHUB_STEP_SUMMARY
+          echo "- **E2E Tests:** ${{ steps.test-plan.outputs.run_e2e == 'true' && '✅' || '⏭️' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment:** ${{ steps.deploy-check.outputs.should_deploy == 'true' && '✅' || '⏭️' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Detected:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Critical Code:** ${{ steps.changes.outputs.critical == 'true' && '🔴 Modified' || '✅ No changes' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** ${{ steps.changes.outputs.frontend == 'true' && '🟡 Modified' || '✅ No changes' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Configuration:** ${{ steps.changes.outputs.config == 'true' && '🟡 Modified' || '✅ No changes' }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # QUALITY GATES FOR STAGING
+  # ==============================================================================
+  staging-quality-gates:
+    name: 🧪 Staging Quality Gates
+    runs-on: ubuntu-latest
+    needs: prepare-staging
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: true
+      matrix:
+        test-suite: [php-tests, javascript-tests, integration-tests]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🗃️ Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/composer
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/composer.lock', '**/package-lock.json') }}
+
+      - name: 📦 Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress --optimize-autoloader
+          npm ci
+
+      - name: 🔧 Setup WordPress test environment
+        run: |
+          if [ -f "scripts/docker-setup.sh" ]; then
+            bash scripts/docker-setup.sh --test-only
+          fi
+
+      - name: 🧪 Run PHP Tests
+        if: matrix.test-suite == 'php-tests'
+        run: |
+          composer run phpcs
+          composer run phpstan
+          composer run test:coverage
+          composer run quality-gates-enforce
+
+      - name: ⚛️ Run JavaScript Tests
+        if: matrix.test-suite == 'javascript-tests'
+        run: |
+          npm run lint
+          npm run test:coverage
+          npm run build
+          npm run check:bundle-size
+
+      - name: 🔗 Run Integration Tests
+        if: matrix.test-suite == 'integration-tests'
+        run: |
+          # Run comprehensive integration tests for staging
+          if [ -f "scripts/run-phase-tests.sh" ]; then
+            bash scripts/run-phase-tests.sh --type integration --environment staging
+          fi
+
+      - name: 📊 Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-suite }}
+          path: |
+            coverage/
+            tests/reports/
+          retention-days: 7
+
+  # ==============================================================================
+  # END-TO-END TESTING
+  # ==============================================================================
+  e2e-tests:
+    name: 🌐 E2E Tests (Staging)
+    runs-on: ubuntu-latest
+    needs: [prepare-staging, staging-quality-gates]
+    if: needs.prepare-staging.outputs.should-run-e2e == 'true'
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+        test-suite: [core, advanced]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build assets
+        run: npm run build
+
+      - name: 🐳 Setup WordPress environment
+        run: |
+          if [ -f "scripts/docker-setup.sh" ]; then
+            bash scripts/docker-setup.sh --e2e-testing
+          fi
+
+      - name: 🔧 Install Playwright
+        run: |
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: 🧪 Run E2E tests - ${{ matrix.test-suite }}
+        run: |
+          export BROWSER=${{ matrix.browser }}
+          export TEST_SUITE=${{ matrix.test-suite }}
+          export WP_BASE_URL=http://localhost:8080
+          
+          # Run appropriate test suite
+          if [ "${{ matrix.test-suite }}" == "core" ]; then
+            npm run test:e2e:core
+          else
+            npm run test:e2e:advanced
+          fi
+        env:
+          WP_ADMIN_USER: admin
+          WP_ADMIN_PASS: password
+
+      - name: 📤 Upload E2E results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-results-${{ matrix.browser }}-${{ matrix.test-suite }}
+          path: |
+            tests/e2e/reports/
+            tests/e2e/screenshots/
+            tests/e2e/videos/
+          retention-days: 7
+
+  # ==============================================================================
+  # STAGING DEPLOYMENT
+  # ==============================================================================
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [prepare-staging, staging-quality-gates, e2e-tests]
+    if: always() && needs.prepare-staging.outputs.should-deploy == 'true' && (success() || needs.e2e-tests.result == 'skipped')
+    timeout-minutes: 15
+    environment: staging
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 📦 Create staging package
+        run: |
+          bash scripts/deploy.sh --environment staging --dry-run
+          bash scripts/create-deployment-package.sh staging
+
+      - name: 🚀 Deploy to staging server
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Staging URL: ${{ needs.prepare-staging.outputs.staging-url }}"
+          
+          # Here you would implement actual staging deployment
+          # Examples:
+          # - Upload via FTP/SFTP
+          # - Deploy via SSH
+          # - Use hosting provider APIs
+          # - Deploy to staging WordPress instance
+          
+          echo "✅ Staging deployment completed"
+
+      - name: 🔍 Post-deployment validation
+        run: |
+          echo "🔍 Validating staging deployment..."
+          
+          # Health check
+          sleep 30  # Allow time for deployment to settle
+          
+          # Basic connectivity test
+          if curl -f -s "${{ needs.prepare-staging.outputs.staging-url }}" > /dev/null; then
+            echo "✅ Staging site is accessible"
+          else
+            echo "❌ Staging site is not accessible"
+            exit 1
+          fi
+          
+          echo "✅ Post-deployment validation passed"
+
+      - name: 📤 Upload staging package
+        uses: actions/upload-artifact@v3
+        with:
+          name: staging-package-${{ needs.prepare-staging.outputs.commit-sha }}
+          path: woo-ai-assistant-*-staging.zip
+          retention-days: 14
+
+  # ==============================================================================
+  # STAGING SMOKE TESTS
+  # ==============================================================================
+  staging-smoke-tests:
+    name: 💨 Staging Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [prepare-staging, deploy-staging]
+    if: success()
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install test dependencies
+        run: npm ci
+
+      - name: 🔧 Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: 💨 Run smoke tests
+        run: |
+          export WP_BASE_URL="${{ needs.prepare-staging.outputs.staging-url }}"
+          
+          # Run basic smoke tests
+          npm run test:e2e:smoke
+        env:
+          STAGING_URL: ${{ needs.prepare-staging.outputs.staging-url }}
+
+      - name: 📊 Generate smoke test report
+        if: always()
+        run: |
+          echo "## 💨 Staging Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging URL:** ${{ needs.prepare-staging.outputs.staging-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests Executed:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Basic site accessibility" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Plugin activation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Widget loading" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Basic chat functionality" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # NOTIFICATION AND CLEANUP
+  # ==============================================================================
+  staging-notification:
+    name: 📬 Staging Completion
+    runs-on: ubuntu-latest
+    needs: [prepare-staging, staging-quality-gates, e2e-tests, deploy-staging, staging-smoke-tests]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Final staging status
+        run: |
+          echo "## 🔄 Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ needs.prepare-staging.outputs.branch-name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ needs.prepare-staging.outputs.commit-sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging URL:** ${{ needs.prepare-staging.outputs.staging-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Execution Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Quality Gates:** ${{ needs.staging-quality-gates.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **E2E Tests:** ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment:** ${{ needs.deploy-staging.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Smoke Tests:** ${{ needs.staging-smoke-tests.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🎉 Success notification
+        if: success()
+        run: |
+          echo "## ✅ Staging Deployment Successful!"
+          echo ""
+          echo "🔗 **Staging Environment:** ${{ needs.prepare-staging.outputs.staging-url }}"
+          echo "📦 **Package:** staging-package-${{ needs.prepare-staging.outputs.commit-sha }}"
+          echo ""
+          echo "The staging environment has been successfully updated and is ready for testing!"
+
+      - name: ⚠️ Failure notification
+        if: failure()
+        run: |
+          echo "## ❌ Staging Deployment Failed"
+          echo ""
+          echo "One or more steps in the staging deployment pipeline failed."
+          echo "Please check the job logs for details and resolve the issues."
+          echo ""
+          echo "**Failed Jobs:**"
+          if [[ "${{ needs.staging-quality-gates.result }}" == "failure" ]]; then
+            echo "- Quality Gates"
+          fi
+          if [[ "${{ needs.e2e-tests.result }}" == "failure" ]]; then
+            echo "- E2E Tests"
+          fi
+          if [[ "${{ needs.deploy-staging.result }}" == "failure" ]]; then
+            echo "- Deployment"
+          fi
+          if [[ "${{ needs.staging-smoke-tests.result }}" == "failure" ]]; then
+            echo "- Smoke Tests"
+          fi

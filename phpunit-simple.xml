@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+         bootstrap="tests/bootstrap-simple.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         stopOnFailure="false"
+         failOnWarning="false">
+    
+    <!-- Test Extensions -->
+    <extensions>
+    </extensions>
+    
+    <!-- Simple Test Suites -->
+    <testsuites>
+        <testsuite name="Simple Tests">
+            <file>tests/unit/SimpleTestExample.php</file>
+        </testsuite>
+    </testsuites>
+
+    <!-- Code Coverage (basic) -->
+    <coverage includeUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage/html-simple"/>
+            <text outputFile="coverage/coverage-simple.txt"/>
+        </report>
+    </coverage>
+
+    <!-- PHP Configuration -->
+    <php>
+        <const name="WOO_AI_ASSISTANT_TESTING" value="true"/>
+        <const name="WOO_AI_DEVELOPMENT_MODE" value="true"/>
+        
+        <ini name="memory_limit" value="256M"/>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="date.timezone" value="UTC"/>
+    </php>
+</phpunit>

@@ -15,6 +15,14 @@
 ## 🎯 Quick Start
 
 ### Prerequisites Checklist
+
+#### Docker Setup (Recommended)
+- [ ] Docker Desktop installed and running
+- [ ] Git configured
+- [ ] VS Code or PhpStorm IDE
+- [ ] Terminal/Command Line access
+
+#### Alternative MAMP Setup
 - [ ] macOS with MAMP installed
 - [ ] PHP 8.2+ configured in MAMP
 - [ ] Node.js 18+ and npm installed
@@ -25,6 +33,22 @@
 - [ ] WooCommerce 7.0+ activated
 
 ### 30-Second Setup
+
+#### Docker Setup (Recommended)
+```bash
+# 1. Clone the repository
+git clone [repository-url] woo-ai-assistant
+cd woo-ai-assistant
+
+# 2. Run automated Docker setup
+./scripts/docker-setup.sh
+
+# 3. Access your development environment
+# WordPress: http://localhost:8080
+# Admin: http://localhost:8080/wp-admin (admin/password)
+```
+
+#### MAMP Setup (Alternative)
 ```bash
 # 1. Clone the repository
 cd /Applications/MAMP/htdocs/wp/wp-content/plugins/
@@ -48,7 +72,78 @@ wp plugin activate woo-ai-assistant
 
 ## 🛠 Development Environment Setup
 
-### Step 1: MAMP Configuration
+### 🐳 Docker Setup (Primary Method)
+
+Docker provides the most consistent and production-like development environment. All developers should use this method for consistency.
+
+#### Step 1: Install Docker
+1. Download Docker Desktop: https://www.docker.com/products/docker-desktop
+2. Install and start Docker Desktop
+3. Verify installation: `docker --version`
+
+#### Step 2: Clone and Setup Project
+```bash
+# Clone the repository
+git clone [repository-url] woo-ai-assistant
+cd woo-ai-assistant
+
+# Run the automated setup script
+./scripts/docker-setup.sh
+```
+
+The setup script will:
+- Create .env file from template
+- Build all Docker images
+- Start MySQL, Redis, and Mailhog services
+- Initialize WordPress with WooCommerce
+- Create sample products for testing
+- Set up development users and settings
+
+#### Step 3: Access Your Environment
+- **WordPress**: http://localhost:8080
+- **WordPress Admin**: http://localhost:8080/wp-admin
+  - Username: `admin`
+  - Password: `password`
+- **phpMyAdmin**: http://localhost:8081
+- **Mailhog**: http://localhost:8025 (Email testing)
+
+#### Step 4: Configure API Keys
+Edit the `.env` file and add your development API keys:
+```env
+OPENROUTER_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+PINECONE_API_KEY=your_key_here
+```
+
+#### Docker Daily Commands
+```bash
+# Start the environment
+docker-compose up -d
+
+# Stop the environment
+docker-compose down
+
+# View logs
+docker-compose logs -f wordpress
+
+# Run WP-CLI commands
+docker-compose exec wordpress wp --allow-root plugin list
+
+# Run Composer commands  
+docker-compose exec wordpress composer install
+
+# Run tests
+./scripts/docker-test.sh
+
+# Complete reset (if needed)
+./scripts/docker-reset.sh
+```
+
+### 💻 Alternative: MAMP Configuration
+
+If you prefer MAMP or cannot use Docker, follow these steps:
+
+#### Step 1: MAMP Configuration
 
 #### 1.1 Configure PHP
 ```
@@ -156,7 +251,66 @@ graph LR
     B --> C[3. Implement]
     C --> D[4. Test & Verify]
     D --> E[5. Mark Complete]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#f1f8e9
 ```
+
+### 🎯 Specialized Agents Workflow Diagram
+
+```mermaid
+graph TD
+    START([New Task]) --> CHECK{Check Task Type}
+    
+    CHECK -->|PHP/Backend| WP[wp-backend-developer]
+    CHECK -->|React/Frontend| REACT[react-frontend-specialist]
+    
+    WP --> IMPL1[Implement PHP Classes]
+    REACT --> IMPL2[Implement React Components]
+    
+    IMPL1 --> QA[qa-testing-specialist]
+    IMPL2 --> QA[qa-testing-specialist]
+    
+    QA --> TEST{Quality Gates}
+    TEST -->|Pass| RM[roadmap-project-manager]
+    TEST -->|Fail| FIX[Fix Issues]
+    FIX --> QA
+    
+    RM --> COMPLETE[Mark Completed]
+    
+    style START fill:#e3f2fd
+    style WP fill:#e8f5e8
+    style REACT fill:#e1f5fe
+    style QA fill:#fff3e0
+    style RM fill:#f3e5f5
+    style TEST fill:#ffebee
+    style COMPLETE fill:#e8f5e8
+```
+
+### 🤖 CRITICAL: Specialized Agents Workflow
+
+This project requires using **specialized AI agents** for different types of work:
+
+#### Agent Selection Rules:
+- **wp-backend-developer** 🔧 - For PHP classes, database, WordPress/WooCommerce hooks
+- **react-frontend-specialist** ⚛️ - For React components, JavaScript, widget frontend
+- **qa-testing-specialist** ✅ - MANDATORY before completing ANY task
+- **roadmap-project-manager** 📋 - For task status updates, progress tracking
+
+#### Mandatory Workflow Sequence:
+```
+1. 📋 roadmap-project-manager - Mark task as "in_progress"
+2. 🔧 wp-backend-developer OR ⚛️ react-frontend-specialist - Implement
+3. ✅ qa-testing-specialist - Run quality gates (MANDATORY)
+4. 📋 roadmap-project-manager - Mark as "completed" only after QA passes
+```
+
+⚠️ **CRITICAL:** Never skip the qa-testing-specialist step!
+
+📋 **For Complete Agent Specifications:** See `CLAUDE.md` Section "🤖 SPECIALIZED AGENTS WORKFLOW" for detailed agent usage rules, trigger keywords, and examples.
 
 #### Step 1: Check Roadmap
 ```bash
@@ -180,7 +334,7 @@ graph LR
 #### Step 4: Test & Verify
 ```bash
 # Run quality gates (MANDATORY!)
-bash scripts/quality-gates-enforcer.sh
+composer run quality-gates-enforce
 
 # If any fail, fix and re-run
 # Only proceed when ALL pass
@@ -296,7 +450,7 @@ trait Singleton {
 #### Automatic Verification (Recommended)
 ```bash
 # Run ALL quality gates at once
-bash scripts/quality-gates-enforcer.sh
+composer run quality-gates-enforce
 ```
 
 #### Manual Verification

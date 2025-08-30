@@ -15,6 +15,14 @@
 ## 🎯 Quick Start
 
 ### Prerequisites Checklist
+
+#### Docker Setup (Recommended)
+- [ ] Docker Desktop installed and running
+- [ ] Git configured
+- [ ] VS Code or PhpStorm IDE
+- [ ] Terminal/Command Line access
+
+#### Alternative MAMP Setup
 - [ ] macOS with MAMP installed
 - [ ] PHP 8.2+ configured in MAMP
 - [ ] Node.js 18+ and npm installed
@@ -25,6 +33,22 @@
 - [ ] WooCommerce 7.0+ activated
 
 ### 30-Second Setup
+
+#### Docker Setup (Recommended)
+```bash
+# 1. Clone the repository
+git clone [repository-url] woo-ai-assistant
+cd woo-ai-assistant
+
+# 2. Run automated Docker setup
+./scripts/docker-setup.sh
+
+# 3. Access your development environment
+# WordPress: http://localhost:8080
+# Admin: http://localhost:8080/wp-admin (admin/password)
+```
+
+#### MAMP Setup (Alternative)
 ```bash
 # 1. Clone the repository
 cd /Applications/MAMP/htdocs/wp/wp-content/plugins/
@@ -48,7 +72,78 @@ wp plugin activate woo-ai-assistant
 
 ## 🛠 Development Environment Setup
 
-### Step 1: MAMP Configuration
+### 🐳 Docker Setup (Primary Method)
+
+Docker provides the most consistent and production-like development environment. All developers should use this method for consistency.
+
+#### Step 1: Install Docker
+1. Download Docker Desktop: https://www.docker.com/products/docker-desktop
+2. Install and start Docker Desktop
+3. Verify installation: `docker --version`
+
+#### Step 2: Clone and Setup Project
+```bash
+# Clone the repository
+git clone [repository-url] woo-ai-assistant
+cd woo-ai-assistant
+
+# Run the automated setup script
+./scripts/docker-setup.sh
+```
+
+The setup script will:
+- Create .env file from template
+- Build all Docker images
+- Start MySQL, Redis, and Mailhog services
+- Initialize WordPress with WooCommerce
+- Create sample products for testing
+- Set up development users and settings
+
+#### Step 3: Access Your Environment
+- **WordPress**: http://localhost:8080
+- **WordPress Admin**: http://localhost:8080/wp-admin
+  - Username: `admin`
+  - Password: `password`
+- **phpMyAdmin**: http://localhost:8081
+- **Mailhog**: http://localhost:8025 (Email testing)
+
+#### Step 4: Configure API Keys
+Edit the `.env` file and add your development API keys:
+```env
+OPENROUTER_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+PINECONE_API_KEY=your_key_here
+```
+
+#### Docker Daily Commands
+```bash
+# Start the environment
+docker-compose up -d
+
+# Stop the environment
+docker-compose down
+
+# View logs
+docker-compose logs -f wordpress
+
+# Run WP-CLI commands
+docker-compose exec wordpress wp --allow-root plugin list
+
+# Run Composer commands  
+docker-compose exec wordpress composer install
+
+# Run tests
+./scripts/docker-test.sh
+
+# Complete reset (if needed)
+./scripts/docker-reset.sh
+```
+
+### 💻 Alternative: MAMP Configuration
+
+If you prefer MAMP or cannot use Docker, follow these steps:
+
+#### Step 1: MAMP Configuration
 
 #### 1.1 Configure PHP
 ```

@@ -1,0 +1,223 @@
+#!/bin/bash
+
+# Commit Message Validation Hook for Woo AI Assistant
+#
+# This hook validates commit messages to ensure they follow the project's
+# conventional commit format and standards.
+#
+# @package WooAiAssistant
+# @subpackage Git Hooks
+# @since 1.0.0
+# @author Claude Code Assistant
+
+set -euo pipefail
+
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+readonly COMMIT_MSG_FILE="$1"
+readonly COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+log() {
+    echo -e "${BLUE}[commit-msg]${NC} $*"
+}
+
+success() {
+    echo -e "${GREEN}✅ $*${NC}"
+}
+
+warning() {
+    echo -e "${YELLOW}⚠️  $*${NC}"
+}
+
+error() {
+    echo -e "${RED}❌ $*${NC}" >&2
+}
+
+# =============================================================================
+# VALIDATION FUNCTIONS
+# =============================================================================
+
+validate_commit_format() {
+    log "Validating commit message format..."
+    
+    # Skip validation for merge commits
+    if echo "$COMMIT_MSG" | grep -q "^Merge "; then
+        success "Merge commit detected, skipping validation"
+        return 0
+    fi
+    
+    # Skip validation for revert commits
+    if echo "$COMMIT_MSG" | grep -q "^Revert "; then
+        success "Revert commit detected, skipping validation"
+        return 0
+    fi
+    
+    # Expected format: <type>(<scope>): <description>
+    # Examples:
+    # feat(kb): add product indexing functionality
+    # fix(chat): resolve conversation memory leak
+    # docs(readme): update installation instructions
+    
+    local format_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\([a-z0-9-]+\))?: .+$"
+    
+    if ! echo "$COMMIT_MSG" | head -n1 | grep -qE "$format_regex"; then
+        error "Invalid commit message format!"
+        echo ""
+        echo "Expected format:"
+        echo "  <type>(<scope>): <description>"
+        echo ""
+        echo "Valid types:"
+        echo "  feat     - New feature"
+        echo "  fix      - Bug fix"
+        echo "  docs     - Documentation changes"
+        echo "  style    - Code style changes (formatting, etc.)"
+        echo "  refactor - Code refactoring"
+        echo "  perf     - Performance improvements"
+        echo "  test     - Adding or updating tests"
+        echo "  build    - Changes to build system"
+        echo "  ci       - Changes to CI configuration"
+        echo "  chore    - Other changes (maintenance, etc.)"
+        echo ""
+        echo "Valid scopes (examples):"
+        echo "  kb, chat, admin, widget, api, config, phase-0, phase-1, etc."
+        echo ""
+        echo "Examples:"
+        echo "  feat(kb): add product indexing functionality"
+        echo "  fix(chat): resolve conversation memory leak"
+        echo "  docs(readme): update installation instructions"
+        echo ""
+        return 1
+    fi
+    
+    success "Commit message format is valid"
+    return 0
+}
+
+validate_commit_length() {
+    log "Validating commit message length..."
+    
+    local first_line
+    first_line=$(echo "$COMMIT_MSG" | head -n1)
+    local first_line_length=${#first_line}
+    
+    # First line should be <= 72 characters
+    if [[ $first_line_length -gt 72 ]]; then
+        error "First line is too long ($first_line_length characters, max 72)"
+        echo ""
+        echo "Current first line:"
+        echo "  $first_line"
+        echo ""
+        echo "💡 Tip: Keep the first line concise and use the body for details"
+        return 1
+    fi
+    
+    # Check for body lines length (if body exists)
+    local line_num=0
+    local has_long_lines=false
+    
+    while IFS= read -r line; do
+        line_num=$((line_num + 1))
+        
+        # Skip first line (already checked) and empty lines
+        if [[ $line_num -eq 1 ]] || [[ -z "$line" ]]; then
+            continue
+        fi
+        
+        # Body lines should be <= 80 characters
+        if [[ ${#line} -gt 80 ]]; then
+            error "Line $line_num is too long (${#line} characters, max 80)"
+            echo "  $line"
+            has_long_lines=true
+        fi
+    done <<< "$COMMIT_MSG"
+    
+    if [[ "$has_long_lines" == "true" ]]; then
+        return 1
+    fi
+    
+    success "Commit message length is valid"
+    return 0
+}
+
+validate_commit_content() {
+    log "Validating commit message content..."
+    
+    local first_line
+    first_line=$(echo "$COMMIT_MSG" | head -n1)
+    
+    # Extract description part (after type and scope)
+    local description
+    description=$(echo "$first_line" | sed -E 's/^[^:]+: //')
+    
+    # Description should not start with uppercase (except for proper nouns)
+    if [[ "$description" =~ ^[A-Z] ]] && [[ ! "$description" =~ ^(README|API|CI|CD|URL|HTTP|HTTPS|JSON|XML|HTML|CSS|JS|PHP|SQL|WP|DB) ]]; then
+        warning "Description should start with lowercase letter"
+        echo "Current: $description"
+        echo "Suggested: ${description,}"
+    fi
+    
+    # Description should not end with a period
+    if [[ "$description" == *. ]]; then
+        warning "Description should not end with a period"
+        echo "Current: $description"
+        echo "Suggested: ${description%?}"
+    fi
+    
+    # Check for common issues
+    if echo "$first_line" | grep -qi "fix bug\|bug fix"; then
+        warning "Consider being more specific than 'fix bug'"
+        echo "Example: fix(chat): resolve memory leak in conversation handler"
+    fi
+    
+    if echo "$first_line" | grep -qi "update\|change" && ! echo "$first_line" | grep -qi "docs\|readme"; then
+        warning "Consider using more specific verbs than 'update' or 'change'"
+        echo "Examples: feat, fix, refactor, improve, optimize, etc."
+    fi
+    
+    success "Commit message content validation completed"
+    return 0
+}
+
+check_task_reference() {
+    log "Checking for task reference..."
+    
+    # Look for task references in the commit message
+    if echo "$COMMIT_MSG" | grep -qi "task [0-9]\+\.\|phase [0-9]\+"; then
+        success "Task reference found"
+    else
+        # This is just informational, not an error
+        log "No task reference found (optional)"
+    fi
+    
+    return 0
+}
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+main() {
+    log "Validating commit message..."
+    
+    # Show the commit message being validated (first line only)
+    local first_line
+    first_line=$(echo "$COMMIT_MSG" | head -n1)
+    echo "Message: $first_line"
+    echo ""
+    
+    # Run all validations
+    validate_commit_format || exit 1
+    validate_commit_length || exit 1
+    validate_commit_content || exit 1
+    check_task_reference || exit 1
+    
+    success "Commit message validation passed!"
+}
+
+# Run main function
+main "$@"

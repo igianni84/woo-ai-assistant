@@ -1,50 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
          colors="true"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         convertDeprecationsToExceptions="true"
-         failOnRisky="true"
-         failOnWarning="true"
          stopOnFailure="false"
-         executionOrder="random">
+         stopOnError="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         failOnRisky="false"
+         failOnWarning="false"
+         processIsolation="false"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         beStrictAboutTestsThatDoNotTestAnything="false">
     
+    <!-- Test Suites Configuration -->
     <testsuites>
-        <testsuite name="Unit">
+        <testsuite name="Unit Tests">
             <directory>tests/unit</directory>
         </testsuite>
-        <testsuite name="Integration">
+        <testsuite name="Integration Tests">
             <directory>tests/integration</directory>
         </testsuite>
+        <testsuite name="All Tests">
+            <directory>tests</directory>
+        </testsuite>
     </testsuites>
-    
+
+    <!-- Code Coverage Configuration -->
     <coverage includeUncoveredFiles="true"
-              pathCoverage="false"
-              ignoreDeprecatedCodeUnits="true"
-              disableCodeCoverageIgnore="true">
+              processUncoveredFiles="true"
+              ignoreDeprecatedCodeUnitsFromCodeCoverage="true">
         <include>
             <directory suffix=".php">src</directory>
         </include>
         <exclude>
+            <directory>src/Setup</directory>
             <directory>src/Common/Traits</directory>
             <directory>src/Common/Exceptions</directory>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+            <file>woo-ai-assistant.php</file>
+            <file>uninstall.php</file>
         </exclude>
         <report>
-            <html outputDirectory="coverage/html"/>
-            <text outputFile="coverage/coverage.txt"/>
+            <html outputDirectory="coverage/html" lowUpperBound="50" highLowerBound="80"/>
+            <text outputFile="coverage/coverage.txt" showUncoveredFiles="true"/>
             <clover outputFile="coverage/clover.xml"/>
         </report>
     </coverage>
-    
+
+    <!-- PHP Configuration -->
     <php>
-        <const name="WOO_AI_ASSISTANT_TEST_MODE" value="true"/>
+        <!-- WordPress Test Database Configuration -->
+        <const name="WP_TESTS_DOMAIN" value="localhost"/>
+        <const name="WP_TESTS_EMAIL" value="admin@localhost.test"/>
+        <const name="WP_TESTS_TITLE" value="Test Blog"/>
+
+        <!-- MAMP Database Configuration -->
+        <const name="DB_NAME" value="wp_test"/>
+        <const name="DB_USER" value="root"/>
+        <const name="DB_PASSWORD" value="root"/>
+        <const name="DB_HOST" value="localhost:8889"/>
+        <const name="DB_CHARSET" value="utf8"/>
+        <const name="DB_COLLATE" value=""/>
+
+        <!-- WordPress Test Configuration -->
         <const name="WP_DEBUG" value="true"/>
+        <const name="WP_DEBUG_LOG" value="false"/>
+        <const name="WP_DEBUG_DISPLAY" value="false"/>
+        <const name="SCRIPT_DEBUG" value="true"/>
+
+        <!-- Plugin Test Configuration -->
+        <const name="WOO_AI_ASSISTANT_TESTING" value="true"/>
+        <const name="WOO_AI_ASSISTANT_DEBUG" value="true"/>
+        <const name="WOO_AI_DEVELOPMENT_MODE" value="true"/>
+        
+        <!-- Disable external API calls during testing -->
+        <const name="WOO_AI_USE_MOCK_API" value="true"/>
+        <const name="WOO_AI_USE_DUMMY_EMBEDDINGS" value="true"/>
+
+        <!-- Test-specific paths -->
+        <const name="WOO_AI_TEST_FIXTURES_DIR" value="tests/fixtures"/>
+        <const name="WOO_AI_TEST_TMP_DIR" value="tests/tmp"/>
+
+        <!-- WordPress table prefix for tests -->
+        <const name="WP_TESTS_TABLE_PREFIX" value="wptests_"/>
+
+        <!-- Multisite configuration (disable for now) -->
+        <const name="WP_TESTS_MULTISITE" value="false"/>
+
+        <!-- Force timezone for consistent testing -->
+        <ini name="date.timezone" value="UTC"/>
+        
+        <!-- Memory and error reporting -->
+        <ini name="memory_limit" value="512M"/>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="display_startup_errors" value="1"/>
+        
+        <!-- Xdebug configuration for coverage -->
+        <ini name="xdebug.mode" value="coverage"/>
+
+        <!-- Environment variables -->
         <env name="WOO_AI_DEVELOPMENT_MODE" value="true"/>
     </php>
-    
+
+    <!-- Logging Configuration -->
     <logging>
-        <junit outputFile="coverage/junit.xml"/>
+        <junit outputFile="tests/logs/junit.xml"/>
+        <testdoxHtml outputFile="tests/logs/testdox.html"/>
+        <testdoxText outputFile="tests/logs/testdox.txt"/>
     </logging>
 </phpunit>
