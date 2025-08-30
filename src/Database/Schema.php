@@ -818,4 +818,409 @@ class Schema
 
         return $results;
     }
+
+    /**
+     * Add missing indexes to existing tables
+     *
+     * This method can be called to add performance indexes that might be
+     * missing from older installations or after schema updates.
+     *
+     * @since 1.0.0
+     * @return array Results of index creation
+     */
+    public function addMissingIndexes(): array
+    {
+        $results = [];
+
+        Logger::info('Adding missing database indexes');
+
+        // Additional performance indexes that can be added post-installation
+        $additionalIndexes = [
+            'woo_ai_conversations' => [
+                'idx_user_status' => 'ADD INDEX `idx_user_status` (`user_id`, `status`)',
+                'idx_created_rating' => 'ADD INDEX `idx_created_rating` (`created_at`, `rating`)',
+                'idx_session_status' => 'ADD INDEX `idx_session_status` (`session_id`, `status`)'
+            ],
+            'woo_ai_messages' => [
+                'idx_conv_role_created' => 'ADD INDEX `idx_conv_role_created` (`conversation_id`, `role`, `created_at`)',
+                'idx_model_tokens' => 'ADD INDEX `idx_model_tokens` (`model_used`, `tokens_used`)',
+                'idx_processing_time' => 'ADD INDEX `idx_processing_time` (`processing_time_ms`)'
+            ],
+            'woo_ai_knowledge_base' => [
+                'idx_type_active_updated' => 'ADD INDEX `idx_type_active_updated` (`content_type`, `is_active`, `updated_at`)',
+                'idx_embedding_model' => 'ADD INDEX `idx_embedding_model` (`embedding_model`)',
+                'idx_word_count' => 'ADD INDEX `idx_word_count` (`word_count`)'
+            ],
+            'woo_ai_analytics' => [
+                'idx_type_value' => 'ADD INDEX `idx_type_value` (`metric_type`, `metric_value`)',
+                'idx_user_created' => 'ADD INDEX `idx_user_created` (`user_id`, `created_at`)',
+                'idx_source_type' => 'ADD INDEX `idx_source_type` (`source`, `metric_type`)'
+            ],
+            'woo_ai_action_logs' => [
+                'idx_type_success_created' => 'ADD INDEX `idx_type_success_created` (`action_type`, `success`, `created_at`)',
+                'idx_severity_created' => 'ADD INDEX `idx_severity_created` (`severity`, `created_at`)',
+                'idx_execution_time' => 'ADD INDEX `idx_execution_time` (`execution_time_ms`)'
+            ]
+        ];
+
+        foreach ($additionalIndexes as $tableName => $indexes) {
+            $fullTableName = $this->wpdb->prefix . $tableName;
+            $results[$tableName] = [];
+
+            foreach ($indexes as $indexName => $sql) {
+                // Check if index already exists
+                $existingIndexes = $this->wpdb->get_results(
+                    "SHOW INDEX FROM `{$fullTableName}` WHERE Key_name = '{$indexName}'",
+                    ARRAY_A
+                );
+
+                if (empty($existingIndexes)) {
+                    $alterSql = "ALTER TABLE `{$fullTableName}` {$sql}";
+                    $result = $this->wpdb->query($alterSql);
+
+                    $results[$tableName][$indexName] = [
+                        'success' => $result !== false,
+                        'error' => $result === false ? $this->wpdb->last_error : null
+                    ];
+
+                    if ($result !== false) {
+                        Logger::info("Added index {$indexName} to {$fullTableName}");
+                    } else {
+                        Logger::error("Failed to add index {$indexName} to {$fullTableName}: " . $this->wpdb->last_error);
+                    }
+                } else {
+                    $results[$tableName][$indexName] = [
+                        'success' => true,
+                        'skipped' => true,
+                        'reason' => 'Index already exists'
+                    ];
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Create foreign key constraints if supported
+     *
+     * MySQL/MariaDB with InnoDB storage engine supports foreign keys.
+     * This method adds referential integrity constraints.
+     *
+     * @since 1.0.0
+     * @return array Results of constraint creation
+     */
+    public function createForeignKeyConstraints(): array
+    {
+        $results = [];
+
+        Logger::info('Creating foreign key constraints');
+
+        // Check if storage engine supports foreign keys
+        $storageEngine = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT ENGINE FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
+                DB_NAME,
+                $this->wpdb->prefix . 'woo_ai_conversations'
+            )
+        );
+
+        if (strtolower($storageEngine) !== 'innodb') {
+            Logger::warning('Foreign key constraints require InnoDB storage engine');
+            return ['error' => 'Storage engine does not support foreign keys'];
+        }
+
+        $constraints = [
+            'woo_ai_messages' => [
+                'fk_messages_conversation' => [
+                    'sql' => "ADD CONSTRAINT `fk_messages_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `{$this->wpdb->prefix}woo_ai_conversations` (`id`) ON DELETE CASCADE",
+                    'column' => 'conversation_id'
+                ]
+            ],
+            'woo_ai_analytics' => [
+                'fk_analytics_conversation' => [
+                    'sql' => "ADD CONSTRAINT `fk_analytics_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `{$this->wpdb->prefix}woo_ai_conversations` (`id`) ON DELETE SET NULL",
+                    'column' => 'conversation_id'
+                ]
+            ],
+            'woo_ai_action_logs' => [
+                'fk_logs_conversation' => [
+                    'sql' => "ADD CONSTRAINT `fk_logs_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `{$this->wpdb->prefix}woo_ai_conversations` (`id`) ON DELETE SET NULL",
+                    'column' => 'conversation_id'
+                ]
+            ]
+        ];
+
+        foreach ($constraints as $tableName => $tableConstraints) {
+            $fullTableName = $this->wpdb->prefix . $tableName;
+            $results[$tableName] = [];
+
+            foreach ($tableConstraints as $constraintName => $constraint) {
+                // Check if constraint already exists
+                $existing = $this->wpdb->get_var($this->wpdb->prepare(
+                    "SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE 
+                     WHERE CONSTRAINT_SCHEMA = %s 
+                     AND TABLE_NAME = %s 
+                     AND CONSTRAINT_NAME = %s",
+                    DB_NAME,
+                    $fullTableName,
+                    $constraintName
+                ));
+
+                if (!$existing) {
+                    $alterSql = "ALTER TABLE `{$fullTableName}` {$constraint['sql']}";
+                    $result = $this->wpdb->query($alterSql);
+
+                    $results[$tableName][$constraintName] = [
+                        'success' => $result !== false,
+                        'error' => $result === false ? $this->wpdb->last_error : null
+                    ];
+
+                    if ($result !== false) {
+                        Logger::info("Created foreign key constraint {$constraintName} on {$fullTableName}");
+                    } else {
+                        Logger::error("Failed to create constraint {$constraintName}: " . $this->wpdb->last_error);
+                    }
+                } else {
+                    $results[$tableName][$constraintName] = [
+                        'success' => true,
+                        'skipped' => true,
+                        'reason' => 'Constraint already exists'
+                    ];
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Analyze table performance and suggest optimizations
+     *
+     * @since 1.0.0
+     * @return array Performance analysis results
+     */
+    public function analyzePerformance(): array
+    {
+        Logger::info('Analyzing database performance');
+
+        $analysis = [
+            'table_stats' => $this->getTableStats(),
+            'slow_queries' => $this->identifySlowQueries(),
+            'index_usage' => $this->analyzeIndexUsage(),
+            'recommendations' => []
+        ];
+
+        // Generate recommendations based on analysis
+        $analysis['recommendations'] = $this->generateOptimizationRecommendations($analysis);
+
+        return $analysis;
+    }
+
+    /**
+     * Identify potentially slow queries
+     *
+     * @since 1.0.0
+     * @return array Slow query patterns
+     */
+    private function identifySlowQueries(): array
+    {
+        // Common query patterns that might be slow
+        $patterns = [
+            'large_table_full_scan' => [
+                'description' => 'Full table scan on large tables',
+                'tables' => []
+            ],
+            'missing_indexes' => [
+                'description' => 'Queries that could benefit from additional indexes',
+                'queries' => []
+            ],
+            'complex_joins' => [
+                'description' => 'Complex multi-table joins',
+                'joins' => []
+            ]
+        ];
+
+        // Check table sizes
+        foreach ($this->tableDefinitions as $tableName => $definition) {
+            $stats = $this->wpdb->get_row($this->wpdb->prepare(
+                "SELECT table_rows, avg_row_length FROM information_schema.tables 
+                 WHERE table_schema = %s AND table_name = %s",
+                DB_NAME,
+                $definition['name']
+            ), ARRAY_A);
+
+            if ($stats && $stats['table_rows'] > 10000) {
+                $patterns['large_table_full_scan']['tables'][] = [
+                    'table' => $tableName,
+                    'rows' => $stats['table_rows'],
+                    'avg_row_length' => $stats['avg_row_length']
+                ];
+            }
+        }
+
+        return $patterns;
+    }
+
+    /**
+     * Analyze index usage patterns
+     *
+     * @since 1.0.0
+     * @return array Index usage analysis
+     */
+    private function analyzeIndexUsage(): array
+    {
+        $usage = [];
+
+        foreach ($this->tableDefinitions as $tableName => $definition) {
+            $fullTableName = $definition['name'];
+
+            // Get index information
+            $indexes = $this->wpdb->get_results(
+                "SHOW INDEX FROM `{$fullTableName}`",
+                ARRAY_A
+            );
+
+            $usage[$tableName] = [
+                'total_indexes' => count($indexes),
+                'indexes' => $indexes,
+                'recommendations' => []
+            ];
+
+            // Analyze for unused indexes (this would require query log analysis in production)
+            // For now, just mark potential optimization opportunities
+            $duplicateGroups = [];
+            foreach ($indexes as $index) {
+                $column = $index['Column_name'];
+                if (!isset($duplicateGroups[$column])) {
+                    $duplicateGroups[$column] = [];
+                }
+                $duplicateGroups[$column][] = $index['Key_name'];
+            }
+
+            foreach ($duplicateGroups as $column => $indexNames) {
+                if (count($indexNames) > 1) {
+                    $usage[$tableName]['recommendations'][] = [
+                        'type' => 'duplicate_indexes',
+                        'column' => $column,
+                        'indexes' => $indexNames,
+                        'suggestion' => 'Consider consolidating duplicate indexes on column ' . $column
+                    ];
+                }
+            }
+        }
+
+        return $usage;
+    }
+
+    /**
+     * Generate optimization recommendations
+     *
+     * @since 1.0.0
+     * @param array $analysis Performance analysis data
+     * @return array Optimization recommendations
+     */
+    private function generateOptimizationRecommendations(array $analysis): array
+    {
+        $recommendations = [];
+
+        // Table size recommendations
+        foreach ($analysis['table_stats'] as $tableName => $stats) {
+            if ($stats['rows'] > 100000) {
+                $recommendations[] = [
+                    'type' => 'large_table',
+                    'table' => $tableName,
+                    'priority' => 'high',
+                    'description' => "Table {$tableName} has {$stats['rows']} rows. Consider archiving old data.",
+                    'suggestion' => 'Implement data retention policies or table partitioning'
+                ];
+            }
+
+            if ($stats['total_size'] > 100 * 1024 * 1024) { // 100MB
+                $recommendations[] = [
+                    'type' => 'table_size',
+                    'table' => $tableName,
+                    'priority' => 'medium',
+                    'description' => "Table {$tableName} is {$stats['total_size_formatted']}. Monitor growth.",
+                    'suggestion' => 'Consider data compression or archiving strategies'
+                ];
+            }
+        }
+
+        // Index recommendations
+        foreach ($analysis['index_usage'] as $tableName => $usage) {
+            foreach ($usage['recommendations'] as $rec) {
+                $recommendations[] = array_merge($rec, [
+                    'table' => $tableName,
+                    'priority' => 'medium'
+                ]);
+            }
+        }
+
+        // General recommendations
+        $recommendations[] = [
+            'type' => 'maintenance',
+            'priority' => 'low',
+            'description' => 'Regular database maintenance',
+            'suggestion' => 'Schedule regular OPTIMIZE TABLE operations and orphaned record cleanup'
+        ];
+
+        return $recommendations;
+    }
+
+    /**
+     * Export schema definition as SQL
+     *
+     * @since 1.0.0
+     * @param array $options Export options
+     * @return string SQL export
+     */
+    public function exportSchema(array $options = []): string
+    {
+        $includeData = $options['include_data'] ?? false;
+        $includeViews = $options['include_views'] ?? true;
+
+        $sql = "-- Woo AI Assistant Database Schema Export\n";
+        $sql .= "-- Generated: " . current_time('mysql') . "\n";
+        $sql .= "-- Plugin Version: " . WOO_AI_ASSISTANT_VERSION . "\n\n";
+
+        $sql .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
+
+        // Export table structures
+        foreach ($this->tableDefinitions as $tableName => $definition) {
+            $sql .= "-- Table: {$tableName}\n";
+            $sql .= "DROP TABLE IF EXISTS `{$definition['name']}`;\n";
+            $sql .= "CREATE TABLE `{$definition['name']}` (\n";
+            $sql .= "  {$definition['structure']}\n";
+            $sql .= ") ENGINE=InnoDB {$definition['charset_collate']};\n\n";
+
+            // Include data if requested
+            if ($includeData) {
+                $data = $this->wpdb->get_results("SELECT * FROM `{$definition['name']}`", ARRAY_A);
+                if (!empty($data)) {
+                    $sql .= "-- Data for table {$tableName}\n";
+                    foreach ($data as $row) {
+                        $values = array_map(function ($value) {
+                            return $value === null ? 'NULL' : "'" . esc_sql($value) . "'";
+                        }, array_values($row));
+                        $sql .= "INSERT INTO `{$definition['name']}` VALUES (" . implode(', ', $values) . ");\n";
+                    }
+                    $sql .= "\n";
+                }
+            }
+        }
+
+        // Export views if requested
+        if ($includeViews) {
+            foreach ($this->viewDefinitions as $viewName => $definition) {
+                $sql .= "-- View: {$viewName}\n";
+                $sql .= "DROP VIEW IF EXISTS `{$definition['name']}`;\n";
+                $sql .= "CREATE VIEW `{$definition['name']}` AS {$definition['definition']};\n\n";
+            }
+        }
+
+        $sql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
+
+        return $sql;
+    }
 }

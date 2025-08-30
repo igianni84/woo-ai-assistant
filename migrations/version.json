@@ -1,40 +1,40 @@
 {
-  "current_version": "0",
-  "target_version": "1",
-  "migrations": {
-    "001": {
-      "version": "1",
-      "name": "initial_schema",
-      "description": "Creates the 6 core database tables for Woo AI Assistant",
-      "file": "001_initial_schema.sql",
-      "applied": false,
-      "applied_at": null,
-      "rollback_file": null,
-      "checksum": null,
-      "dependencies": [],
-      "tables_created": [
-        "woo_ai_conversations",
-        "woo_ai_messages", 
-        "woo_ai_knowledge_base",
-        "woo_ai_settings",
-        "woo_ai_analytics",
-        "woo_ai_action_logs"
-      ],
-      "views_created": [
-        "woo_ai_conversation_summary",
-        "woo_ai_kb_summary"
-      ],
-      "estimated_time_seconds": 5,
-      "requires_backup": true
-    }
-  },
-  "rollback_history": [],
-  "last_migration_check": null,
-  "plugin_version": "1.0.0",
-  "database_version": "1.0.0",
-  "migration_lock": false,
-  "migration_lock_time": null,
-  "auto_migrate_on_activation": true,
-  "backup_before_migration": true,
-  "migration_timeout_seconds": 300
+    "current_version": "1",
+    "target_version": "1",
+    "migrations": {
+        "001": {
+            "version": "1",
+            "name": "initial_schema",
+            "description": "Creates the 6 core database tables for Woo AI Assistant",
+            "file": "001_initial_schema.sql",
+            "applied": true,
+            "applied_at": "2025-08-30 20:36:56",
+            "rollback_file": null,
+            "checksum": "82b65cbe55450af18cd10f0692f3c935",
+            "dependencies": [],
+            "tables_created": [
+                "woo_ai_conversations",
+                "woo_ai_messages",
+                "woo_ai_knowledge_base",
+                "woo_ai_settings",
+                "woo_ai_analytics",
+                "woo_ai_action_logs"
+            ],
+            "views_created": [
+                "woo_ai_conversation_summary",
+                "woo_ai_kb_summary"
+            ],
+            "estimated_time_seconds": 5,
+            "requires_backup": true
+        }
+    },
+    "rollback_history": [],
+    "last_migration_check": "2025-08-30 20:36:56",
+    "plugin_version": "1.0.0",
+    "database_version": "1.0.0",
+    "migration_lock": false,
+    "migration_lock_time": null,
+    "auto_migrate_on_activation": true,
+    "backup_before_migration": true,
+    "migration_timeout_seconds": 300
 }

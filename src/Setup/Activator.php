@@ -55,6 +55,9 @@ class Activator
             // Check system requirements
             self::checkRequirements();
 
+            // Detect if this is an upgrade
+            $isUpgrade = self::detectUpgrade();
+
             // Set plugin activation timestamp
             self::setActivationTimestamp();
 
@@ -63,6 +66,13 @@ class Activator
 
             // Set default options
             self::setDefaultOptions();
+
+            // Run installer for initial data population
+            if (!$isUpgrade) {
+                self::runInitialInstallation();
+            } else {
+                self::runUpgrade();
+            }
 
             // Schedule cron jobs
             self::scheduleCronJobs();
@@ -266,6 +276,8 @@ class Activator
      */
     private static function setDefaultOptions(): void
     {
+        Logger::info('Setting default plugin options');
+
         $defaultOptions = [
             'woo_ai_assistant_version' => Utils::getVersion(),
             'woo_ai_assistant_enabled' => true,
@@ -276,16 +288,66 @@ class Activator
             'woo_ai_assistant_max_conversations_per_month' => 100, // Free plan default
             'woo_ai_assistant_auto_index' => true,
             'woo_ai_assistant_proactive_triggers' => false,
+            'woo_ai_assistant_ai_model' => 'gemini-2.0-flash-exp', // Default AI model
+            'woo_ai_assistant_ai_temperature' => 0.7,
+            'woo_ai_assistant_ai_max_tokens' => 1000,
+            'woo_ai_assistant_widget_theme' => 'modern',
+            'woo_ai_assistant_widget_position' => 'bottom-right',
+            'woo_ai_assistant_enable_analytics' => true,
+            'woo_ai_assistant_kb_sync_interval' => 24, // hours
+            'woo_ai_assistant_conversation_timeout' => 30, // minutes
+            'woo_ai_assistant_max_message_length' => 2000,
         ];
 
+        $newOptions = 0;
         foreach ($defaultOptions as $option => $value) {
             // Only set if option doesn't exist (don't override existing settings)
+            if (get_option($option) === false) {
+                update_option($option, $value);
+                $newOptions++;
+            }
+        }
+
+        Logger::debug('Default options processed', [
+            'total_options' => count($defaultOptions),
+            'new_options' => $newOptions,
+            'existing_options' => count($defaultOptions) - $newOptions
+        ]);
+
+        // Initialize license and plan settings for development mode
+        if (Utils::isDevelopmentMode()) {
+            self::initializeDevelopmentSettings();
+        }
+
+        // Trigger hook for other components to set their defaults
+        do_action('woo_ai_assistant_default_options_set');
+    }
+
+    /**
+     * Initialize development-specific settings
+     *
+     * @return void
+     */
+    private static function initializeDevelopmentSettings(): void
+    {
+        Logger::info('Initializing development settings');
+
+        $devOptions = [
+            'woo_ai_assistant_license_key' => 'dev-license-' . wp_generate_uuid4(),
+            'woo_ai_assistant_license_status' => 'valid',
+            'woo_ai_assistant_license_plan' => 'unlimited',
+            'woo_ai_assistant_development_mode' => true,
+            'woo_ai_assistant_use_dummy_data' => false,
+            'woo_ai_assistant_enhanced_logging' => true,
+        ];
+
+        foreach ($devOptions as $option => $value) {
             if (get_option($option) === false) {
                 update_option($option, $value);
             }
         }
 
-        Logger::debug('Default options set', ['options_count' => count($defaultOptions)]);
+        Logger::debug('Development settings initialized');
     }
 
     /**
@@ -434,5 +496,197 @@ class Activator
     {
         update_option('woo_ai_assistant_first_activation', false);
         Logger::debug('First activation marked as complete');
+    }
+
+    /**
+     * Detect if this is a plugin upgrade
+     *
+     * @return bool True if this is an upgrade
+     */
+    private static function detectUpgrade(): bool
+    {
+        $installedVersion = get_option('woo_ai_assistant_version', null);
+        $currentVersion = Utils::getVersion();
+
+        if ($installedVersion === null) {
+            // Fresh installation
+            Logger::info('Fresh plugin installation detected');
+            return false;
+        }
+
+        if (version_compare($installedVersion, $currentVersion, '<')) {
+            // Upgrade detected
+            Logger::info('Plugin upgrade detected', [
+                'from_version' => $installedVersion,
+                'to_version' => $currentVersion
+            ]);
+            return true;
+        }
+
+        // Same version or downgrade (treat as re-activation)
+        Logger::info('Plugin re-activation detected', [
+            'current_version' => $currentVersion,
+            'installed_version' => $installedVersion
+        ]);
+        return false;
+    }
+
+    /**
+     * Run initial installation tasks
+     *
+     * Sets up the plugin for first-time use with zero configuration required.
+     *
+     * @throws \Exception If installation fails
+     * @return void
+     */
+    private static function runInitialInstallation(): void
+    {
+        Logger::info('Running initial installation tasks');
+
+        try {
+            // Import installer class
+            $installerClass = '\\WooAiAssistant\\Setup\\Installer';
+
+            if (!class_exists($installerClass)) {
+                throw new \Exception('Installer class not found: ' . $installerClass);
+            }
+
+            // Run installation
+            $installer = new $installerClass();
+            $result = $installer->install();
+
+            if (!$result['success']) {
+                throw new \Exception('Installation failed: ' . implode(', ', $result['errors']));
+            }
+
+            Logger::info('Initial installation completed successfully', [
+                'installed_components' => $result['installed'] ?? []
+            ]);
+
+            // Mark as first-time setup
+            update_option('woo_ai_assistant_first_time_setup', true);
+        } catch (\Exception $e) {
+            Logger::error('Initial installation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Run upgrade tasks
+     *
+     * Handles version-specific upgrade logic and data migration.
+     *
+     * @throws \Exception If upgrade fails
+     * @return void
+     */
+    private static function runUpgrade(): void
+    {
+        $fromVersion = get_option('woo_ai_assistant_version', '0.0.0');
+        $toVersion = Utils::getVersion();
+
+        Logger::info('Running upgrade tasks', [
+            'from_version' => $fromVersion,
+            'to_version' => $toVersion
+        ]);
+
+        try {
+            // Version-specific upgrade logic
+            if (version_compare($fromVersion, '1.0.0', '<')) {
+                self::upgradeToV100();
+            }
+
+            // Update version number
+            update_option('woo_ai_assistant_version', $toVersion);
+            update_option('woo_ai_assistant_last_upgrade', current_time('mysql'));
+
+            Logger::info('Upgrade completed successfully', [
+                'upgraded_to' => $toVersion
+            ]);
+
+            // Clear first-time setup flag if set
+            delete_option('woo_ai_assistant_first_time_setup');
+
+            // Trigger upgrade hook
+            do_action('woo_ai_assistant_upgraded', $fromVersion, $toVersion);
+        } catch (\Exception $e) {
+            Logger::error('Upgrade failed', [
+                'from_version' => $fromVersion,
+                'to_version' => $toVersion,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Upgrade to version 1.0.0
+     *
+     * @return void
+     */
+    private static function upgradeToV100(): void
+    {
+        Logger::info('Running v1.0.0 upgrade tasks');
+
+        // Clear any legacy cache
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+
+        // Update any legacy options
+        $legacyOptions = [
+            'woo_ai_max_conversations' => 'woo_ai_assistant_max_conversations_per_month',
+            'woo_ai_enable_widget' => 'woo_ai_assistant_widget_enabled',
+            'woo_ai_enable_debug' => 'woo_ai_assistant_debug_mode',
+        ];
+
+        foreach ($legacyOptions as $old => $new) {
+            $value = get_option($old, null);
+            if ($value !== null && get_option($new, false) === false) {
+                update_option($new, $value);
+                delete_option($old);
+            }
+        }
+
+        Logger::info('v1.0.0 upgrade tasks completed');
+    }
+
+    /**
+     * Get upgrade history
+     *
+     * @return array Array of upgrade records
+     */
+    public static function getUpgradeHistory(): array
+    {
+        return get_option('woo_ai_assistant_upgrade_history', []);
+    }
+
+    /**
+     * Record upgrade in history
+     *
+     * @param string $fromVersion Version upgraded from
+     * @param string $toVersion Version upgraded to
+     * @return void
+     */
+    public static function recordUpgrade(string $fromVersion, string $toVersion): void
+    {
+        $history = self::getUpgradeHistory();
+
+        $history[] = [
+            'from_version' => $fromVersion,
+            'to_version' => $toVersion,
+            'upgraded_at' => current_time('mysql'),
+            'wp_version' => get_bloginfo('version'),
+            'php_version' => PHP_VERSION
+        ];
+
+        // Keep only last 10 upgrade records
+        if (count($history) > 10) {
+            $history = array_slice($history, -10);
+        }
+
+        update_option('woo_ai_assistant_upgrade_history', $history);
     }
 }

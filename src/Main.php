@@ -140,10 +140,9 @@ class Main
         }
 
         // TODO: In future tasks, initialize additional modules:
-        // - Knowledge Base Manager
-        // - REST API Controller
-        // - Frontend Widget Loader
-        // - Chatbot Handler
+        // - Knowledge Base Manager (Task 2.x)
+        // - Frontend Widget Loader (Task 4.5)
+        // - Chatbot Handler (Task 5.1)
 
         // Apply filter to allow module registration by other code
         $this->modules = apply_filters('woo_ai_assistant_load_modules', $this->modules);
@@ -163,8 +162,8 @@ class Main
      */
     public function initRestApi(): void
     {
-        // TODO: Initialize REST API controller in future tasks
-        Logger::debug('REST API initialization placeholder');
+        // Load REST API controller (Task 1.2)
+        $this->loadRestApiModule();
 
         do_action('woo_ai_assistant_rest_api_init');
     }
@@ -220,6 +219,29 @@ class Main
             Logger::info('Admin module loaded successfully');
         } catch (Exception $e) {
             Logger::error('Failed to load admin module', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Load REST API module
+     *
+     * Initializes the REST API controller and registers all endpoints.
+     *
+     * @return void
+     */
+    private function loadRestApiModule(): void
+    {
+        try {
+            // Load REST API controller
+            $restController = \WooAiAssistant\RestApi\RestController::getInstance();
+            $this->registerModule('rest_api', $restController);
+
+            Logger::info('REST API module loaded successfully');
+        } catch (Exception $e) {
+            Logger::error('Failed to load REST API module', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
