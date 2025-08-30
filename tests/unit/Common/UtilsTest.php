@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for Utils Class
  *
@@ -65,7 +66,7 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getVersion_should_return_valid_version_string(): void
     {
         $version = Utils::getVersion();
-        
+
         $this->assertIsString($version, 'Version should be a string');
         $this->assertNotEmpty($version, 'Version should not be empty');
         $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $version, 'Version should follow semantic versioning pattern');
@@ -79,7 +80,7 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getPluginPath_should_return_valid_path(): void
     {
         $path = Utils::getPluginPath();
-        
+
         $this->assertIsString($path, 'Plugin path should be a string');
         $this->assertNotEmpty($path, 'Plugin path should not be empty');
         $this->assertTrue(is_dir($path), 'Plugin path should exist as directory');
@@ -93,7 +94,7 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getPluginPath_should_append_subdirectory(): void
     {
         $subPath = Utils::getPluginPath('src/Common');
-        
+
         $this->assertStringContains('src/Common', $subPath, 'Should append subdirectory to plugin path');
         $this->assertTrue(is_dir($subPath), 'Subdirectory path should exist');
     }
@@ -106,7 +107,7 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getPluginUrl_should_return_valid_url(): void
     {
         $url = Utils::getPluginUrl();
-        
+
         $this->assertIsString($url, 'Plugin URL should be a string');
         $this->assertNotEmpty($url, 'Plugin URL should not be empty');
         $this->assertTrue(filter_var($url, FILTER_VALIDATE_URL) !== false, 'Plugin URL should be valid URL format');
@@ -120,7 +121,7 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getPluginUrl_should_append_file_path(): void
     {
         $fileUrl = Utils::getPluginUrl('assets/css/style.css');
-        
+
         $this->assertStringContains('assets/css/style.css', $fileUrl, 'Should append file path to plugin URL');
         $this->assertTrue(filter_var($fileUrl, FILTER_VALIDATE_URL) !== false, 'File URL should be valid');
     }
@@ -134,7 +135,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $validEmail = 'user@example.com';
         $sanitized = Utils::sanitizeEmail($validEmail);
-        
+
         $this->assertEquals($validEmail, $sanitized, 'Valid email should be returned unchanged');
         $this->assertIsString($sanitized, 'Sanitized email should be string');
     }
@@ -168,7 +169,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $action = 'test_action';
         $nonce = Utils::generateNonce($action);
-        
+
         $this->assertIsString($nonce, 'Generated nonce should be a string');
         $this->assertNotEmpty($nonce, 'Generated nonce should not be empty');
         $this->assertGreaterThan(10, strlen($nonce), 'Nonce should have sufficient length');
@@ -183,7 +184,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $action = 'test_verification';
         $nonce = Utils::generateNonce($action);
-        
+
         $isValid = Utils::verifyNonce($nonce, $action);
         $this->assertTrue($isValid, 'Generated nonce should be valid for same action');
     }
@@ -197,7 +198,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $nonce = Utils::generateNonce('correct_action');
         $isValid = Utils::verifyNonce($nonce, 'wrong_action');
-        
+
         $this->assertFalse($isValid, 'Nonce should be invalid for different action');
     }
 
@@ -254,7 +255,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $htmlText = '<p>This is <strong>HTML</strong> text with   extra   spaces.</p>';
         $cleaned = Utils::cleanText($htmlText);
-        
+
         $this->assertEquals('This is HTML text with extra spaces.', $cleaned, 'Should remove HTML tags and normalize whitespace');
     }
 
@@ -267,7 +268,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $longText = 'This is a very long text that should be truncated to a shorter length.';
         $truncated = Utils::cleanText($longText, 20, '...');
-        
+
         $this->assertLessThanOrEqual(20, strlen($truncated), 'Truncated text should not exceed specified length');
         $this->assertStringContains('...', $truncated, 'Truncated text should contain suffix');
     }
@@ -320,7 +321,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $id1 = Utils::generateUniqueId();
         $id2 = Utils::generateUniqueId();
-        
+
         $this->assertIsString($id1, 'Generated ID should be string');
         $this->assertIsString($id2, 'Generated ID should be string');
         $this->assertNotEquals($id1, $id2, 'Generated IDs should be different');
@@ -337,7 +338,7 @@ class UtilsTest extends WooAiBaseTestCase
     {
         $prefix = 'test_prefix';
         $id = Utils::generateUniqueId($prefix);
-        
+
         $this->assertStringStartsWith($prefix . '_', $id, 'Generated ID should start with prefix');
     }
 
@@ -349,10 +350,10 @@ class UtilsTest extends WooAiBaseTestCase
     public function test_getTimezone_should_return_valid_timezone(): void
     {
         $timezone = Utils::getTimezone();
-        
+
         $this->assertIsString($timezone, 'Timezone should be a string');
         $this->assertNotEmpty($timezone, 'Timezone should not be empty');
-        
+
         // Verify it's a valid timezone
         $validTimezone = in_array($timezone, timezone_identifiers_list()) || $timezone === 'UTC';
         $this->assertTrue($validTimezone, 'Should return a valid timezone identifier');
@@ -367,24 +368,24 @@ class UtilsTest extends WooAiBaseTestCase
     {
         // In test environment, debug mode should be enabled
         $testData = 'Test debug message';
-        
+
         // Capture error log output by temporarily changing error log destination
         $originalLogDestination = ini_get('error_log');
         $tempLogFile = tempnam(sys_get_temp_dir(), 'woo_ai_debug_test');
         ini_set('error_log', $tempLogFile);
-        
+
         Utils::debugLog($testData, 'test_context');
-        
+
         // Restore original error log destination
         ini_set('error_log', $originalLogDestination);
-        
+
         // Check if log was written (if debug is enabled)
         if (defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG) {
             $logContent = file_get_contents($tempLogFile);
             $this->assertStringContains('Woo AI Assistant', $logContent, 'Debug log should contain plugin name');
             $this->assertStringContains('test_context', $logContent, 'Debug log should contain context');
         }
-        
+
         // Clean up
         unlink($tempLogFile);
     }
@@ -427,15 +428,15 @@ class UtilsTest extends WooAiBaseTestCase
 
         $reflection = new \ReflectionClass(Utils::class);
         $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-        
+
         foreach ($methods as $method) {
             $methodName = $method->getName();
-            
+
             // Skip magic methods
             if (strpos($methodName, '__') === 0) {
                 continue;
             }
-            
+
             $this->assertTrue(
                 ctype_lower($methodName[0]) && !strpos($methodName, '_'),
                 "Method {$methodName} should follow camelCase convention"
@@ -485,7 +486,7 @@ class UtilsTest extends WooAiBaseTestCase
         $this->assertFalse(Utils::sanitizeEmail(''), 'Empty email should return false');
         $this->assertEquals('', Utils::cleanText(''), 'Empty text should return empty string');
         $this->assertFalse(Utils::isJson(''), 'Empty string should not be valid JSON');
-        
+
         // Test with invalid inputs
         $this->assertIsString(Utils::formatBytes(-1), 'Negative bytes should still return string');
         $this->assertIsString(Utils::generateUniqueId(''), 'Empty prefix should still work');

@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 /**
  * Plugin Activation Test Script
  *
@@ -21,7 +22,7 @@ if (!$wp_tests_dir) {
         dirname(__DIR__, 4) . '/wp-tests-lib',
         dirname(__DIR__, 4) . '/tests/phpunit',
     ];
-    
+
     foreach ($possible_paths as $path) {
         if (file_exists($path . '/includes/functions.php')) {
             $wp_tests_dir = $path;
@@ -33,7 +34,7 @@ if (!$wp_tests_dir) {
 // Simple activation test without full WordPress bootstrap
 if (!$wp_tests_dir) {
     echo "⚠️  Running simple syntax and class loading test (WordPress test environment not found)\n";
-    
+
     // Test 1: Check if main plugin file exists
     $plugin_file = dirname(__DIR__) . '/woo-ai-assistant.php';
     if (!file_exists($plugin_file)) {
@@ -41,7 +42,7 @@ if (!$wp_tests_dir) {
         exit(1);
     }
     echo "✅ Main plugin file exists\n";
-    
+
     // Test 2: Check PHP syntax of main file
     $syntax_check = shell_exec("php -l $plugin_file 2>&1");
     if (strpos($syntax_check, 'No syntax errors') === false) {
@@ -49,7 +50,7 @@ if (!$wp_tests_dir) {
         exit(1);
     }
     echo "✅ Main plugin file syntax is valid\n";
-    
+
     // Test 3: Check autoloader
     $autoloader = dirname(__DIR__) . '/vendor/autoload.php';
     if (!file_exists($autoloader)) {
@@ -58,7 +59,7 @@ if (!$wp_tests_dir) {
     }
     require_once $autoloader;
     echo "✅ Composer autoloader loaded\n";
-    
+
     // Test 4: Check critical classes can be loaded
     echo "🔍 Testing critical class loading...\n";
     $critical_classes = [
@@ -73,14 +74,14 @@ if (!$wp_tests_dir) {
         'WooAiAssistant\\Common\\Sanitizer',
         'WooAiAssistant\\Common\\Traits\\Singleton',
     ];
-    
+
     $failed_classes = [];
     foreach ($critical_classes as $class) {
         if (!class_exists($class) && !trait_exists($class)) {
             $failed_classes[] = $class;
         }
     }
-    
+
     if (!empty($failed_classes)) {
         echo "❌ Failed to load critical classes:\n";
         foreach ($failed_classes as $class) {
@@ -89,7 +90,7 @@ if (!$wp_tests_dir) {
         exit(1);
     }
     echo "✅ All critical classes can be loaded\n";
-    
+
     // Test 5: Check critical methods exist
     $methods_to_check = [
         'WooAiAssistant\\Common\\Utils' => [
@@ -107,7 +108,7 @@ if (!$wp_tests_dir) {
             'install',
         ],
     ];
-    
+
     $missing_methods = [];
     foreach ($methods_to_check as $class => $methods) {
         if (class_exists($class)) {
@@ -119,7 +120,7 @@ if (!$wp_tests_dir) {
             }
         }
     }
-    
+
     if (!empty($missing_methods)) {
         echo "❌ Missing required methods:\n";
         foreach ($missing_methods as $method) {
@@ -128,7 +129,7 @@ if (!$wp_tests_dir) {
         exit(1);
     }
     echo "✅ All required methods exist\n";
-    
+
     // Test 6: Check for common fatal error patterns
     $php_files = glob(dirname(__DIR__) . '/src/**/*.php');
     if (empty($php_files)) {
@@ -142,7 +143,7 @@ if (!$wp_tests_dir) {
             }
         }
     }
-    
+
     $syntax_errors = [];
     foreach ($php_files as $file) {
         $syntax_check = shell_exec("php -l $file 2>&1");
@@ -150,7 +151,7 @@ if (!$wp_tests_dir) {
             $syntax_errors[$file] = $syntax_check;
         }
     }
-    
+
     if (!empty($syntax_errors)) {
         echo "❌ PHP syntax errors found:\n";
         foreach ($syntax_errors as $file => $error) {
@@ -159,33 +160,33 @@ if (!$wp_tests_dir) {
         exit(1);
     }
     echo "✅ No PHP syntax errors in src/ directory\n";
-    
+
     // Test 7: Check database table creation queries
     if (class_exists('WooAiAssistant\\Setup\\Activator')) {
         echo "✅ Activator class is loadable\n";
     }
-    
+
     echo "\n";
     echo "========================================\n";
     echo "✅ PLUGIN ACTIVATION TEST PASSED\n";
     echo "========================================\n";
     echo "The plugin should be able to activate without fatal errors.\n";
     echo "Note: This is a simplified test. Full WordPress integration testing recommended.\n";
-    
 } else {
     // Full WordPress test environment available
     echo "Running full WordPress activation test...\n";
-    
+
     require_once $wp_tests_dir . '/includes/functions.php';
-    
-    function _manually_load_plugin() {
+
+    function _manually_load_plugin()
+    {
         require dirname(__DIR__) . '/woo-ai-assistant.php';
     }
-    
+
     tests_add_filter('muplugins_loaded', '_manually_load_plugin');
-    
+
     require_once $wp_tests_dir . '/includes/bootstrap.php';
-    
+
     // Test activation
     try {
         WooAiAssistant\Setup\Activator::activate();

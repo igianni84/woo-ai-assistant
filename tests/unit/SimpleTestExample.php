@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Simple Test Example
  *
@@ -76,15 +77,15 @@ class SimpleTestExample extends TestCase
     public function test_fixture_files_should_exist(): void
     {
         $fixturesDir = WOO_AI_ASSISTANT_PLUGIN_DIR . '/tests/fixtures';
-        
+
         $this->assertDirectoryExists($fixturesDir, 'Fixtures directory should exist');
-        
+
         $fixtureFiles = [
             'sample-products.json',
-            'sample-users.json', 
+            'sample-users.json',
             'plugin-configurations.json'
         ];
-        
+
         foreach ($fixtureFiles as $file) {
             $filePath = $fixturesDir . '/' . $file;
             $this->assertFileExists($filePath, "Fixture file should exist: {$file}");
@@ -99,19 +100,19 @@ class SimpleTestExample extends TestCase
     public function test_fixture_json_should_be_valid(): void
     {
         $fixturesDir = WOO_AI_ASSISTANT_PLUGIN_DIR . '/tests/fixtures';
-        
+
         $jsonFiles = [
             'sample-products.json',
             'sample-users.json',
             'plugin-configurations.json'
         ];
-        
+
         foreach ($jsonFiles as $jsonFile) {
             $filePath = $fixturesDir . '/' . $jsonFile;
             $content = file_get_contents($filePath);
-            
+
             $this->assertIsString($content, "Should be able to read fixture: {$jsonFile}");
-            
+
             $data = json_decode($content, true);
             $this->assertNotNull($data, "JSON should be valid in fixture: {$jsonFile}");
             $this->assertEquals(JSON_ERROR_NONE, json_last_error(), "JSON should have no errors in fixture: {$jsonFile}");
@@ -126,7 +127,7 @@ class SimpleTestExample extends TestCase
     public function test_directory_structure_should_exist(): void
     {
         $baseDir = WOO_AI_ASSISTANT_PLUGIN_DIR;
-        
+
         $requiredDirs = [
             '/tests',
             '/tests/unit',
@@ -137,7 +138,7 @@ class SimpleTestExample extends TestCase
             '/tests/unit/Common',
             '/tests/unit/Config'
         ];
-        
+
         foreach ($requiredDirs as $dir) {
             $fullPath = $baseDir . $dir;
             $this->assertDirectoryExists($fullPath, "Required directory should exist: {$dir}");
@@ -152,7 +153,7 @@ class SimpleTestExample extends TestCase
     public function test_key_test_files_should_exist(): void
     {
         $baseDir = WOO_AI_ASSISTANT_PLUGIN_DIR;
-        
+
         $testFiles = [
             '/tests/bootstrap.php',
             '/tests/unit/WooAiBaseTestCase.php',
@@ -160,7 +161,7 @@ class SimpleTestExample extends TestCase
             '/tests/fixtures/FixtureLoader.php',
             '/phpunit.xml'
         ];
-        
+
         foreach ($testFiles as $file) {
             $fullPath = $baseDir . $file;
             $this->assertFileExists($fullPath, "Test file should exist: {$file}");
@@ -176,18 +177,18 @@ class SimpleTestExample extends TestCase
     {
         $composerFile = WOO_AI_ASSISTANT_PLUGIN_DIR . '/composer.json';
         $this->assertFileExists($composerFile, 'composer.json should exist');
-        
+
         $content = file_get_contents($composerFile);
         $composer = json_decode($content, true);
-        
+
         $this->assertArrayHasKey('require-dev', $composer, 'composer.json should have require-dev section');
-        
+
         $requiredDevPackages = [
             'phpunit/phpunit',
             'mockery/mockery',
             'squizlabs/php_codesniffer'
         ];
-        
+
         foreach ($requiredDevPackages as $package) {
             $this->assertArrayHasKey($package, $composer['require-dev'], "Should have dev dependency: {$package}");
         }
@@ -203,13 +204,13 @@ class SimpleTestExample extends TestCase
         $composerFile = WOO_AI_ASSISTANT_PLUGIN_DIR . '/composer.json';
         $content = file_get_contents($composerFile);
         $composer = json_decode($content, true);
-        
+
         $this->assertArrayHasKey('autoload', $composer, 'Should have autoload section');
         $this->assertArrayHasKey('autoload-dev', $composer, 'Should have autoload-dev section');
-        
+
         $this->assertArrayHasKey('psr-4', $composer['autoload'], 'Should use PSR-4 autoloading');
         $this->assertArrayHasKey('psr-4', $composer['autoload-dev'], 'Should use PSR-4 for dev autoloading');
-        
+
         $this->assertArrayHasKey('WooAiAssistant\\', $composer['autoload']['psr-4'], 'Should have plugin namespace');
         $this->assertArrayHasKey('WooAiAssistant\\Tests\\', $composer['autoload-dev']['psr-4'], 'Should have test namespace');
     }
@@ -223,7 +224,7 @@ class SimpleTestExample extends TestCase
     {
         $startMemory = memory_get_usage();
         $startTime = microtime(true);
-        
+
         // Simulate some test operations
         for ($i = 0; $i < 1000; $i++) {
             $data = ['test' => 'data', 'number' => $i];
@@ -231,13 +232,13 @@ class SimpleTestExample extends TestCase
             $decoded = json_decode($json, true);
             $this->assertEquals($data, $decoded);
         }
-        
+
         $endTime = microtime(true);
         $endMemory = memory_get_usage();
-        
+
         $executionTime = $endTime - $startTime;
         $memoryUsage = $endMemory - $startMemory;
-        
+
         $this->assertLessThan(2.0, $executionTime, 'Simple operations should be fast');
         $this->assertLessThan(1048576, $memoryUsage, 'Memory usage should be reasonable'); // < 1MB
     }

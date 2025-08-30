@@ -31,7 +31,7 @@ if (!defined('ABSPATH')) {
  *
  * Tests the Installer class functionality including:
  * - Zero-config initial installation
- * - Sample data creation without duplicates  
+ * - Sample data creation without duplicates
  * - wpdb::prepare() usage validation
  * - Idempotent installation process
  * - Installation validation and rollback
@@ -137,7 +137,7 @@ class InstallerTest extends WooAiBaseTestCase
         $this->assertTrue($result['success'], 'Installation should succeed');
         $this->assertIsArray($result['installed'], 'Should return list of installed components');
         $this->assertEmpty($result['errors'], 'Should have no errors: ' . implode(', ', $result['errors']));
-        
+
         // Check that all major components were installed
         $installedComponents = implode(' ', $result['installed']);
         $this->assertStringContainsString('settings', $installedComponents, 'Initial settings should be installed');
@@ -163,14 +163,14 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed');
-        
+
         // Validate wpdb::prepare() usage in captured queries
         $this->validateWpdbPrepareUsage();
-        
+
         // Check that settings queries used prepare correctly
         $settingsQueries = $this->getQueriesForTable('woo_ai_settings');
         $this->assertNotEmpty($settingsQueries, 'Settings queries should have been captured');
-        
+
         foreach ($settingsQueries as $query) {
             if ($query['type'] === 'prepare') {
                 $this->assertValidPrepareStatement($query['query'], $query['args']);
@@ -190,7 +190,7 @@ class InstallerTest extends WooAiBaseTestCase
         // Arrange
         $this->setupQueryCapture();
         $this->mockDatabaseTables();
-        
+
         // Simulate existing knowledge base entries by making wpdb return existing data
         $this->mockExistingKnowledgeBaseEntries();
 
@@ -199,13 +199,13 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed even with existing data');
-        
+
         // Check that duplicate checking queries were made
         $kbQueries = $this->getQueriesForTable('woo_ai_knowledge_base');
-        $duplicateCheckQueries = array_filter($kbQueries, function($query) {
+        $duplicateCheckQueries = array_filter($kbQueries, function ($query) {
             return strpos($query['query'], 'chunk_hash') !== false && strpos($query['query'], 'SELECT') !== false;
         });
-        
+
         $this->assertNotEmpty($duplicateCheckQueries, 'Should check for existing entries to prevent duplicates');
     }
 
@@ -229,7 +229,7 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($firstResult['success'], 'First installation should succeed');
-        $this->assertTrue($secondResult['success'], 'Second installation should succeed');  
+        $this->assertTrue($secondResult['success'], 'Second installation should succeed');
         $this->assertTrue($thirdResult['success'], 'Third installation should succeed');
 
         // Check that no errors occurred
@@ -248,7 +248,7 @@ class InstallerTest extends WooAiBaseTestCase
         // Arrange
         $this->mockDatabaseTables();
         $this->mockUtilsMethods();
-        
+
         // Mock successful validation
         $this->mockInstallationValidation(true);
 
@@ -270,7 +270,7 @@ class InstallerTest extends WooAiBaseTestCase
         // Arrange
         $this->mockDatabaseTables();
         $this->mockUtilsMethods();
-        
+
         // Simulate failure in non-critical component (analytics)
         $this->mockAnalyticsFailure();
 
@@ -293,7 +293,7 @@ class InstallerTest extends WooAiBaseTestCase
         // Arrange
         $this->mockDatabaseTables();
         $this->mockUtilsMethods();
-        
+
         // Simulate failure in critical component (initial settings)
         $this->mockCriticalComponentFailure();
 
@@ -323,7 +323,7 @@ class InstallerTest extends WooAiBaseTestCase
         $this->assertTrue($result['success'], 'Installation should succeed');
 
         // Check settings insertion queries
-        $settingsInsertions = array_filter($this->capturedQueries, function($query) {
+        $settingsInsertions = array_filter($this->capturedQueries, function ($query) {
             return $query['type'] === 'insert' && strpos($query['table'], 'woo_ai_settings') !== false;
         });
 
@@ -353,7 +353,7 @@ class InstallerTest extends WooAiBaseTestCase
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed');
         $this->assertTrue(get_option('woo_ai_assistant_widget_ready'), 'Widget should be marked as ready');
-        
+
         $welcomeMessages = get_option('woo_ai_assistant_welcome_messages');
         $this->assertIsArray($welcomeMessages, 'Welcome messages should be configured');
         $this->assertArrayHasKey('product', $welcomeMessages, 'Should have product page welcome message');
@@ -377,11 +377,11 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed');
-        
+
         // Check analytics insertions
         $analyticsInsertions = $this->getQueriesForTable('woo_ai_analytics');
         $this->assertNotEmpty($analyticsInsertions, 'Analytics data should be inserted');
-        
+
         // Find installation completed metric
         $installationMetric = null;
         foreach ($analyticsInsertions as $query) {
@@ -390,7 +390,7 @@ class InstallerTest extends WooAiBaseTestCase
                 break;
             }
         }
-        
+
         $this->assertNotNull($installationMetric, 'Installation completion should be tracked');
         $this->assertEquals(1, $installationMetric['data']['metric_value'], 'Installation metric value should be 1');
     }
@@ -411,15 +411,15 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed');
-        
+
         // Check conversation creation
         $conversationInsertions = $this->getQueriesForTable('woo_ai_conversations');
         $this->assertNotEmpty($conversationInsertions, 'Welcome conversation should be created');
-        
+
         // Check message creation
         $messageInsertions = $this->getQueriesForTable('woo_ai_messages');
         $this->assertNotEmpty($messageInsertions, 'Welcome messages should be created');
-        
+
         // Verify template conversation was saved
         $this->assertNotFalse(get_option('woo_ai_assistant_welcome_conversation_id'), 'Welcome conversation ID should be saved');
     }
@@ -439,12 +439,12 @@ class InstallerTest extends WooAiBaseTestCase
 
         // Assert
         $this->assertTrue($result['success'], 'Installation should succeed');
-        
+
         $defaultPrompts = get_option('woo_ai_assistant_default_prompts');
         $this->assertIsArray($defaultPrompts, 'Default prompts should be configured');
         $this->assertArrayHasKey('system_prompt', $defaultPrompts, 'System prompt should be set');
         $this->assertArrayHasKey('greeting_prompt', $defaultPrompts, 'Greeting prompt should be set');
-        
+
         $responseTemplates = get_option('woo_ai_assistant_response_templates');
         $this->assertIsArray($responseTemplates, 'Response templates should be configured');
         $this->assertArrayHasKey('product_not_found', $responseTemplates, 'Product not found template should exist');
@@ -488,7 +488,7 @@ class InstallerTest extends WooAiBaseTestCase
 
         foreach ($methods as $method) {
             $methodName = $method->getName();
-            
+
             // Skip magic methods and constructors
             if (strpos($methodName, '__') === 0) {
                 continue;
@@ -527,7 +527,7 @@ class InstallerTest extends WooAiBaseTestCase
         delete_option('woo_ai_assistant_welcome_conversation_id');
         delete_option('woo_ai_assistant_default_prompts');
         delete_option('woo_ai_assistant_response_templates');
-        
+
         // Clear cron jobs
         wp_clear_scheduled_hook('woo_ai_assistant_initial_indexing');
     }
@@ -540,7 +540,7 @@ class InstallerTest extends WooAiBaseTestCase
     private function mockDatabaseTables(): void
     {
         global $wpdb;
-        
+
         // Add test table prefix to mock wpdb
         foreach ($this->testTables as $table) {
             $wpdb->{str_replace('woo_ai_', '', $table)} = $wpdb->prefix . $table;
@@ -554,7 +554,7 @@ class InstallerTest extends WooAiBaseTestCase
      */
     private function mockUtilsMethods(): void
     {
-        add_filter('woo_ai_assistant_get_woocommerce_version', function() {
+        add_filter('woo_ai_assistant_get_woocommerce_version', function () {
             return '8.0.0';
         });
     }
@@ -567,7 +567,7 @@ class InstallerTest extends WooAiBaseTestCase
     private function mockExistingKnowledgeBaseEntries(): void
     {
         // Mock wpdb to return existing entries when checking for duplicates
-        add_filter('wpdb_get_var_result', function($result, $query) {
+        add_filter('wpdb_get_var_result', function ($result, $query) {
             if (strpos($query, 'chunk_hash') !== false && strpos($query, 'woo_ai_knowledge_base') !== false) {
                 return '1'; // Simulate existing entry found
             }
@@ -587,9 +587,9 @@ class InstallerTest extends WooAiBaseTestCase
         $mockSchema = $this->createMock(Schema::class);
         $mockSchema->method('validateSchema')
             ->willReturn(['valid' => $success, 'errors' => [], 'warnings' => []]);
-        
+
         // Store in a way that installer can access
-        add_filter('woo_ai_assistant_schema_instance', function() use ($mockSchema) {
+        add_filter('woo_ai_assistant_schema_instance', function () use ($mockSchema) {
             return $mockSchema;
         });
     }
@@ -602,7 +602,7 @@ class InstallerTest extends WooAiBaseTestCase
     private function mockAnalyticsFailure(): void
     {
         // Mock wpdb insert failure for analytics table
-        add_filter('wpdb_insert_result', function($result, $table, $data) {
+        add_filter('wpdb_insert_result', function ($result, $table, $data) {
             if (strpos($table, 'woo_ai_analytics') !== false) {
                 return false; // Simulate insert failure
             }
@@ -618,7 +618,7 @@ class InstallerTest extends WooAiBaseTestCase
     private function mockCriticalComponentFailure(): void
     {
         // Mock wpdb failure for settings table
-        add_filter('wpdb_insert_result', function($result, $table, $data) {
+        add_filter('wpdb_insert_result', function ($result, $table, $data) {
             if (strpos($table, 'woo_ai_settings') !== false) {
                 return false; // Simulate critical failure
             }
@@ -634,15 +634,15 @@ class InstallerTest extends WooAiBaseTestCase
     private function setupQueryCapture(): void
     {
         global $wpdb;
-        
+
         // Create mock wpdb that captures all operations
         $this->mockWpdb = $this->createPartialMock(get_class($wpdb), [
             'prepare', 'query', 'get_var', 'get_results', 'insert'
         ]);
-        
+
         // Capture prepare calls
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, ...$args) {
+            ->willReturnCallback(function ($query, ...$args) {
                 $this->capturedQueries[] = [
                     'type' => 'prepare',
                     'query' => $query,
@@ -650,10 +650,10 @@ class InstallerTest extends WooAiBaseTestCase
                 ];
                 return $this->originalWpdb->prepare($query, ...$args);
             });
-            
+
         // Capture insert calls
         $this->mockWpdb->method('insert')
-            ->willReturnCallback(function($table, $data, $format = null) {
+            ->willReturnCallback(function ($table, $data, $format = null) {
                 $this->capturedQueries[] = [
                     'type' => 'insert',
                     'table' => $table,
@@ -662,21 +662,21 @@ class InstallerTest extends WooAiBaseTestCase
                 ];
                 return 1; // Simulate success
             });
-            
+
         // Capture other calls
         $this->mockWpdb->method('get_var')
-            ->willReturnCallback(function($query, $x = 0, $y = 0) {
+            ->willReturnCallback(function ($query, $x = 0, $y = 0) {
                 $this->capturedQueries[] = [
                     'type' => 'get_var',
                     'query' => $query
                 ];
                 return null; // Simulate no existing data
             });
-            
+
         // Copy properties from original wpdb
         $this->mockWpdb->prefix = $wpdb->prefix;
         $this->mockWpdb->last_error = '';
-        
+
         // Replace global wpdb
         $wpdb = $this->mockWpdb;
     }
@@ -689,7 +689,7 @@ class InstallerTest extends WooAiBaseTestCase
     private function validateWpdbPrepareUsage(): void
     {
         $violations = [];
-        
+
         foreach ($this->capturedQueries as $query) {
             if ($query['type'] === 'prepare') {
                 if (!$this->isValidPrepareUsage($query['query'], $query['args'])) {
@@ -697,7 +697,7 @@ class InstallerTest extends WooAiBaseTestCase
                 }
             }
         }
-        
+
         $this->assertEmpty($violations, 'wpdb::prepare() violations found: ' . implode('; ', $violations));
     }
 
@@ -712,13 +712,13 @@ class InstallerTest extends WooAiBaseTestCase
     {
         // Count placeholders
         $placeholderCount = substr_count($query, '%s') + substr_count($query, '%d') + substr_count($query, '%f');
-        
+
         // Check if table name placeholder is used correctly
         if (strpos($query, '%1s') !== false) {
             // %1s should not be counted as a regular placeholder for table names
             $placeholderCount -= substr_count($query, '%1s');
         }
-        
+
         return $placeholderCount === count($args);
     }
 
@@ -730,7 +730,7 @@ class InstallerTest extends WooAiBaseTestCase
      */
     private function getQueriesForTable(string $tableName): array
     {
-        return array_filter($this->capturedQueries, function($query) use ($tableName) {
+        return array_filter($this->capturedQueries, function ($query) use ($tableName) {
             if (isset($query['table'])) {
                 return strpos($query['table'], $tableName) !== false;
             }

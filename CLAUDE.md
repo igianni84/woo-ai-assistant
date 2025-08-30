@@ -546,6 +546,25 @@ If you prefer MAMP or need to use it for compatibility, follow the setup below.
 - **WordPress:** Latest stable
 - **WooCommerce:** Latest stable
 
+#### WP-CLI Configuration for MAMP
+⚠️ **Important:** WP-CLI requires special configuration to work with MAMP's MySQL:
+
+1. **Use 127.0.0.1 instead of localhost** in wp-config.php:
+   ```php
+   define('DB_HOST', '127.0.0.1:8889');  // NOT localhost:8889
+   ```
+
+2. **Use the helper script** for WP-CLI commands:
+   ```bash
+   ./scripts/wp-cli-mamp.sh plugin list
+   ./scripts/wp-cli-mamp.sh db query "SELECT 1"
+   ```
+
+3. **Alternative:** Add MAMP MySQL to PATH:
+   ```bash
+   export PATH="/Applications/MAMP/Library/bin/mysql80/bin:$PATH"
+   ```
+
 #### Development Setup Steps
 
 ##### Step 1: Create Configuration File

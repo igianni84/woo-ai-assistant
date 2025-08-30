@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for DevelopmentConfig Class
  *
@@ -74,10 +75,10 @@ class DevelopmentConfigTest extends WooAiBaseTestCase
     {
         // Test with environment variable simulation
         $_ENV['OPENROUTER_API_KEY'] = 'test_openrouter_key';
-        
+
         $apiKey = $this->developmentConfig->getApiKey('openrouter');
         $this->assertEquals('test_openrouter_key', $apiKey, 'Should return development API key');
-        
+
         // Clean up
         unset($_ENV['OPENROUTER_API_KEY']);
     }
@@ -114,7 +115,7 @@ class DevelopmentConfigTest extends WooAiBaseTestCase
     public function test_public_methods_should_follow_camel_case_convention(): void
     {
         $publicMethods = ['isDevelopmentMode', 'isValidLicense', 'getApiKey', 'hasFeature'];
-        
+
         foreach ($publicMethods as $methodName) {
             $this->assertMethodFollowsCamelCase($this->developmentConfig, $methodName);
         }

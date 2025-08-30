@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Base Test Case for Woo AI Assistant Plugin
  *
@@ -323,7 +324,7 @@ abstract class WooAiBaseTestCase extends WP_UnitTestCase
      */
     protected function mockApiResponse(string $endpoint, array $response): void
     {
-        add_filter('woo_ai_assistant_mock_api_response_' . $endpoint, function() use ($response) {
+        add_filter('woo_ai_assistant_mock_api_response_' . $endpoint, function () use ($response) {
             return $response;
         });
     }
@@ -340,15 +341,15 @@ abstract class WooAiBaseTestCase extends WP_UnitTestCase
     {
         foreach ($expected as $key => $type) {
             $this->assertArrayHasKey(
-                $key, 
-                $actual, 
+                $key,
+                $actual,
                 $message ?: "Array should contain key '{$key}'"
             );
 
             if (is_string($type)) {
                 $this->assertInternalType(
-                    $type, 
-                    $actual[$key], 
+                    $type,
+                    $actual[$key],
                     $message ?: "Key '{$key}' should be of type '{$type}'"
                 );
             } elseif (is_array($type) && is_array($actual[$key])) {
@@ -369,7 +370,7 @@ abstract class WooAiBaseTestCase extends WP_UnitTestCase
         $reflection = new \ReflectionClass($instance);
         $method = $reflection->getMethod($method_name);
         $method->setAccessible(true);
-        
+
         return $method;
     }
 
@@ -385,7 +386,7 @@ abstract class WooAiBaseTestCase extends WP_UnitTestCase
         $reflection = new \ReflectionClass($instance);
         $property = $reflection->getProperty($property_name);
         $property->setAccessible(true);
-        
+
         return $property;
     }
 

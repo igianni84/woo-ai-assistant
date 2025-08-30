@@ -115,7 +115,7 @@ class ActivatorTest extends WooAiBaseTestCase
         $this->mockUtilsMethods();
 
         // Act
-        $this->expectNoExceptions(function() {
+        $this->expectNoExceptions(function () {
             Activator::activate();
         });
 
@@ -197,8 +197,8 @@ class ActivatorTest extends WooAiBaseTestCase
         $mockMigrations = $this->createMock(Migrations::class);
         $mockMigrations->expects($this->once())
             ->method('runMigrations')
-            ->with($this->callback(function($args) {
-                return is_array($args) && 
+            ->with($this->callback(function ($args) {
+                return is_array($args) &&
                        isset($args['backup']) && $args['backup'] === false &&
                        isset($args['force']) && $args['force'] === false;
             }))
@@ -262,7 +262,7 @@ class ActivatorTest extends WooAiBaseTestCase
     /**
      * Test wpdb::prepare() usage validation
      *
-     * This test specifically validates correct usage of wpdb::prepare() 
+     * This test specifically validates correct usage of wpdb::prepare()
      * and would have caught the 6 incorrect calls that were fixed.
      *
      * @return void
@@ -349,7 +349,7 @@ class ActivatorTest extends WooAiBaseTestCase
             $this->assertFalse(get_option('woo_ai_assistant_activated_at', false), 'Activation timestamp should be cleared');
             $this->assertFalse(get_option('woo_ai_assistant_activation_complete', false), 'Activation flag should be cleared');
             $this->assertFalse(wp_next_scheduled('woo_ai_assistant_daily_index'), 'Cron jobs should be cleared');
-            
+
             throw $e; // Re-throw to satisfy expectException
         }
     }
@@ -363,7 +363,7 @@ class ActivatorTest extends WooAiBaseTestCase
     {
         // Arrange
         update_option('woo_ai_assistant_version', '0.9.0'); // Simulate old version
-        
+
         $this->mockDatabaseClasses();
         $this->mockUtilsMethods(['getVersion' => '1.0.0']);
 
@@ -390,7 +390,7 @@ class ActivatorTest extends WooAiBaseTestCase
 
         foreach ($methods as $method) {
             $methodName = $method->getName();
-            
+
             // Skip magic methods and constructors
             if (strpos($methodName, '__') === 0) {
                 continue;
@@ -467,7 +467,7 @@ class ActivatorTest extends WooAiBaseTestCase
     {
         // Test missing json extension
         $this->mockPhpExtension('json', false);
-        
+
         $this->expectException(\Exception::class);
         $this->expectExceptionMessageMatches('/json.*extension/');
 
@@ -540,7 +540,7 @@ class ActivatorTest extends WooAiBaseTestCase
         $values = array_merge($defaults, $overrides);
 
         foreach ($values as $method => $returnValue) {
-            add_filter("woo_ai_assistant_{$method}", function() use ($returnValue) {
+            add_filter("woo_ai_assistant_{$method}", function () use ($returnValue) {
                 return $returnValue;
             });
         }
@@ -584,7 +584,7 @@ class ActivatorTest extends WooAiBaseTestCase
     private function mockPhpExtension(string $extension, bool $loaded): void
     {
         // Override extension_loaded function for testing
-        add_filter('woo_ai_assistant_extension_loaded_' . $extension, function() use ($loaded) {
+        add_filter('woo_ai_assistant_extension_loaded_' . $extension, function () use ($loaded) {
             return $loaded;
         });
     }
@@ -601,7 +601,7 @@ class ActivatorTest extends WooAiBaseTestCase
     {
         // Store the mock for later use
         $filterName = "mock_static_{$className}_{$methodName}";
-        add_filter($filterName, function() use ($returnValue) {
+        add_filter($filterName, function () use ($returnValue) {
             return $returnValue;
         });
     }
@@ -620,7 +620,7 @@ class ActivatorTest extends WooAiBaseTestCase
 
         // Capture prepare calls
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, ...$args) {
+            ->willReturnCallback(function ($query, ...$args) {
                 $this->capturedQueries[] = [
                     'type' => 'prepare',
                     'query' => $query,
@@ -631,7 +631,7 @@ class ActivatorTest extends WooAiBaseTestCase
 
         // Capture direct query calls
         $this->mockWpdb->method('query')
-            ->willReturnCallback(function($query) {
+            ->willReturnCallback(function ($query) {
                 $this->capturedQueries[] = [
                     'type' => 'query',
                     'query' => $query
@@ -712,7 +712,7 @@ class ActivatorTest extends WooAiBaseTestCase
     {
         // Count placeholders
         $placeholderCount = substr_count($query, '%s') + substr_count($query, '%d') + substr_count($query, '%f');
-        
+
         // Should match number of arguments
         return $placeholderCount === count($args);
     }
@@ -727,7 +727,7 @@ class ActivatorTest extends WooAiBaseTestCase
     {
         // This would require more sophisticated mocking for class instantiation
         // For now, we'll use a filter to override the installer behavior
-        add_filter('woo_ai_assistant_installer_instance', function() use ($mockInstaller) {
+        add_filter('woo_ai_assistant_installer_instance', function () use ($mockInstaller) {
             return $mockInstaller;
         });
     }

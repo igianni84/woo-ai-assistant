@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHPUnit Bootstrap for Woo AI Assistant Plugin
  *
@@ -62,7 +63,7 @@ if (!$_tests_dir) {
         // Manual installation paths
         dirname(__FILE__) . '/wordpress-tests-lib',
     ];
-    
+
     foreach ($possible_paths as $path) {
         if (is_dir($path)) {
             $_tests_dir = $path;
@@ -94,7 +95,8 @@ require_once $_tests_dir . '/includes/functions.php';
 /**
  * Load the plugin and WooCommerce for testing
  */
-function _manually_load_plugin_and_dependencies() {
+function _manually_load_plugin_and_dependencies()
+{
     // Load WooCommerce first (required for our plugin)
     if (!function_exists('is_plugin_active')) {
         include_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -102,7 +104,7 @@ function _manually_load_plugin_and_dependencies() {
 
     // Define WooCommerce path (adjust based on your MAMP setup)
     $woocommerce_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
-    
+
     if (file_exists($woocommerce_path)) {
         require_once $woocommerce_path;
         echo "WooCommerce loaded for testing\n";
@@ -131,13 +133,14 @@ tests_add_filter('muplugins_loaded', '_manually_load_plugin_and_dependencies');
 /**
  * Setup test database and activate plugins
  */
-function _setup_test_environment() {
+function _setup_test_environment()
+{
     // Activate WooCommerce
     activate_plugin('woocommerce/woocommerce.php');
-    
+
     // Activate our plugin
     activate_plugin(WOO_AI_ASSISTANT_BASENAME);
-    
+
     echo "Plugins activated in test environment\n";
 }
 
@@ -147,20 +150,21 @@ tests_add_filter('wp_loaded', '_setup_test_environment');
 /**
  * Create test data after setup
  */
-function _create_test_data() {
+function _create_test_data()
+{
     // Create test product categories
     if (function_exists('wp_insert_term')) {
         wp_insert_term('Electronics', 'product_cat', [
             'description' => 'Electronic products for testing',
             'slug' => 'electronics'
         ]);
-        
+
         wp_insert_term('Clothing', 'product_cat', [
-            'description' => 'Clothing products for testing', 
+            'description' => 'Clothing products for testing',
             'slug' => 'clothing'
         ]);
     }
-    
+
     // Set WooCommerce currency for testing
     if (function_exists('update_option')) {
         update_option('woocommerce_currency', 'USD');
@@ -168,7 +172,7 @@ function _create_test_data() {
         update_option('woocommerce_price_thousand_sep', ',');
         update_option('woocommerce_price_num_decimals', 2);
     }
-    
+
     echo "Test data created\n";
 }
 
@@ -186,11 +190,12 @@ require $_tests_dir . '/includes/bootstrap.php';
  * @param array $args Product arguments
  * @return WC_Product|false Product object or false on failure
  */
-function woo_ai_create_test_product($args = []) {
+function woo_ai_create_test_product($args = [])
+{
     if (!class_exists('WC_Product_Simple')) {
         return false;
     }
-    
+
     $defaults = [
         'name' => 'Test Product',
         'slug' => 'test-product',
@@ -202,9 +207,9 @@ function woo_ai_create_test_product($args = []) {
         'featured' => false,
         'manage_stock' => false,
     ];
-    
+
     $args = wp_parse_args($args, $defaults);
-    
+
     $product = new WC_Product_Simple();
     $product->set_name($args['name']);
     $product->set_slug($args['slug']);
@@ -215,9 +220,9 @@ function woo_ai_create_test_product($args = []) {
     $product->set_catalog_visibility($args['catalog_visibility']);
     $product->set_featured($args['featured']);
     $product->set_manage_stock($args['manage_stock']);
-    
+
     $product_id = $product->save();
-    
+
     return $product_id ? wc_get_product($product_id) : false;
 }
 
@@ -228,7 +233,8 @@ function woo_ai_create_test_product($args = []) {
  * @param array $args Additional user arguments
  * @return int|WP_Error User ID on success, WP_Error on failure
  */
-function woo_ai_create_test_user($role = 'customer', $args = []) {
+function woo_ai_create_test_user($role = 'customer', $args = [])
+{
     $defaults = [
         'user_login' => 'test_user_' . uniqid(),
         'user_email' => 'test_' . uniqid() . '@example.com',
@@ -237,32 +243,33 @@ function woo_ai_create_test_user($role = 'customer', $args = []) {
         'last_name' => 'User',
         'role' => $role
     ];
-    
+
     $args = wp_parse_args($args, $defaults);
-    
+
     return wp_insert_user($args);
 }
 
 /**
  * Clean up test data
  */
-function woo_ai_cleanup_test_data() {
+function woo_ai_cleanup_test_data()
+{
     global $wpdb;
-    
+
     // Clean up products
     $wpdb->query("DELETE FROM {$wpdb->posts} WHERE post_type = 'product'");
     $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE post_id NOT IN (SELECT ID FROM {$wpdb->posts})");
-    
+
     // Clean up test users (keep admin)
     $wpdb->query("DELETE FROM {$wpdb->users} WHERE ID > 1");
     $wpdb->query("DELETE FROM {$wpdb->usermeta} WHERE user_id NOT IN (SELECT ID FROM {$wpdb->users})");
-    
+
     // Clean up terms
     $wpdb->query("DELETE FROM {$wpdb->terms} WHERE slug LIKE 'test-%'");
-    
+
     // Clean up plugin options
     delete_option('woo_ai_assistant_test_option');
-    
+
     // Clean up transients
     $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_woo_ai_%'");
     $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_woo_ai_%'");

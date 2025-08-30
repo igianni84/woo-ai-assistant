@@ -166,6 +166,30 @@ MAMP > Preferences > Web Server
 - Document Root: /Applications/MAMP/htdocs
 ```
 
+#### 1.4 Configure WP-CLI for MAMP
+WP-CLI requires special configuration to work with MAMP:
+
+**Option 1: Use the helper script (Recommended)**
+```bash
+# Use the provided script that automatically configures the environment
+./scripts/wp-cli-mamp.sh plugin list
+./scripts/wp-cli-mamp.sh db query "SELECT 1"
+```
+
+**Option 2: Manual PATH configuration**
+```bash
+# Add MAMP MySQL to PATH for each command
+PATH="/Applications/MAMP/Library/bin/mysql80/bin:$PATH" wp plugin list
+```
+
+**Option 3: Add to your shell profile (permanent)**
+```bash
+# Add to ~/.zshrc or ~/.bash_profile
+export PATH="/Applications/MAMP/Library/bin/mysql80/bin:$PATH"
+```
+
+**Important:** Ensure wp-config.php uses `127.0.0.1:8889` instead of `localhost:8889` for DB_HOST
+
 ### Step 2: WordPress Setup
 
 #### 2.1 Access WordPress

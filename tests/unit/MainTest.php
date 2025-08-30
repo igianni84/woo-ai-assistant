@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for Main Plugin Class
  *
@@ -143,10 +144,10 @@ class MainTest extends WooAiBaseTestCase
         $pluginInfo = $this->main->getPluginInfo();
 
         $this->assertIsArray($pluginInfo, 'Plugin info should be an array');
-        
+
         $expectedKeys = [
             'name',
-            'version', 
+            'version',
             'path',
             'url',
             'development_mode',
@@ -179,7 +180,7 @@ class MainTest extends WooAiBaseTestCase
     public function test_addPluginActionLinks_should_add_settings_link(): void
     {
         $originalLinks = ['deactivate' => 'Deactivate'];
-        
+
         $modifiedLinks = $this->main->addPluginActionLinks($originalLinks);
 
         $this->assertIsArray($modifiedLinks, 'Modified links should be an array');
@@ -203,7 +204,7 @@ class MainTest extends WooAiBaseTestCase
 
         $this->assertIsArray($modifiedLinks, 'Modified links should be an array');
         $this->assertGreaterThan(count($originalLinks), count($modifiedLinks), 'Should have more links than original');
-        
+
         $linkText = implode(' ', $modifiedLinks);
         $this->assertStringContainsString('GitHub', $linkText, 'Should contain GitHub link');
         $this->assertStringContainsString('Support', $linkText, 'Should contain Support link');
@@ -277,7 +278,7 @@ class MainTest extends WooAiBaseTestCase
             'getInstance',
             'loadModules',
             'initRestApi',
-            'initFrontend', 
+            'initFrontend',
             'initAdmin',
             'addPluginActionLinks',
             'addPluginRowMeta',
@@ -339,11 +340,11 @@ class MainTest extends WooAiBaseTestCase
         $restApiInitFired = false;
 
         // Hook into our custom actions
-        add_action('woo_ai_assistant_modules_loaded', function() use (&$moduleLoadedFired) {
+        add_action('woo_ai_assistant_modules_loaded', function () use (&$moduleLoadedFired) {
             $moduleLoadedFired = true;
         });
 
-        add_action('woo_ai_assistant_rest_api_init', function() use (&$restApiInitFired) {
+        add_action('woo_ai_assistant_rest_api_init', function () use (&$restApiInitFired) {
             $restApiInitFired = true;
         });
 
@@ -391,7 +392,7 @@ class MainTest extends WooAiBaseTestCase
         $shutdownFired = false;
 
         // Hook into shutdown action
-        add_action('woo_ai_assistant_shutdown', function() use (&$shutdownFired) {
+        add_action('woo_ai_assistant_shutdown', function () use (&$shutdownFired) {
             $shutdownFired = true;
         });
 
@@ -430,7 +431,7 @@ class MainTest extends WooAiBaseTestCase
     public function test_plugin_memory_usage_should_be_reasonable(): void
     {
         $initialMemory = memory_get_usage();
-        
+
         // Perform multiple operations
         for ($i = 0; $i < 100; $i++) {
             $this->main->getPluginInfo();

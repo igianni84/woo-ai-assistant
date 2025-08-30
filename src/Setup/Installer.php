@@ -71,7 +71,7 @@ class Installer
         $this->runInstallationStep('scheduleInitialIndexing', 'Knowledge base indexing schedule', false);
         $this->runInstallationStep('createWelcomeConversation', 'Welcome conversation template', false);
         $this->runInstallationStep('setupDefaultAIPrompts', 'AI prompts and response templates', false);
-        
+
         // Final validation
         try {
             $this->validateInstallation();
@@ -104,7 +104,7 @@ class Installer
             $this->{$methodName}();
         } catch (\Exception $e) {
             $errorMessage = "Failed to {$stepName}: " . $e->getMessage();
-            
+
             if ($critical) {
                 $this->installationResult['success'] = false;
                 $this->installationResult['errors'][] = $errorMessage;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Simple Bootstrap for Basic PHPUnit Tests
  *

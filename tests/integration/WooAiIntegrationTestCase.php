@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Base Integration Test Case for Woo AI Assistant Plugin
  *
@@ -20,7 +21,7 @@ use WooAiAssistant\Main;
  * Class WooAiIntegrationTestCase
  *
  * Base test case for integration tests.
- * 
+ *
  * @since 1.0.0
  */
 abstract class WooAiIntegrationTestCase extends WP_UnitTestCase

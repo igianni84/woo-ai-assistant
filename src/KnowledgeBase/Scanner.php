@@ -91,7 +91,7 @@ class Scanner
     protected function init(): void
     {
         $this->detectMultilingualSupport();
-        
+
         Logger::debug('Knowledge Base Scanner initialized', [
             'batch_size' => $this->batchSize,
             'cache_ttl' => $this->cacheTtl,
@@ -112,12 +112,12 @@ class Scanner
      * @param bool  $args['force_refresh'] Whether to bypass cache. Default false.
      * @param array $args['include_ids'] Specific product IDs to scan. Default empty.
      * @param array $args['exclude_ids'] Product IDs to exclude. Default empty.
-     * 
+     *
      * @return array Array of product data formatted for indexing.
      *               Each element contains 'id', 'type', 'title', 'content', 'url', 'metadata', 'language', 'last_modified'.
-     * 
+     *
      * @throws Exception When WooCommerce is not active or scanning fails.
-     * 
+     *
      * @example
      * ```php
      * $scanner = Scanner::getInstance();
@@ -185,7 +185,7 @@ class Scanner
             if ($query->have_posts()) {
                 while ($query->have_posts()) {
                     $query->the_post();
-                    
+
                     try {
                         $productData = $this->processProduct(get_post());
                         if ($productData) {
@@ -214,7 +214,6 @@ class Scanner
             Cache::getInstance()->set($cacheKey, $products, $this->cacheTtl);
 
             return $products;
-
         } catch (Exception $e) {
             Logger::error('Product scanning failed', [
                 'error' => $e->getMessage(),
@@ -235,9 +234,9 @@ class Scanner
      * @param bool  $args['include_wc_pages'] Include WooCommerce pages. Default true.
      * @param bool  $args['include_legal_pages'] Include privacy, terms pages. Default true.
      * @param array $args['custom_page_ids'] Additional page IDs to include. Default empty.
-     * 
+     *
      * @return array Array of page data formatted for indexing.
-     * 
+     *
      * @throws Exception When page scanning fails.
      */
     public function scanPages(array $args = []): array
@@ -317,7 +316,6 @@ class Scanner
             Cache::getInstance()->set($cacheKey, $pages, $this->cacheTtl);
 
             return $pages;
-
         } catch (Exception $e) {
             Logger::error('Page scanning failed', [
                 'error' => $e->getMessage(),
@@ -338,9 +336,9 @@ class Scanner
      * @param int   $args['limit'] Maximum number of posts to scan. Default 100.
      * @param array $args['post_types'] Post types to scan. Default ['post'].
      * @param array $args['categories'] Category IDs to filter. Default empty.
-     * 
+     *
      * @return array Array of post data formatted for indexing.
-     * 
+     *
      * @throws Exception When post scanning fails.
      */
     public function scanPosts(array $args = []): array
@@ -381,7 +379,7 @@ class Scanner
             if ($query->have_posts()) {
                 while ($query->have_posts()) {
                     $query->the_post();
-                    
+
                     try {
                         $postData = $this->processPost(get_post());
                         if ($postData) {
@@ -406,7 +404,6 @@ class Scanner
             Cache::getInstance()->set($cacheKey, $posts, $this->cacheTtl);
 
             return $posts;
-
         } catch (Exception $e) {
             Logger::error('Post scanning failed', [
                 'error' => $e->getMessage(),
@@ -427,9 +424,9 @@ class Scanner
      * @param bool  $args['include_shipping'] Include shipping settings. Default true.
      * @param bool  $args['include_payment'] Include payment method settings. Default true.
      * @param bool  $args['include_tax'] Include tax settings. Default true.
-     * 
+     *
      * @return array Array of settings data formatted for indexing.
-     * 
+     *
      * @throws Exception When WooCommerce is not active or settings scanning fails.
      */
     public function scanWooCommerceSettings(array $args = []): array
@@ -483,7 +480,6 @@ class Scanner
             Cache::getInstance()->set($cacheKey, $settings, $this->cacheTtl);
 
             return array_filter($settings);
-
         } catch (Exception $e) {
             Logger::error('WooCommerce settings scanning failed', [
                 'error' => $e->getMessage(),
@@ -503,9 +499,9 @@ class Scanner
      * @param array $args Optional. Arguments for category scanning.
      * @param bool  $args['include_categories'] Include product categories. Default true.
      * @param bool  $args['include_tags'] Include product tags. Default true.
-     * 
+     *
      * @return array Array of taxonomy data formatted for indexing.
-     * 
+     *
      * @throws Exception When WooCommerce is not active or taxonomy scanning fails.
      */
     public function scanCategories(array $args = []): array
@@ -570,7 +566,6 @@ class Scanner
             Cache::getInstance()->set($cacheKey, $taxonomies, $this->cacheTtl);
 
             return $taxonomies;
-
         } catch (Exception $e) {
             Logger::error('Category/taxonomy scanning failed', [
                 'error' => $e->getMessage(),
@@ -594,10 +589,10 @@ class Scanner
      * @param bool  $args['include_settings'] Include WooCommerce settings. Default true.
      * @param bool  $args['include_categories'] Include categories/tags. Default true.
      * @param bool  $args['force_refresh'] Force refresh of all cached data. Default false.
-     * 
+     *
      * @return array Comprehensive scan results with all content types.
      *               Contains 'success' boolean, 'data' array, and 'errors' array.
-     * 
+     *
      * @example
      * ```php
      * $scanner = Scanner::getInstance();
@@ -610,7 +605,7 @@ class Scanner
     public function scanAll(array $args = []): array
     {
         $startTime = microtime(true);
-        
+
         $defaults = [
             'include_products' => true,
             'include_pages' => true,
@@ -945,10 +940,10 @@ class Scanner
     private function processShippingSettings(): array
     {
         $shippingData = [];
-        
+
         // Get shipping zones
         $zones = WC_Shipping_Zones::get_zones();
-        
+
         foreach ($zones as $zone) {
             $methods = [];
             foreach ($zone['shipping_methods'] as $method) {
@@ -1112,7 +1107,7 @@ class Scanner
             // Polylang
             return pll_current_language() ?: 'en';
         }
-        
+
         return 'en';
     }
 

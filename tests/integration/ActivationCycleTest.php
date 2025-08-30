@@ -57,7 +57,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
      */
     private $expectedTables = [
         'woo_ai_settings',
-        'woo_ai_knowledge_base', 
+        'woo_ai_knowledge_base',
         'woo_ai_conversations',
         'woo_ai_messages',
         'woo_ai_analytics',
@@ -99,7 +99,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
 
         // Ensure clean state
         $this->ensurePluginInactive();
-        
+
         // Initialize plugin main instance
         $this->pluginMain = Main::getInstance();
     }
@@ -161,7 +161,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
         $this->assertPluginDeactivated();
         $this->assertCronJobsCleared();
         $this->assertCachesCleared();
-        
+
         // Data should be preserved for reactivation
         $this->assertDatabaseTablesPreserved();
         $this->assertUserDataPreserved();
@@ -180,7 +180,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
         // Arrange - Go through activation-deactivation cycle
         $this->performFreshActivation();
         $originalData = $this->capturePluginData();
-        
+
         $this->performDeactivation();
         $this->assertPluginDeactivated('Plugin should be deactivated');
 
@@ -208,14 +208,14 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
             // Activate
             $this->performFreshActivation();
             $this->assertPluginFullyActivated("Plugin should be activated in cycle {$cycle}");
-            
+
             // Capture data state
             $cycleData = $this->capturePluginData();
-            
+
             // Deactivate
             $this->performDeactivation();
             $this->assertPluginDeactivated("Plugin should be deactivated in cycle {$cycle}");
-            
+
             // Verify data consistency across cycles
             if ($cycle > 1) {
                 $this->assertDataConsistentAcrossCycles($cycleData, $cycle);
@@ -238,7 +238,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         // Arrange - Simulate existing installation with older version
         $this->simulateOlderVersionInstalled('0.9.0');
-        
+
         // Act - Activate newer version (simulates upgrade)
         $this->performUpgradeActivation();
 
@@ -263,7 +263,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
 
         // Act & Assert - Activation should fail
         $this->expectException(\Exception::class);
-        
+
         try {
             Activator::activate();
         } catch (\Exception $e) {
@@ -285,15 +285,15 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
 
         // Act - Go through complete cycle
         $this->performFreshActivation();
-        
+
         // Assert - Verify WordPress integration
         $this->assertWordPressHooksRegistered();
         $this->assertWooCommerceIntegrationActive();
-        
+
         // Deactivate and verify cleanup
         $this->performDeactivation();
         $this->assertWordPressHooksUnregistered();
-        
+
         // Reactivate and verify restored
         $this->performReactivation();
         $this->assertWordPressHooksRegistered();
@@ -310,11 +310,11 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
         // Fresh activation
         $this->performFreshActivation();
         $this->assertDatabaseIntegrity();
-        
+
         // After deactivation
         $this->performDeactivation();
         $this->assertDatabaseIntegrity(); // Tables should still be valid
-        
+
         // After reactivation
         $this->performReactivation();
         $this->assertDatabaseIntegrity();
@@ -331,9 +331,9 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         // Simulate concurrent activation attempts
         // In real scenario, this could happen with multiple admin users
-        
+
         $activationResults = [];
-        
+
         // Simulate multiple activation attempts
         for ($i = 0; $i < 3; $i++) {
             try {
@@ -348,10 +348,10 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
 
         // At least the first activation should succeed
         $this->assertTrue($activationResults[0]['success'], 'First activation should succeed');
-        
+
         // Plugin should be properly activated regardless
         $this->assertPluginFullyActivated();
-        
+
         // No duplicate data should be created
         $this->assertNoDuplicatesInDatabase();
     }
@@ -365,7 +365,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         // Clear any existing state
         $this->ensurePluginInactive();
-        
+
         // Perform activation
         Activator::activate();
     }
@@ -434,7 +434,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         // Check that deactivation-specific cleanup occurred
         $this->assertFalse(wp_next_scheduled('woo_ai_assistant_daily_index'), 'Cron jobs should be cleared');
-        
+
         // Note: We don't delete the activation flags on deactivation in this implementation
         // as they may be needed for reactivation. Adjust based on actual Deactivator behavior.
     }
@@ -447,7 +447,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertDatabaseTablesExist(): void
     {
         global $wpdb;
-        
+
         foreach ($this->expectedTables as $tableName) {
             $fullTableName = $wpdb->prefix . $tableName;
             $tableExists = $wpdb->get_var("SHOW TABLES LIKE '{$fullTableName}'") === $fullTableName;
@@ -506,12 +506,12 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertSampleDataCreated(): void
     {
         global $wpdb;
-        
+
         // Check knowledge base has sample entries
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
         $kbCount = $wpdb->get_var("SELECT COUNT(*) FROM {$kbTable} WHERE is_active = 1");
         $this->assertGreaterThan(0, $kbCount, 'Sample knowledge base entries should be created');
-        
+
         // Check settings were populated
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
         $settingsCount = $wpdb->get_var("SELECT COUNT(*) FROM {$settingsTable}");
@@ -526,7 +526,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertWidgetConfigured(): void
     {
         $this->assertTrue(get_option('woo_ai_assistant_widget_ready', false), 'Widget should be ready');
-        
+
         $welcomeMessages = get_option('woo_ai_assistant_welcome_messages', []);
         $this->assertNotEmpty($welcomeMessages, 'Welcome messages should be configured');
         $this->assertArrayHasKey('default', $welcomeMessages, 'Default welcome message should exist');
@@ -540,7 +540,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertAnalyticsInitialized(): void
     {
         global $wpdb;
-        
+
         $analyticsTable = $wpdb->prefix . 'woo_ai_analytics';
         $analyticsCount = $wpdb->get_var("SELECT COUNT(*) FROM {$analyticsTable}");
         $this->assertGreaterThan(0, $analyticsCount, 'Analytics should be initialized with installation metrics');
@@ -565,13 +565,13 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertUserDataPreserved(): void
     {
         global $wpdb;
-        
+
         // Check that user conversations are preserved
         $conversationsTable = $wpdb->prefix . 'woo_ai_conversations';
         $conversationCount = $wpdb->get_var("SELECT COUNT(*) FROM {$conversationsTable}");
         // We expect at least the welcome template conversation
         $this->assertGreaterThanOrEqual(0, $conversationCount, 'User conversations should be preserved');
-        
+
         // Check that settings are preserved
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
         $settingsCount = $wpdb->get_var("SELECT COUNT(*) FROM {$settingsTable}");
@@ -598,20 +598,20 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function capturePluginData(): array
     {
         global $wpdb;
-        
+
         $data = [];
-        
+
         // Capture data from each table
         foreach ($this->expectedTables as $tableName) {
             $fullTableName = $wpdb->prefix . $tableName;
             $data[$tableName] = $wpdb->get_results("SELECT * FROM {$fullTableName}", ARRAY_A);
         }
-        
+
         // Capture critical options
         foreach ($this->criticalOptions as $optionName) {
             $data['options'][$optionName] = get_option($optionName);
         }
-        
+
         return $data;
     }
 
@@ -624,14 +624,14 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertDataIntegrityPreserved(array $originalData): void
     {
         $currentData = $this->capturePluginData();
-        
+
         // Compare critical data counts
         foreach ($this->expectedTables as $tableName) {
             $originalCount = count($originalData[$tableName]);
             $currentCount = count($currentData[$tableName]);
-            
+
             $this->assertEquals(
-                $originalCount, 
+                $originalCount,
                 $currentCount,
                 "Data count for {$tableName} should be preserved (was {$originalCount}, now {$currentCount})"
             );
@@ -647,7 +647,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertNoDuplicateDataCreated(array $originalData): void
     {
         global $wpdb;
-        
+
         // Check for duplicates in knowledge base (common issue)
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
         $duplicateCount = $wpdb->get_var("
@@ -658,9 +658,9 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
                 HAVING cnt > 1
             ) AS duplicates
         ");
-        
+
         $this->assertEquals(0, $duplicateCount, 'No duplicate knowledge base entries should exist');
-        
+
         // Check for duplicate settings
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
         $duplicateSettingsCount = $wpdb->get_var("
@@ -671,7 +671,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
                 HAVING cnt > 1
             ) AS duplicates
         ");
-        
+
         $this->assertEquals(0, $duplicateSettingsCount, 'No duplicate settings should exist');
     }
 
@@ -700,11 +700,11 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
         // Set up database tables (simulate they exist from old version)
         $schema = Schema::getInstance();
         $schema->createTables();
-        
+
         // Set old version number
         update_option('woo_ai_assistant_version', $version);
         update_option('woo_ai_assistant_activation_complete', true);
-        
+
         // Create some old-style data
         global $wpdb;
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
@@ -802,7 +802,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         // Check that WooCommerce hooks are registered
         $this->assertTrue(class_exists('WooCommerce'), 'WooCommerce should be available');
-        
+
         // Verify plugin registered with WooCommerce
         // This is implementation-specific based on how the plugin integrates
         $this->assertTrue(true, 'WooCommerce integration should be active');
@@ -817,7 +817,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     {
         $schema = Schema::getInstance();
         $validation = $schema->validateSchema();
-        
+
         $this->assertTrue($validation['valid'], 'Database schema should be valid');
         $this->assertEmpty($validation['errors'], 'Database should have no integrity errors');
     }
@@ -830,7 +830,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
     private function assertNoDuplicatesInDatabase(): void
     {
         global $wpdb;
-        
+
         // Check knowledge base duplicates
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
         $kbDuplicates = $wpdb->get_var("
@@ -841,7 +841,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
                 HAVING cnt > 1
             ) AS dups
         ");
-        
+
         $this->assertEquals(0, $kbDuplicates, 'No duplicate knowledge base entries should exist');
     }
 
@@ -855,7 +855,7 @@ class ActivationCycleTest extends WooAiIntegrationTestCase
         // Clear activation flags
         delete_option('woo_ai_assistant_activation_complete');
         delete_option('woo_ai_assistant_activated_at');
-        
+
         // Clear scheduled crons
         foreach ($this->expectedCronJobs as $cronJob) {
             wp_clear_scheduled_hook($cronJob);

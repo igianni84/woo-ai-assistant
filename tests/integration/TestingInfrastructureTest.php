@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Testing Infrastructure Integration Tests
  *
@@ -35,11 +36,11 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         // Check WordPress constants
         $this->assertTrue(defined('ABSPATH'), 'ABSPATH should be defined');
         $this->assertTrue(defined('WP_DEBUG'), 'WP_DEBUG should be defined');
-        
+
         // Check database connection
         global $wpdb;
         $this->assertInstanceOf('wpdb', $wpdb, 'WordPress database should be available');
-        
+
         // Test database query
         $result = $wpdb->get_var("SELECT 1");
         $this->assertEquals(1, $result, 'Database should be responsive');
@@ -92,11 +93,11 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         $products = FixtureLoader::loadJsonFixture('sample-products');
         $this->assertIsArray($products, 'Product fixtures should be loaded as array');
         $this->assertNotEmpty($products, 'Product fixtures should not be empty');
-        
+
         $users = FixtureLoader::loadJsonFixture('sample-users');
         $this->assertIsArray($users, 'User fixtures should be loaded as array');
         $this->assertNotEmpty($users, 'User fixtures should not be empty');
-        
+
         $config = FixtureLoader::loadJsonFixture('plugin-configurations');
         $this->assertIsArray($config, 'Configuration fixtures should be loaded as array');
         $this->assertNotEmpty($config, 'Configuration fixtures should not be empty');
@@ -121,19 +122,19 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         ];
 
         $productIds = FixtureLoader::createTestProducts([$productData]);
-        
+
         $this->assertIsArray($productIds, 'Product creation should return array of IDs');
         $this->assertCount(1, $productIds, 'Should create one product');
-        
+
         $productId = $productIds[0];
         $this->assertGreaterThan(0, $productId, 'Product ID should be positive integer');
-        
+
         // Verify product was created correctly
         $product = wc_get_product($productId);
         $this->assertInstanceOf('WC_Product', $product, 'Should create valid WooCommerce product');
         $this->assertEquals('Test Integration Product', $product->get_name(), 'Product name should match');
         $this->assertEquals('19.99', $product->get_regular_price(), 'Product price should match');
-        
+
         // Clean up
         wp_delete_post($productId, true);
     }
@@ -155,19 +156,19 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         ];
 
         $userIds = FixtureLoader::createTestUsers([$userData]);
-        
+
         $this->assertIsArray($userIds, 'User creation should return array of IDs');
         $this->assertCount(1, $userIds, 'Should create one user');
-        
+
         $userId = $userIds[0];
         $this->assertGreaterThan(0, $userId, 'User ID should be positive integer');
-        
+
         // Verify user was created correctly
         $user = get_user_by('id', $userId);
         $this->assertInstanceOf('WP_User', $user, 'Should create valid WordPress user');
         $this->assertEquals('test_integration_user', $user->user_login, 'Username should match');
         $this->assertEquals('integration@test.com', $user->user_email, 'Email should match');
-        
+
         // Clean up
         wp_delete_user($userId);
     }
@@ -180,17 +181,17 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
     public function test_configuration_loading_should_work(): void
     {
         $devConfig = FixtureLoader::loadPluginConfig('development_config');
-        
+
         $this->assertIsArray($devConfig, 'Development config should be array');
         $this->assertArrayHasKey('development_mode', $devConfig, 'Should have development_mode key');
         $this->assertTrue($devConfig['development_mode'], 'Development mode should be true in dev config');
-        
+
         // Test applying configuration
         FixtureLoader::applyPluginConfig('development_config');
-        
+
         $appliedValue = get_option('woo_ai_assistant_development_mode');
         $this->assertTrue($appliedValue, 'Configuration should be applied as WordPress options');
-        
+
         // Clean up
         delete_option('woo_ai_assistant_development_mode');
     }
@@ -204,14 +205,14 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
     {
         // Test WordPress test factory
         $this->assertInstanceOf('WP_UnitTest_Factory', $this->factory, 'WordPress test factory should be available');
-        
+
         // Test creating WordPress objects through factory
         $postId = $this->factory->post->create(['post_title' => 'Test Post']);
         $this->assertGreaterThan(0, $postId, 'Should be able to create posts through factory');
-        
+
         $userId = $this->factory->user->create(['user_login' => 'test_factory_user']);
         $this->assertGreaterThan(0, $userId, 'Should be able to create users through factory');
-        
+
         // Test WordPress assertions
         $this->assertInstanceOf('WP_Post', get_post($postId), 'Created post should be WP_Post instance');
         $this->assertInstanceOf('WP_User', get_user_by('id', $userId), 'Created user should be WP_User instance');
@@ -225,19 +226,19 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
     public function test_database_isolation_should_work(): void
     {
         global $wpdb;
-        
+
         // Check that we're using test database
         $this->assertStringContains('test', DB_NAME, 'Should be using test database');
-        
+
         // Check table prefix
         $this->assertStringContains('test', $wpdb->prefix, 'Should be using test table prefix');
-        
+
         // Test that we can create and clean up data without affecting main site
         $testOption = 'woo_ai_test_isolation_check';
         add_option($testOption, 'test_value');
-        
+
         $this->assertEquals('test_value', get_option($testOption), 'Should be able to set test options');
-        
+
         delete_option($testOption);
         $this->assertFalse(get_option($testOption), 'Should be able to clean up test options');
     }
@@ -251,24 +252,24 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
     {
         $startTime = microtime(true);
         $startMemory = memory_get_usage();
-        
+
         // Perform typical testing operations
         $products = FixtureLoader::loadJsonFixture('sample-products');
         $users = FixtureLoader::loadJsonFixture('sample-users');
         $config = FixtureLoader::loadPluginConfig();
-        
+
         // Create and clean up test data
         $productIds = FixtureLoader::createTestProducts(array_slice($products, 0, 2));
         $userIds = FixtureLoader::createTestUsers(array_slice($users, 0, 2));
-        
+
         FixtureLoader::cleanupTestData($productIds, $userIds);
-        
+
         $endTime = microtime(true);
         $endMemory = memory_get_usage();
-        
+
         $executionTime = $endTime - $startTime;
         $memoryUsage = $endMemory - $startMemory;
-        
+
         $this->assertLessThan(5.0, $executionTime, 'Testing infrastructure operations should complete within 5 seconds');
         $this->assertLessThan(10485760, $memoryUsage, 'Memory usage should be less than 10MB'); // 10MB limit
     }
@@ -299,7 +300,7 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
                 'regular_price' => '9.99'
             ]
         ]);
-        
+
         $testUsers = FixtureLoader::createTestUsers([
             [
                 'user_login' => 'cleanup_test_user',
@@ -307,20 +308,20 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
                 'user_pass' => 'password123'
             ]
         ]);
-        
+
         // Verify data exists
         $this->assertNotEmpty($testProducts, 'Test products should be created');
         $this->assertNotEmpty($testUsers, 'Test users should be created');
-        
+
         $productId = $testProducts[0];
         $userId = $testUsers[0];
-        
+
         $this->assertInstanceOf('WC_Product', wc_get_product($productId), 'Test product should exist');
         $this->assertInstanceOf('WP_User', get_user_by('id', $userId), 'Test user should exist');
-        
+
         // Clean up
         FixtureLoader::cleanupTestData($testProducts, $testUsers);
-        
+
         // Verify cleanup worked
         $this->assertFalse(wc_get_product($productId), 'Test product should be deleted');
         $this->assertFalse(get_user_by('id', $userId), 'Test user should be deleted');
@@ -336,7 +337,7 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         $testDirs = [
             'tests',
             'tests/unit',
-            'tests/integration', 
+            'tests/integration',
             'tests/fixtures',
             'tests/logs',
             'tests/tmp',
@@ -345,7 +346,7 @@ class TestingInfrastructureTest extends WooAiIntegrationTestCase
         ];
 
         $pluginDir = WOO_AI_ASSISTANT_PLUGIN_DIR;
-        
+
         foreach ($testDirs as $dir) {
             $fullPath = $pluginDir . '/' . $dir;
             $this->assertTrue(is_dir($fullPath), "Test directory should exist: {$fullPath}");
