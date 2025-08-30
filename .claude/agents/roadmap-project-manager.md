@@ -30,7 +30,7 @@ When updating ROADMAP.md:
 - Verify all checklist items are properly marked
 - Ensure task descriptions match actual implementation
 
-Before mark a task as complete, execute "composer run quality-gates-check". Mark as completed only if "exit code = 0" and QA has approved.
+Before mark a task as complete, execute "composer run quality-gates-enforce". Mark as completed only if "exit code = 0" and QA has approved.
 
 You must be strict about enforcing the quality gates - never allow a task to be marked as completed until ALL verification scripts have been run and passed. You understand the project's zero-config philosophy and ensure all development aligns with the established architecture and coding standards.
 

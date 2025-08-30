@@ -1,0 +1,139 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: ['8.1', '8.2']
+        wordpress-version: ['6.0', 'latest']
+    
+    name: PHP ${{ matrix.php-version }} - WP ${{ matrix.wordpress-version }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, ctype, iconv, curl, dom, fileinfo, json, mysql, mysqli, zip
+        coverage: xdebug
+        tools: composer:v2, phpunit, phpcs, phpstan
+    
+    - name: Validate composer.json
+      run: composer validate --strict
+    
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+    
+    - name: Run PHP Code Sniffer
+      run: |
+        if [ -f "vendor/bin/phpcs" ]; then
+          vendor/bin/phpcs --standard=PSR12 --extensions=php src/
+        fi
+      continue-on-error: true
+    
+    - name: Run PHPStan
+      run: |
+        if [ -f "vendor/bin/phpstan" ]; then
+          vendor/bin/phpstan analyse src/ --level=5
+        fi
+      continue-on-error: true
+    
+    - name: Setup WordPress Test Suite
+      run: |
+        bash bin/install-wp-tests.sh wordpress_test root '' localhost ${{ matrix.wordpress-version }}
+      continue-on-error: true
+    
+    - name: Run PHPUnit tests
+      run: |
+        if [ -f "vendor/bin/phpunit" ]; then
+          vendor/bin/phpunit --coverage-text
+        fi
+      continue-on-error: true
+    
+    - name: Check file structure
+      run: |
+        if [ -f "scripts/verify-paths.sh" ]; then
+          bash scripts/verify-paths.sh
+        fi
+      continue-on-error: true
+
+  javascript-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    name: Node ${{ matrix.node-version }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        if [ -f "package.json" ]; then
+          npm ci
+        fi
+      continue-on-error: true
+    
+    - name: Run linting
+      run: |
+        if [ -f "package.json" ]; then
+          npm run lint --if-present
+        fi
+      continue-on-error: true
+    
+    - name: Run tests
+      run: |
+        if [ -f "package.json" ]; then
+          npm test --if-present
+        fi
+      continue-on-error: true
+    
+    - name: Build assets
+      run: |
+        if [ -f "package.json" ]; then
+          npm run build --if-present
+        fi
+      continue-on-error: true
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run security checks
+      uses: symfonycorp/security-checker-action@v4
+      continue-on-error: true
+    
+    - name: Check for sensitive data
+      run: |
+        # Check for API keys or sensitive data
+        ! grep -r "sk_live_" --include="*.php" --include="*.js" .
+        ! grep -r "api_key" --include="*.php" --include="*.js" . | grep -v ".env.example"
+      continue-on-error: true

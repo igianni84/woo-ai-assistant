@@ -586,34 +586,10 @@ Use the "File Coverage Checklist" below to verify all files are created.
 ## 🔄 Next Steps
 
 1. **Start with Phase 0** - Set up the foundation
-2. **Follow task dependencies** - Never skip prerequisites  
-3. **Use specialized agents** - See [CLAUDE.md](./CLAUDE.md) for agent workflow
-4. **Test each phase** - Follow [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) progressive approach
-5. **Update this roadmap** - Mark tasks as completed
-6. **Document everything** - Keep documentation current
-
----
-
-## 📚 Related Documentation
-
-### 🎯 Essential Reading Order
-1. **[START_HERE.md](./START_HERE.md)** - Entry point and quick navigation
-2. **[DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md)** - Setup instructions and workflow
-3. **[CLAUDE.md](./CLAUDE.md)** - Coding standards and specialized agents (CRITICAL)
-4. **[ROADMAP.md](./ROADMAP.md)** - This file - task progression and tracking
-5. **[TESTING_STRATEGY.md](./TESTING_STRATEGY.md)** - Progressive testing approach
-
-### 📋 Reference Documentation
-- **[ARCHITETTURA.md](./ARCHITETTURA.md)** - Complete file structure and architecture
-- **[PROJECT_SPECIFICATIONS.md](./PROJECT_SPECIFICATIONS.md)** - Business requirements and features
-- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Real-time development status
-
-### 🔄 Document Interdependencies
-- **ROADMAP.md** ↔ **TESTING_STRATEGY.md**: Task-test mapping table
-- **ROADMAP.md** ↔ **CLAUDE.md**: Agent assignments by phase
-- **ROADMAP.md** ↔ **PROJECT_STATUS.md**: Progress synchronization
-- **ROADMAP.md** ↔ **ARCHITETTURA.md**: File coverage checklist
-- **DEVELOPMENT_GUIDE.md** ↔ **CLAUDE.md**: Agent workflow implementation
+2. **Follow task dependencies** - Never skip prerequisites
+3. **Test each phase** - Ensure quality before proceeding
+4. **Update this roadmap** - Mark tasks as completed
+5. **Document everything** - Keep documentation current
 
 ---
 
