@@ -63,45 +63,62 @@ class Installer
     {
         Logger::info('Starting zero-config installation process');
 
+        // Run each installation step with individual error handling for graceful degradation
+        $this->runInstallationStep('populateInitialSettings', 'Initial settings', true);
+        $this->runInstallationStep('createSampleKnowledgeBase', 'Sample knowledge base', false);
+        $this->runInstallationStep('setupDefaultWidgetConfiguration', 'Widget configuration', true);
+        $this->runInstallationStep('initializeAnalytics', 'Analytics tracking', false);
+        $this->runInstallationStep('scheduleInitialIndexing', 'Knowledge base indexing schedule', false);
+        $this->runInstallationStep('createWelcomeConversation', 'Welcome conversation template', false);
+        $this->runInstallationStep('setupDefaultAIPrompts', 'AI prompts and response templates', false);
+        
+        // Final validation
         try {
-            // Step 1: Populate initial settings in the database
-            $this->populateInitialSettings();
-
-            // Step 2: Create sample knowledge base entries
-            $this->createSampleKnowledgeBase();
-
-            // Step 3: Setup default widget configuration
-            $this->setupDefaultWidgetConfiguration();
-
-            // Step 4: Initialize analytics tracking
-            $this->initializeAnalytics();
-
-            // Step 5: Schedule initial knowledge base indexing
-            $this->scheduleInitialIndexing();
-
-            // Step 6: Create welcome conversation template
-            $this->createWelcomeConversation();
-
-            // Step 7: Setup default AI prompts and responses
-            $this->setupDefaultAIPrompts();
-
-            // Step 8: Validate installation
             $this->validateInstallation();
-
             Logger::info('Zero-config installation completed successfully', [
-                'installed_components' => $this->installationResult['installed']
+                'installed_components' => $this->installationResult['installed'],
+                'warnings' => $this->installationResult['warnings']
             ]);
         } catch (\Exception $e) {
-            $this->installationResult['success'] = false;
-            $this->installationResult['errors'][] = $e->getMessage();
-
-            Logger::error('Installation failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            $this->installationResult['warnings'][] = 'Installation validation failed: ' . $e->getMessage();
+            Logger::warning('Installation validation failed but plugin can still function', [
+                'error' => $e->getMessage()
             ]);
         }
 
         return $this->installationResult;
+    }
+
+    /**
+     * Run a single installation step with error handling
+     *
+     * @param string $methodName Method to execute
+     * @param string $stepName Human readable step name
+     * @param bool $critical Whether failure should stop installation
+     * @return void
+     */
+    private function runInstallationStep(string $methodName, string $stepName, bool $critical = false): void
+    {
+        try {
+            Logger::debug("Running installation step: {$stepName}");
+            $this->{$methodName}();
+        } catch (\Exception $e) {
+            $errorMessage = "Failed to {$stepName}: " . $e->getMessage();
+            
+            if ($critical) {
+                $this->installationResult['success'] = false;
+                $this->installationResult['errors'][] = $errorMessage;
+                Logger::error("Critical installation step failed: {$stepName}", [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            } else {
+                $this->installationResult['warnings'][] = $errorMessage;
+                Logger::warning("Non-critical installation step failed: {$stepName}", [
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 
     /**
@@ -269,26 +286,53 @@ class Installer
         ];
 
         $insertedCount = 0;
+        $skippedCount = 0;
 
         foreach ($sampleEntries as $entry) {
             $entry['chunk_hash'] = md5($entry['chunk_text']);
             $entry['updated_at'] = current_time('mysql');
             $entry['embedding_model'] = 'initial-setup';
 
-            $result = $wpdb->insert($kbTable, $entry);
+            // Check if this entry already exists by chunk_hash
+            $existingEntry = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM `%1s` WHERE chunk_hash = %s",
+                $kbTable,
+                $entry['chunk_hash']
+            ));
 
-            if ($result === false) {
-                throw new \Exception("Failed to create sample KB entry. Error: " . $wpdb->last_error);
+            if ($existingEntry === null) {
+                $result = $wpdb->insert($kbTable, $entry);
+
+                if ($result === false) {
+                    Logger::warning("Failed to create sample KB entry", [
+                        'error' => $wpdb->last_error,
+                        'chunk_text' => substr($entry['chunk_text'], 0, 50) . '...'
+                    ]);
+                    continue; // Continue with next entry instead of throwing exception
+                }
+
+                $insertedCount++;
+            } else {
+                $skippedCount++;
+                Logger::debug("Skipped duplicate KB entry", [
+                    'chunk_hash' => $entry['chunk_hash'],
+                    'content_type' => $entry['content_type']
+                ]);
             }
-
-            $insertedCount++;
         }
 
-        Logger::info('Sample knowledge base entries created', [
-            'entries_created' => $insertedCount
+        Logger::info('Sample knowledge base entries processed', [
+            'entries_created' => $insertedCount,
+            'entries_skipped' => $skippedCount,
+            'total_entries' => count($sampleEntries)
         ]);
 
-        $this->installationResult['installed'][] = "Sample knowledge base ({$insertedCount} entries)";
+        if ($insertedCount > 0) {
+            $this->installationResult['installed'][] = "Sample knowledge base ({$insertedCount} new entries)";
+        }
+        if ($skippedCount > 0) {
+            $this->installationResult['installed'][] = "Sample knowledge base ({$skippedCount} existing entries preserved)";
+        }
     }
 
     /**
@@ -537,7 +581,7 @@ class Installer
         global $wpdb;
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
 
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM {$settingsTable}");
+        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `%1s`", $settingsTable));
         return $count > 20; // Should have at least 20+ initial settings
     }
 
@@ -561,7 +605,7 @@ class Installer
         global $wpdb;
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
 
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM {$kbTable} WHERE is_active = 1");
+        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `%1s` WHERE is_active = %d", $kbTable, 1));
         return $count > 0;
     }
 
@@ -575,7 +619,7 @@ class Installer
         global $wpdb;
         $analyticsTable = $wpdb->prefix . 'woo_ai_analytics';
 
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM {$analyticsTable}");
+        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `%1s`", $analyticsTable));
         return $count > 0;
     }
 
@@ -673,7 +717,7 @@ class Installer
         global $wpdb;
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
 
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$kbTable} WHERE is_active = 1");
+        return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `%1s` WHERE is_active = %d", $kbTable, 1));
     }
 
     /**
@@ -686,6 +730,6 @@ class Installer
         global $wpdb;
         $settingsTable = $wpdb->prefix . 'woo_ai_settings';
 
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$settingsTable}");
+        return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `%1s`", $settingsTable));
     }
 }

@@ -48,6 +48,10 @@ if [ $PHASE -ge 0 ]; then
     run_check "Path Verification" "bash scripts/verify-paths.sh 0 >/dev/null 2>&1"
     [ $? -ne 0 ] && TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
     
+    # NEW: Plugin Activation Test
+    run_check "Plugin Activation Test" "php scripts/test-plugin-activation.php >/dev/null 2>&1"
+    [ $? -ne 0 ] && TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    
     echo ""
 fi
 

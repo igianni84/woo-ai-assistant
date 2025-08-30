@@ -139,8 +139,10 @@ class Main
             $this->loadAdminModule();
         }
 
+        // Load Knowledge Base module (Task 2.1)
+        $this->loadKnowledgeBaseModule();
+
         // TODO: In future tasks, initialize additional modules:
-        // - Knowledge Base Manager (Task 2.x)
         // - Frontend Widget Loader (Task 4.5)
         // - Chatbot Handler (Task 5.1)
 
@@ -242,6 +244,29 @@ class Main
             Logger::info('REST API module loaded successfully');
         } catch (Exception $e) {
             Logger::error('Failed to load REST API module', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Load Knowledge Base module
+     *
+     * Initializes the Knowledge Base scanner and related functionality.
+     *
+     * @return void
+     */
+    private function loadKnowledgeBaseModule(): void
+    {
+        try {
+            // Load Knowledge Base scanner
+            $scanner = \WooAiAssistant\KnowledgeBase\Scanner::getInstance();
+            $this->registerModule('knowledge_base_scanner', $scanner);
+
+            Logger::info('Knowledge Base module loaded successfully');
+        } catch (Exception $e) {
+            Logger::error('Failed to load Knowledge Base module', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

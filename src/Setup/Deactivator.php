@@ -277,11 +277,15 @@ class Deactivator
             'woo_ai_assistant_api_keys',
         ];
 
-        $optionsToDelete = $wpdb->get_col(
+        // Use safer approach with prepare and IN clause
+        $placeholders = implode(',', array_fill(0, count($preserveOptions), '%s'));
+        $optionsToDelete = $wpdb->get_col($wpdb->prepare(
             "SELECT option_name FROM {$wpdb->options} 
-             WHERE option_name LIKE 'woo_ai_assistant_%' 
-             AND option_name NOT IN ('" . implode("', '", $preserveOptions) . "')"
-        );
+             WHERE option_name LIKE %s 
+             AND option_name NOT IN ($placeholders)",
+            'woo_ai_assistant_%',
+            ...$preserveOptions
+        ));
 
         foreach ($optionsToDelete as $option) {
             delete_option($option);
@@ -344,19 +348,23 @@ class Deactivator
         global $wpdb;
 
         // Count remaining plugin-related data
-        $optionsCount = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'woo_ai_assistant_%'"
-        );
+        $optionsCount = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s",
+            'woo_ai_assistant_%'
+        ));
 
-        $userMetaCount = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key LIKE 'woo_ai_assistant_%'"
-        );
+        $userMetaCount = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
+            'woo_ai_assistant_%'
+        ));
 
-        $transientsCount = $wpdb->get_var(
+        $transientsCount = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->options} 
-             WHERE option_name LIKE '_transient_woo_ai_%' 
-             OR option_name LIKE '_transient_timeout_woo_ai_%'"
-        );
+             WHERE option_name LIKE %s 
+             OR option_name LIKE %s",
+            '_transient_woo_ai_%',
+            '_transient_timeout_woo_ai_%'
+        ));
 
         return [
             'remaining_options' => (int) $optionsCount,

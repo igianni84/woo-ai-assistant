@@ -226,6 +226,30 @@ class Utils
     }
 
     /**
+     * Get WooCommerce version
+     *
+     * @return string WooCommerce version or '0.0.0' if not available
+     * @since 1.0.0
+     */
+    public static function getWooCommerceVersion(): string
+    {
+        if (!self::isWooCommerceActive()) {
+            return '0.0.0';
+        }
+
+        if (defined('WC_VERSION')) {
+            return WC_VERSION;
+        }
+
+        // Fallback: try to get from WooCommerce class
+        if (class_exists('WooCommerce') && isset(WC()->version)) {
+            return WC()->version;
+        }
+
+        return '0.0.0';
+    }
+
+    /**
      * Get WordPress timezone string
      *
      * @return string Timezone string
