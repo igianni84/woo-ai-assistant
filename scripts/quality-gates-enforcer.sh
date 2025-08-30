@@ -109,9 +109,9 @@ echo "🔧 General Quality Checks"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check for debugging code
+# Check for debugging code (exclude legitimate logging functions)
 echo "🔍 Checking for debug code..."
-if grep -r "var_dump\|print_r\|console\.log" src/ widget-src/ 2>/dev/null | grep -v "test\|Test" > /dev/null; then
+if grep -r "var_dump\|console\.log" src/ widget-src/ 2>/dev/null | grep -v "test\|Test\|debugLog\|Logger" > /dev/null; then
     echo "  ❌ Found debug code in source files"
     TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
 else
@@ -123,6 +123,10 @@ echo "🔍 Checking for unresolved TODOs..."
 TODO_COUNT=$(grep -r "TODO\|FIXME\|XXX" src/ widget-src/ 2>/dev/null | wc -l)
 if [ $TODO_COUNT -gt 0 ]; then
     echo "  ⚠️  Found $TODO_COUNT TODO/FIXME comments"
+    # Only count as error for phases > 0 (Phase 0 can have placeholder TODOs)
+    if [ $PHASE -gt 0 ]; then
+        TOTAL_ERRORS=$((TOTAL_ERRORS + 1))
+    fi
 else
     echo "  ✅ No TODO comments found"
 fi

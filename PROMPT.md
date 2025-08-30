@@ -24,6 +24,7 @@ Altra documentazione che potrebbe servirti:
 3. Implementa SOLO quel task seguendo il workflow obbligatorio
 4. FERMATI dopo aver completato il task e mostrami il risultato
 5. NON procedere al task successivo senza mia conferma
+6. Tieni sempre aggiornata la ROADMAP.md nel caso in cui c'è la necessità di aggiungere informazioni rilevanti
 
 ## Workflow Obbligatorio (da CLAUDE.md)
 

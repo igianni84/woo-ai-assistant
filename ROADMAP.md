@@ -14,26 +14,36 @@
 **Every file in Architettura.md is mapped to a specific task.**
 Use the "File Coverage Checklist" below to verify all files are created.
 
+### 🔄 MANDATORY: Git Push After Each Task
+**NEW RULE:** Every successfully completed task MUST be pushed to GitHub.
+```bash
+# After task completion and QA approval:
+git add .
+git commit -m "feat(phase-X): complete Task X.X - <name>"
+git push origin main
+```
+
 ### **PHASE 0: Foundation Setup** 
 *Estimated: 4-5 days*
 
 #### Task 0.1: Plugin Skeleton
-*Status: TO DO*
-- [ ] Create main plugin file `woo-ai-assistant.php`
-- [ ] Define plugin constants (VERSION, PATH, URL)
-- [ ] Create basic file structure as per `Architettura.md`
-- [ ] Setup PSR-4 autoloader via composer.json
-- [ ] Create `src/Main.php` singleton class
-- [ ] Create `src/Common/Traits/Singleton.php` trait
-- [ ] Create `src/Common/Utils.php` helper functions
-- [ ] Create `src/Common/Logger.php` for debug logging
-- [ ] Create `src/Common/Cache.php` for caching layer
-- [ ] Create `src/Setup/Activator.php` and `Deactivator.php`
-- [ ] Implement basic activation/deactivation hooks
-- [ ] Create `uninstall.php` for complete cleanup
-- [ ] Create `.env.example` template file
-- **Output:** Basic plugin that can be activated in WordPress
+*Status: COMPLETED* - Started: 2025-08-30, Completed: 2025-08-30
+- [x] Create main plugin file `woo-ai-assistant.php`
+- [x] Define plugin constants (VERSION, PATH, URL)
+- [x] Create basic file structure as per `Architettura.md`
+- [x] Setup PSR-4 autoloader via composer.json
+- [x] Create `src/Main.php` singleton class
+- [x] Create `src/Common/Traits/Singleton.php` trait
+- [x] Create `src/Common/Utils.php` helper functions
+- [x] Create `src/Common/Logger.php` for debug logging
+- [x] Create `src/Common/Cache.php` for caching layer
+- [x] Create `src/Setup/Activator.php` and `Deactivator.php`
+- [x] Implement basic activation/deactivation hooks
+- [x] Create `uninstall.php` for complete cleanup
+- [x] Create `.env.example` template file
+- **Output:** Basic plugin that can be activated in WordPress - DELIVERED
 - **Dependencies:** None
+- **Notes:** Quality gates passed (QUALITY_GATES_STATUS=PASSED). All core skeleton files implemented with proper PSR-4 structure and singleton pattern.
 
 #### Task 0.2: Development Environment
 *Status: TO DO*
@@ -418,13 +428,13 @@ Use the "File Coverage Checklist" below to verify all files are created.
 - **Total Phases:** 8
 - **Phases Completed:** 0/8 (0%)
 - **Total Tasks:** 37
-- **Tasks Completed:** 0/37 (0%)
+- **Tasks Completed:** 1/37 (2.7%)
 - **Estimated Total Duration:** 54-70 days
 
 ### Phase Status
 | Phase | Status | Progress | Duration |
 |-------|--------|----------|----------|
-| Phase 0: Foundation | TO DO | 0/5 | 4-5 days |
+| Phase 0: Foundation | IN PROGRESS | 1/5 | 4-5 days |
 | Phase 1: Core Infrastructure | TO DO | 0/3 | 5-7 days |
 | Phase 2: Knowledge Base | TO DO | 0/5 | 7-10 days |
 | Phase 3: Server Integration | TO DO | 0/3 | 5-7 days |
@@ -439,14 +449,14 @@ Use the "File Coverage Checklist" below to verify all files are created.
 ## 📝 File Coverage Checklist
 
 ### Core Files
-- [ ] `woo-ai-assistant.php` - Main plugin file (Task 0.1)
-- [ ] `uninstall.php` - Cleanup script (Task 0.1)
-- [ ] `composer.json` - PHP dependencies (Task 0.1)
+- [x] `woo-ai-assistant.php` - Main plugin file (Task 0.1)
+- [x] `uninstall.php` - Cleanup script (Task 0.1)
+- [x] `composer.json` - PHP dependencies (Task 0.1)
 - [ ] `package.json` - Node dependencies (Task 0.2)
 - [ ] `webpack.config.js` - Build configuration (Task 0.2)
 
 ### PHP Source Files (`src/`)
-- [ ] `Main.php` - Singleton orchestrator (Task 0.1)
+- [x] `Main.php` - Singleton orchestrator (Task 0.1)
 
 #### Config/
 - [ ] `DevelopmentConfig.php` - Dev mode configuration (Task 0.2)
@@ -457,8 +467,8 @@ Use the "File Coverage Checklist" below to verify all files are created.
 - [ ] `Schema.php` - Table definitions (Task 0.5)
 
 #### Setup/
-- [ ] `Activator.php` - Activation logic (Task 0.1)
-- [ ] `Deactivator.php` - Deactivation logic (Task 0.1)
+- [x] `Activator.php` - Activation logic (Task 0.1)
+- [x] `Deactivator.php` - Deactivation logic (Task 0.1)
 - [ ] `Installer.php` - Zero-config setup (Task 1.3)
 
 #### Api/
@@ -504,12 +514,12 @@ Use the "File Coverage Checklist" below to verify all files are created.
 - [ ] `GdprPlugins.php` - GDPR compliance (Task 8.3)
 
 #### Common/
-- [ ] `Utils.php` - Helper functions (Task 0.1)
-- [ ] `Logger.php` - Debug logging system (Task 0.1)
-- [ ] `Cache.php` - Caching layer (Task 0.1)
+- [x] `Utils.php` - Helper functions (Task 0.1)
+- [x] `Logger.php` - Debug logging system (Task 0.1)
+- [x] `Cache.php` - Caching layer (Task 0.1)
 - [ ] `Validator.php` - Input validation (Task 1.2)
 - [ ] `Sanitizer.php` - Data sanitization (Task 1.2)
-- [ ] `Traits/Singleton.php` - Singleton trait (Task 0.1)
+- [x] `Traits/Singleton.php` - Singleton trait (Task 0.1)
 - [ ] `Exceptions/` - Custom exceptions (Task 0.1)
 
 ### React Source Files (`widget-src/src/`)
@@ -523,7 +533,7 @@ Use the "File Coverage Checklist" below to verify all files are created.
 - [ ] `hooks/useChat.js` - Chat state management (Task 4.2)
 
 ### Configuration Files
-- [ ] `.env.example` - Development environment template (Task 0.1)
+- [x] `.env.example` - Development environment template (Task 0.1)
 - [ ] `phpunit.xml` - PHPUnit configuration (Task 0.3)
 - [ ] `jest.config.js` - Jest configuration (Task 0.3)
 - [ ] `.github/workflows/ci.yml` - GitHub Actions (Task 0.4)

@@ -1110,24 +1110,67 @@ notify-rollback-complete.sh
 
 ## 🔄 Git Workflow
 
-### Branch Naming
+### Branch Strategy
 ```
-feature/kb-scanner-implementation
+main                    # Branch principale per sviluppo
+├── feature/phase-0-*   # Branch per Phase 0 tasks
+├── feature/phase-1-*   # Branch per Phase 1 tasks
+└── feature/phase-2-*   # Branch per Phase 2 tasks, etc.
+```
+
+### Branch Naming Examples
+```
+feature/task-0.1-plugin-skeleton
+feature/task-0.2-development-environment
 bugfix/conversation-handler-memory-leak
 hotfix/security-vulnerability-fix
 ```
 
-### Commit Messages
-```
-feat(kb): implement product content scanning
+### ⚠️ MANDATORY: Push After Each Task Completion
 
-- Add KnowledgeBaseScanner class with product indexing
-- Include unit tests for scanner functionality  
-- Add documentation for scanning methods
-- Implement caching for improved performance
+**CRITICAL RULE:** Ogni task completato con successo DEVE essere pushato su GitHub.
+
+#### Workflow Obbligatorio per Ogni Task:
+```bash
+# 1. Dopo che qa-testing-specialist conferma QUALITY_GATES_STATUS=PASSED
+# 2. Dopo che roadmap-project-manager ha aggiornato ROADMAP.md come "completed"
+
+# Aggiungi tutti i file modificati
+git add .
+
+# Crea commit con messaggio descrittivo
+git commit -m "feat(phase-0): complete Task 0.1 - Plugin Skeleton
+
+- Create main plugin file with constants
+- Implement PSR-4 autoloader via composer
+- Create Main.php singleton orchestrator
+- Add Common utilities and traits
+- Setup activation/deactivation hooks
+- Quality gates: PASSED
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# Push al repository
+git push origin main  # O al branch feature se stai usando branch separati
+
+# Verifica push riuscito
+git log --oneline -1
+```
+
+### Commit Messages Format
+```
+<type>(<scope>): complete Task X.X - <task-name>
+
+- <key-achievement-1>
+- <key-achievement-2>
+- <key-achievement-3>
+- Quality gates: PASSED|FAILED
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+**Types:** feat, fix, docs, style, refactor, test, chore
+**Scope:** phase-0, phase-1, kb, widget, admin, etc.
 
 ## 📞 Support and Resources
 
