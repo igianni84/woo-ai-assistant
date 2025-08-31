@@ -182,6 +182,11 @@ export const createMockApiResponse = (data = {}, status = 200, success = true) =
  * @param {Object} overrides - Override specific global values
  */
 export const mockWordPressGlobals = (overrides = {}) => {
+  // Mock scrollIntoView for testing environment
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = jest.fn();
+  }
+  
   const defaults = {
     wp: {
       i18n: {

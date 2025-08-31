@@ -1,0 +1,279 @@
+/**
+ * Typing Indicator Component Styles
+ *
+ * Styles for the typing indicator shown when the AI assistant
+ * is processing a response. Features smooth dot animations
+ * and proper accessibility.
+ *
+ * @package WooAiAssistant
+ * @since 1.0.0
+ */
+
+// Variables
+$avatar-size: 32px;
+$avatar-size-small: 28px;
+$dot-size: 6px;
+$dot-size-small: 5px;
+$dot-color: #9ca3af;
+$animation-duration: 1.4s;
+
+// Colors
+$bg-color: #f3f4f6;
+$text-color: #6b7280;
+$assistant-color: #2563eb;
+
+.woo-ai-assistant-typing-indicator {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+.woo-ai-assistant-typing-avatar {
+  width: $avatar-size;
+  height: $avatar-size;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $assistant-color;
+  color: white;
+  flex-shrink: 0;
+  margin-top: 4px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (max-width: 480px) {
+    width: $avatar-size-small;
+    height: $avatar-size-small;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.woo-ai-assistant-typing-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.woo-ai-assistant-typing-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.woo-ai-assistant-typing-sender {
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.woo-ai-assistant-typing-status {
+  font-size: 11px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.woo-ai-assistant-typing-animation {
+  background: $bg-color;
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+  }
+}
+
+.woo-ai-assistant-typing-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.woo-ai-assistant-typing-dot {
+  width: $dot-size;
+  height: $dot-size;
+  border-radius: 50%;
+  background: $dot-color;
+  animation: typingPulse $animation-duration infinite ease-in-out;
+
+  &:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @media (max-width: 480px) {
+    width: $dot-size-small;
+    height: $dot-size-small;
+  }
+}
+
+// Minimal typing indicator (alternative style)
+.woo-ai-assistant-typing-minimal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.woo-ai-assistant-typing-dots-minimal {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  span {
+    width: $dot-size;
+    height: $dot-size;
+    border-radius: 50%;
+    background: $dot-color;
+    animation: typingPulse $animation-duration infinite ease-in-out;
+
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+
+  @media (max-width: 480px) {
+    span {
+      width: $dot-size-small;
+      height: $dot-size-small;
+    }
+  }
+}
+
+// Animations
+@keyframes typingPulse {
+  0%, 60%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  30% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+// Alternative dot animation (wave effect)
+@keyframes typingWave {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+}
+
+// Alternative style using wave animation
+.woo-ai-assistant-typing-dots--wave {
+  .woo-ai-assistant-typing-dot {
+    animation: typingWave $animation-duration infinite ease-in-out;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .woo-ai-assistant-typing-animation {
+    background: #374151;
+  }
+
+  .woo-ai-assistant-typing-sender {
+    color: #9ca3af;
+  }
+
+  .woo-ai-assistant-typing-status {
+    color: #6b7280;
+  }
+
+  .woo-ai-assistant-typing-dot,
+  .woo-ai-assistant-typing-dots-minimal span {
+    background: #9ca3af;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .woo-ai-assistant-typing-animation {
+    border: 1px solid currentColor;
+  }
+
+  .woo-ai-assistant-typing-dot,
+  .woo-ai-assistant-typing-dots-minimal span {
+    background: currentColor;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-assistant-typing-indicator {
+    transition: opacity 0.2s ease;
+  }
+
+  .woo-ai-assistant-typing-minimal {
+    transition: opacity 0.2s ease;
+  }
+
+  .woo-ai-assistant-typing-dot,
+  .woo-ai-assistant-typing-dots-minimal span {
+    animation: none;
+    opacity: 0.6;
+
+    &:nth-child(2) {
+      opacity: 0.8;
+    }
+
+    &:nth-child(3) {
+      opacity: 1;
+    }
+  }
+}

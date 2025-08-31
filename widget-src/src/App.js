@@ -188,12 +188,7 @@ App.propTypes = {
   })
 };
 
-// Default props
-App.defaultProps = {
-  userContext: {},
-  wooCommerceData: {},
-  config: {}
-};
+// Note: Default props are handled by default parameters above
 
 export default App;
 

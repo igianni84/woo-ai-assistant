@@ -1,0 +1,510 @@
+/**
+ * Chat Window Component Styles
+ *
+ * Styles for the main chat window component including header,
+ * messages area, input area, and responsive design.
+ *
+ * @package WooAiAssistant
+ * @since 1.0.0
+ */
+
+// Variables
+$chat-window-width: 380px;
+$chat-window-width-mobile: calc(100vw - 20px);
+$chat-window-max-width: 400px;
+$chat-window-height: 600px;
+$chat-window-max-height: 70vh;
+$header-height: 60px;
+$input-area-min-height: 60px;
+$border-radius: 12px;
+$shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+// Colors
+$bg-color: #ffffff;
+$header-bg: #2563eb;
+$header-text: #ffffff;
+$border-color: #e5e7eb;
+$input-bg: #f9fafb;
+$input-border: #d1d5db;
+$input-focus: #2563eb;
+$error-bg: #fef2f2;
+$error-border: #fecaca;
+$error-text: #dc2626;
+
+// Z-index layers
+$z-chat-window: 999999;
+$z-header: 1;
+$z-input-area: 1;
+
+.woo-ai-assistant-chat-window {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: $chat-window-width;
+  max-width: $chat-window-max-width;
+  height: $chat-window-height;
+  max-height: $chat-window-max-height;
+  background: $bg-color;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  z-index: $z-chat-window;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  &.disconnected {
+    border-color: $error-border;
+    
+    .woo-ai-assistant-chat-header {
+      background: #ef4444;
+    }
+  }
+
+  &.has-error {
+    .woo-ai-assistant-chat-content {
+      background: $error-bg;
+    }
+  }
+
+  // Mobile responsive design
+  @media (max-width: 768px) {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    width: $chat-window-width-mobile;
+    max-width: none;
+    height: calc(100vh - 120px);
+    max-height: none;
+    border-radius: 16px 16px 0 0;
+  }
+
+  @media (max-width: 480px) {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: 16px 16px 0 0;
+    height: calc(100vh - 100px);
+  }
+}
+
+// Header styles
+.woo-ai-assistant-chat-header {
+  background: $header-bg;
+  color: $header-text;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: $border-radius $border-radius 0 0;
+  position: relative;
+  z-index: $z-header;
+  min-height: $header-height;
+  box-sizing: border-box;
+
+  @media (max-width: 480px) {
+    border-radius: 16px 16px 0 0;
+    padding: 12px 16px;
+  }
+}
+
+.woo-ai-assistant-chat-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.woo-ai-assistant-chat-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+  }
+}
+
+.woo-ai-assistant-connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.woo-ai-assistant-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+
+  &.connecting {
+    background: #f59e0b;
+    animation: pulse 2s infinite;
+  }
+
+  &.error {
+    background: #ef4444;
+  }
+
+  &.connected {
+    background: #10b981;
+  }
+}
+
+.woo-ai-assistant-status-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.woo-ai-assistant-chat-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.woo-ai-assistant-chat-minimize,
+.woo-ai-assistant-chat-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  color: currentColor;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Content area styles
+.woo-ai-assistant-chat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: $bg-color;
+}
+
+.woo-ai-assistant-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+}
+
+// Empty state styles
+.woo-ai-assistant-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  text-align: center;
+}
+
+.woo-ai-assistant-empty-state-content {
+  p {
+    margin: 8px 0;
+    color: #6b7280;
+    
+    &:first-of-type {
+      font-weight: 500;
+      color: #374151;
+    }
+  }
+}
+
+.woo-ai-assistant-bot-avatar {
+  width: 48px;
+  height: 48px;
+  background: $header-bg;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 16px;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Error message styles
+.woo-ai-assistant-error-message {
+  margin: 16px;
+  
+  .woo-ai-assistant-message-content.error {
+    background: $error-bg;
+    border: 1px solid $error-border;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    color: $error-text;
+
+    svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    p {
+      margin: 0 0 12px;
+      font-size: 13px;
+    }
+  }
+}
+
+.woo-ai-assistant-retry-button {
+  background: $error-text;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #b91c1c;
+  }
+}
+
+// Input area styles
+.woo-ai-assistant-input-area {
+  border-top: 1px solid $border-color;
+  background: white;
+  padding: 16px;
+  position: relative;
+  z-index: $z-input-area;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+}
+
+.woo-ai-assistant-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  background: $input-bg;
+  border: 1px solid $input-border;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: $input-focus;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.woo-ai-assistant-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  min-height: 20px;
+  max-height: 120px;
+  padding: 0;
+  margin: 0;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.focused {
+    // Additional focused styles if needed
+  }
+}
+
+.woo-ai-assistant-input-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.woo-ai-assistant-clear-button,
+.woo-ai-assistant-send {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  height: 32px;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.woo-ai-assistant-send {
+  &.active {
+    background: $input-focus;
+    color: white;
+
+    &:hover {
+      background: #1d4ed8;
+    }
+
+    &:disabled {
+      background: #9ca3af;
+    }
+  }
+}
+
+.woo-ai-assistant-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.woo-ai-assistant-character-count {
+  margin-left: auto;
+}
+
+// Loading animation for icons
+.woo-ai-assistant-loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .woo-ai-assistant-chat-window {
+    border-width: 2px;
+  }
+  
+  .woo-ai-assistant-input-container:focus-within {
+    border-width: 2px;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-assistant-chat-window {
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+  
+  .woo-ai-assistant-loading {
+    animation: none;
+  }
+  
+  .woo-ai-assistant-status-indicator.connecting {
+    animation: none;
+  }
+}

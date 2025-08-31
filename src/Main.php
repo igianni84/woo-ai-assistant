@@ -142,8 +142,12 @@ class Main
         // Load Knowledge Base module (Task 2.1)
         $this->loadKnowledgeBaseModule();
 
+        // Load Frontend module (Task 4.5)
+        if (!is_admin() && !wp_doing_ajax() && !wp_doing_cron()) {
+            $this->loadFrontendModule();
+        }
+
         // TODO: In future tasks, initialize additional modules:
-        // - Frontend Widget Loader (Task 4.5)
         // - Chatbot Handler (Task 5.1)
 
         // Apply filter to allow module registration by other code
@@ -181,8 +185,8 @@ class Main
             return;
         }
 
-        // TODO: Initialize frontend widget loader in future tasks
-        Logger::debug('Frontend initialization placeholder');
+        // Frontend module will be loaded in loadModules method if needed
+        Logger::debug('Frontend initialization hook fired');
 
         do_action('woo_ai_assistant_frontend_init');
     }
@@ -267,6 +271,29 @@ class Main
             Logger::info('Knowledge Base module loaded successfully');
         } catch (Exception $e) {
             Logger::error('Failed to load Knowledge Base module', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Load Frontend module
+     *
+     * Initializes the frontend widget loader for public site integration.
+     *
+     * @return void
+     */
+    private function loadFrontendModule(): void
+    {
+        try {
+            // Load Widget Loader
+            $widgetLoader = \WooAiAssistant\Frontend\WidgetLoader::getInstance();
+            $this->registerModule('frontend_widget_loader', $widgetLoader);
+
+            Logger::info('Frontend module loaded successfully');
+        } catch (Exception $e) {
+            Logger::error('Failed to load Frontend module', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

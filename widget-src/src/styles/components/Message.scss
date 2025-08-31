@@ -1,0 +1,390 @@
+/**
+ * Message Component Styles
+ *
+ * Styles for individual chat messages including user, assistant,
+ * system, and error messages. Features fade-in animations,
+ * proper spacing, and responsive design.
+ *
+ * @package WooAiAssistant
+ * @since 1.0.0
+ */
+
+// Variables
+$message-gap: 16px;
+$message-gap-small: 12px;
+$avatar-size: 32px;
+$avatar-size-small: 28px;
+$border-radius: 12px;
+$max-width: 80%;
+
+// Colors
+$user-bg: #2563eb;
+$user-text: #ffffff;
+$assistant-bg: #f3f4f6;
+$assistant-text: #111827;
+$system-bg: #fef3c7;
+$system-text: #92400e;
+$error-bg: #fef2f2;
+$error-text: #dc2626;
+$timestamp-color: #9ca3af;
+$sender-color: #6b7280;
+
+.woo-ai-assistant-message {
+  display: flex;
+  gap: 12px;
+  margin-bottom: $message-gap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: messageSlideIn 0.3s ease-out forwards;
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &--latest {
+    margin-bottom: $message-gap + 4px;
+  }
+
+  // Message type variations
+  &--user {
+    flex-direction: row-reverse;
+
+    .woo-ai-assistant-message-content {
+      align-items: flex-end;
+    }
+
+    .woo-ai-assistant-message-body {
+      background: $user-bg;
+      color: $user-text;
+      border-bottom-right-radius: 4px;
+    }
+
+    .woo-ai-assistant-message-header {
+      text-align: right;
+    }
+  }
+
+  &--assistant {
+    .woo-ai-assistant-message-body {
+      background: $assistant-bg;
+      color: $assistant-text;
+      border-bottom-left-radius: 4px;
+    }
+  }
+
+  &--system {
+    justify-content: center;
+    
+    .woo-ai-assistant-message-avatar {
+      background: #f59e0b;
+    }
+
+    .woo-ai-assistant-message-body {
+      background: $system-bg;
+      color: $system-text;
+      text-align: center;
+      font-style: italic;
+      font-size: 13px;
+    }
+  }
+
+  &--error {
+    .woo-ai-assistant-message-avatar {
+      background: #ef4444;
+    }
+
+    .woo-ai-assistant-message-body {
+      background: $error-bg;
+      color: $error-text;
+      border: 1px solid #fecaca;
+    }
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+    margin-bottom: $message-gap-small;
+  }
+}
+
+// Avatar styles
+.woo-ai-assistant-message-avatar {
+  width: $avatar-size;
+  height: $avatar-size;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2563eb;
+  color: white;
+  flex-shrink: 0;
+  margin-top: 4px;
+
+  &--user {
+    background: #10b981;
+  }
+
+  &--assistant {
+    background: #2563eb;
+  }
+
+  &--system {
+    background: #f59e0b;
+  }
+
+  &--error {
+    background: #ef4444;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (max-width: 480px) {
+    width: $avatar-size-small;
+    height: $avatar-size-small;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.woo-ai-assistant-avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+// Message content styles
+.woo-ai-assistant-message-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: $max-width;
+
+  @media (max-width: 480px) {
+    max-width: calc(100% - #{$avatar-size-small} - 8px);
+  }
+}
+
+.woo-ai-assistant-message-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.woo-ai-assistant-message-sender {
+  font-weight: 600;
+  color: $sender-color;
+  white-space: nowrap;
+}
+
+.woo-ai-assistant-message-timestamp {
+  font-size: 11px;
+  color: $timestamp-color;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.woo-ai-assistant-message-body {
+  background: $assistant-bg;
+  color: $assistant-text;
+  border-radius: $border-radius;
+  padding: 12px 16px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+  position: relative;
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+  }
+}
+
+// Message text content
+.woo-ai-assistant-message-text {
+  margin: 0;
+
+  p {
+    margin: 0 0 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul, ol {
+    margin: 8px 0;
+    padding-left: 20px;
+
+    li {
+      margin-bottom: 4px;
+    }
+  }
+
+  strong, b {
+    font-weight: 600;
+  }
+
+  em, i {
+    font-style: italic;
+  }
+
+  br {
+    line-height: 1.8;
+  }
+}
+
+// Message actions (for assistant messages)
+.woo-ai-assistant-message-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.woo-ai-assistant-message--assistant:hover .woo-ai-assistant-message-actions {
+  opacity: 1;
+}
+
+.woo-ai-assistant-message-action {
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 4px;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #374151;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Debug information (development only)
+.woo-ai-assistant-message-debug {
+  margin-top: 12px;
+  font-size: 10px;
+  opacity: 0.6;
+
+  summary {
+    cursor: pointer;
+    font-weight: 500;
+    margin-bottom: 4px;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  }
+}
+
+// Animations
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Dark mode support (if enabled in WordPress)
+@media (prefers-color-scheme: dark) {
+  .woo-ai-assistant-message {
+    &--assistant {
+      .woo-ai-assistant-message-body {
+        background: #374151;
+        color: #f9fafb;
+      }
+    }
+
+    &--system {
+      .woo-ai-assistant-message-body {
+        background: #451a03;
+        color: #fbbf24;
+      }
+    }
+  }
+
+  .woo-ai-assistant-message-sender {
+    color: #9ca3af;
+  }
+
+  .woo-ai-assistant-message-timestamp {
+    color: #6b7280;
+  }
+
+  .woo-ai-assistant-message-action {
+    background: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #f3f4f6;
+    }
+  }
+
+  .woo-ai-assistant-message-debug pre {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .woo-ai-assistant-message-body {
+    border: 1px solid currentColor;
+  }
+  
+  .woo-ai-assistant-message--user .woo-ai-assistant-message-body {
+    background: #000;
+    color: #fff;
+  }
+  
+  .woo-ai-assistant-message--assistant .woo-ai-assistant-message-body {
+    background: #fff;
+    color: #000;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-assistant-message {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+  
+  .woo-ai-assistant-message-actions {
+    transition: opacity 0.1s ease;
+  }
+}
