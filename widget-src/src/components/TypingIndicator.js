@@ -16,14 +16,14 @@ import PropTypes from 'prop-types';
 
 /**
  * TypingIndicator Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {string} props.assistantName - Name of the AI assistant
  * @param {Object} props.config - Widget configuration
  * @returns {JSX.Element} Typing indicator component
  */
-const TypingIndicator = ({ 
+const TypingIndicator = ({
   assistantName = 'AI Assistant',
   config = {}
 }) => {
@@ -53,7 +53,7 @@ const TypingIndicator = ({
   const [typingMessage] = useState(getTypingMessage());
 
   return (
-    <div 
+    <div
       className={`woo-ai-assistant-typing-indicator ${
         isVisible ? 'woo-ai-assistant-typing-indicator--visible' : ''
       }`}
@@ -76,7 +76,7 @@ const TypingIndicator = ({
             {typingMessage}
           </span>
         </div>
-        
+
         <div className="woo-ai-assistant-typing-animation">
           <div className="woo-ai-assistant-typing-dots">
             <span className="woo-ai-assistant-typing-dot"></span>
@@ -103,7 +103,7 @@ export const MinimalTypingIndicator = () => {
   }, []);
 
   return (
-    <div 
+    <div
       className={`woo-ai-assistant-typing-minimal ${
         isVisible ? 'woo-ai-assistant-typing-minimal--visible' : ''
       }`}
@@ -124,11 +124,11 @@ export const MinimalTypingIndicator = () => {
  * Bot Icon Component
  */
 const BotIcon = () => (
-  <svg 
-    width="18" 
-    height="18" 
-    viewBox="0 0 18 18" 
-    fill="none" 
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
     aria-hidden="true"
   >
     <path

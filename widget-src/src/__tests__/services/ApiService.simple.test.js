@@ -1,6 +1,6 @@
 /**
  * Simplified API Service Tests
- * 
+ *
  * Basic tests for the ApiService class to verify core functionality
  */
 
@@ -22,11 +22,11 @@ describe('ApiService Basic Tests', () => {
   beforeEach(() => {
     // Create fresh instance
     apiService = new ApiServiceClass();
-    
+
     // Reset mocks
     jest.clearAllMocks();
     mockFetch.mockReset();
-    
+
     // Mock console to reduce noise
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -82,7 +82,7 @@ describe('ApiService Basic Tests', () => {
 
     it('should build endpoint URLs correctly', () => {
       apiService.baseUrl = 'http://localhost/wp-json/';
-      
+
       expect(apiService.buildUrl('config')).toBe('http://localhost/wp-json/woo-ai-assistant/v1/config');
       expect(apiService.buildUrl('/config')).toBe('http://localhost/wp-json/woo-ai-assistant/v1/config');
     });
@@ -230,10 +230,10 @@ describe('ApiService Basic Tests', () => {
     it('should provide error messages', () => {
       expect(apiService.getErrorMessage(new ApiError('Test', 401)))
         .toBe('Authentication required. Please refresh the page and try again.');
-      
+
       expect(apiService.getErrorMessage(new ApiError('Test', 404)))
         .toBe('The requested resource was not found.');
-      
+
       expect(apiService.getErrorMessage(new Error('General error')))
         .toBe('General error');
     });

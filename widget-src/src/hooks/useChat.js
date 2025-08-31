@@ -14,7 +14,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 
 /**
  * Chat hook for managing conversation state
- * 
+ *
  * @param {Object} config - Configuration object
  * @param {Object} config.userContext - User context data
  * @param {Object} config.wooCommerceData - WooCommerce data
@@ -48,7 +48,7 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
   // Initialize connection on mount
   useEffect(() => {
     initializeConnection();
-    
+
     return () => {
       // Cleanup on unmount
       if (abortControllerRef.current) {
@@ -68,10 +68,10 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
       // Simulate connection initialization
       // In Task 4.3, this will make actual API calls
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setIsConnected(true);
       setConversationId(generateConversationId());
-      
+
       // Add welcome message if no messages exist
       if (messages.length === 0) {
         addMessage({
@@ -81,7 +81,7 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
           timestamp: new Date().toISOString()
         });
       }
-      
+
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Connection failed:', err);
@@ -147,7 +147,7 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
         if (process.env.NODE_ENV === 'development') {
           console.error('Send message failed:', err);
         }
-        
+
         const errorMessage = {
           id: generateMessageId(),
           type: 'error',
@@ -190,7 +190,7 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
     if (retryCountRef.current < chatConfig.maxRetries) {
       retryCountRef.current++;
       setError(null);
-      
+
       if (!isConnected) {
         initializeConnection();
       }
@@ -205,12 +205,12 @@ export const useChat = ({ userContext = {}, wooCommerceData = {}, config = {} })
     conversationId,
     error,
     isLoading,
-    
+
     // Methods
     sendMessage,
     clearMessages,
     retry,
-    
+
     // Computed
     messageCount: messages.length,
     canSend: isConnected && !isLoading && !error,
@@ -243,11 +243,11 @@ const getWelcomeMessage = (userContext, wooCommerceData) => {
   if (currentProduct) {
     return `Hi${userName ? ` ${userName}` : ''}! I can help you with questions about ${currentProduct.name} or anything else you need.`;
   }
-  
+
   if (hasCart) {
     return `Hi${userName ? ` ${userName}` : ''}! I see you have items in your cart. How can I help you complete your purchase?`;
   }
-  
+
   return `Hi${userName ? ` ${userName}` : ''}! I'm your AI shopping assistant. How can I help you today?`;
 };
 
@@ -256,23 +256,23 @@ const getWelcomeMessage = (userContext, wooCommerceData) => {
  */
 const generateMockResponse = (userMessage, userContext, wooCommerceData) => {
   const message = userMessage.toLowerCase();
-  
+
   if (message.includes('product') || message.includes('item')) {
     return "I'd be happy to help you find the right product! Could you tell me more about what you're looking for?";
   }
-  
+
   if (message.includes('cart') || message.includes('checkout')) {
-    return "I can help you with your shopping cart. Would you like me to review your items or assist with checkout?";
+    return 'I can help you with your shopping cart. Would you like me to review your items or assist with checkout?';
   }
-  
+
   if (message.includes('price') || message.includes('cost')) {
-    return "I can help you find information about pricing and any available discounts. What specific product are you interested in?";
+    return 'I can help you find information about pricing and any available discounts. What specific product are you interested in?';
   }
-  
+
   if (message.includes('shipping') || message.includes('delivery')) {
-    return "I can provide information about shipping options and delivery times. What would you like to know?";
+    return 'I can provide information about shipping options and delivery times. What would you like to know?';
   }
-  
+
   return "Thanks for your message! I'm here to help with any questions about products, orders, or shopping. What would you like to know?";
 };
 

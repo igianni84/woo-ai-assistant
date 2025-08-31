@@ -14,11 +14,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Message from '../../components/Message';
-import { 
-  renderWithContext, 
-  assertAriaAttributes, 
+import {
+  renderWithContext,
+  assertAriaAttributes,
   assertComponentNaming,
-  mockWordPressGlobals 
+  mockWordPressGlobals
 } from '../utils/testUtils';
 
 // Mock clipboard API
@@ -59,7 +59,7 @@ describe('Message Component', () => {
   describe('Component Rendering', () => {
     test('renders Message component correctly', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       expect(screen.getByRole('listitem')).toBeInTheDocument();
       expect(screen.getByText(baseMessage.content)).toBeInTheDocument();
     });
@@ -70,9 +70,9 @@ describe('Message Component', () => {
 
     test('applies visibility animation on mount', async () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const messageElement = screen.getByRole('listitem');
-      
+
       await waitFor(() => {
         expect(messageElement).toHaveClass('woo-ai-assistant-message--visible');
       }, { timeout: 100 });
@@ -80,7 +80,7 @@ describe('Message Component', () => {
 
     test('applies latest message class when isLatest is true', () => {
       renderWithContext(<Message {...defaultProps} isLatest={true} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       expect(messageElement).toHaveClass('woo-ai-assistant-message--latest');
     });
@@ -95,7 +95,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={userMessage} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       expect(messageElement).toHaveClass('woo-ai-assistant-message--user');
       expect(screen.getByText('Test User')).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe('Message Component', () => {
 
     test('renders assistant message correctly', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       expect(messageElement).toHaveClass('woo-ai-assistant-message--assistant');
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={systemMessage} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       expect(messageElement).toHaveClass('woo-ai-assistant-message--system');
       expect(screen.getByText('System')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={errorMessage} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       expect(messageElement).toHaveClass('woo-ai-assistant-message--error');
       expect(screen.getByText('Error')).toBeInTheDocument();
@@ -146,7 +146,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={userMessage} />);
-      
+
       const avatar = screen.getByAltText("Test User's avatar");
       expect(avatar).toBeInTheDocument();
       expect(avatar).toHaveAttribute('src', defaultProps.userContext.userAvatar);
@@ -167,18 +167,18 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...propsWithoutAvatar} message={userMessage} />);
-      
+
       const avatarContainer = screen.getByRole('listitem').querySelector('.woo-ai-assistant-message-avatar--user');
       expect(avatarContainer).toBeInTheDocument();
     });
 
     test('shows correct avatar for each message type', () => {
       const messageTypes = ['user', 'assistant', 'system', 'error'];
-      
+
       messageTypes.forEach(type => {
         const message = { ...baseMessage, type };
         const { container } = renderWithContext(<Message {...defaultProps} message={message} />);
-        
+
         const avatarContainer = container.querySelector(`.woo-ai-assistant-message-avatar--${type}`);
         expect(avatarContainer).toBeInTheDocument();
       });
@@ -193,7 +193,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={plainTextMessage} />);
-      
+
       expect(screen.getByText('This is plain text content')).toBeInTheDocument();
     });
 
@@ -204,7 +204,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={htmlMessage} />);
-      
+
       expect(screen.getByText('bold')).toBeInTheDocument();
       expect(screen.getByText('italic')).toBeInTheDocument();
     });
@@ -216,7 +216,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={dangerousHtml} />);
-      
+
       // Script tag should be removed
       expect(screen.queryByText(/script/)).not.toBeInTheDocument();
       expect(screen.getByText(/Safe content.*more content/)).toBeInTheDocument();
@@ -244,7 +244,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={timestampMessage} />);
-      
+
       const timeElement = screen.getByRole('time');
       expect(timeElement).toHaveAttribute('datetime', fixedTimestamp);
     });
@@ -256,7 +256,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={recentMessage} />);
-      
+
       expect(screen.getByText('Just now')).toBeInTheDocument();
     });
 
@@ -268,7 +268,7 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={olderMessage} />);
-      
+
       expect(screen.getByText('5m ago')).toBeInTheDocument();
     });
 
@@ -287,7 +287,7 @@ describe('Message Component', () => {
   describe('Message Actions', () => {
     test('shows copy action for assistant messages', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const copyButton = screen.getByLabelText('Copy message');
       expect(copyButton).toBeInTheDocument();
     });
@@ -299,29 +299,29 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={userMessage} />);
-      
+
       expect(screen.queryByLabelText('Copy message')).not.toBeInTheDocument();
     });
 
     test('copy action works correctly', async () => {
       const user = userEvent.setup();
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const copyButton = screen.getByLabelText('Copy message');
       await user.click(copyButton);
-      
+
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(baseMessage.content);
     });
 
     test('handles copy action error gracefully', async () => {
       // Mock clipboard.writeText to reject
       navigator.clipboard.writeText = jest.fn(() => Promise.reject(new Error('Copy failed')));
-      
+
       const user = userEvent.setup();
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const copyButton = screen.getByLabelText('Copy message');
-      
+
       // Should not throw error even if copy fails
       expect(async () => {
         await user.click(copyButton);
@@ -336,9 +336,9 @@ describe('Message Component', () => {
       process.env.NODE_ENV = 'development';
 
       renderWithContext(<Message {...defaultProps} />);
-      
+
       expect(screen.getByText('Debug Info')).toBeInTheDocument();
-      
+
       process.env.NODE_ENV = originalEnv;
     });
 
@@ -348,9 +348,9 @@ describe('Message Component', () => {
       process.env.NODE_ENV = 'production';
 
       renderWithContext(<Message {...defaultProps} />);
-      
+
       expect(screen.queryByText('Debug Info')).not.toBeInTheDocument();
-      
+
       process.env.NODE_ENV = originalEnv;
     });
 
@@ -364,10 +364,10 @@ describe('Message Component', () => {
       };
 
       renderWithContext(<Message {...defaultProps} message={messageWithMetadata} />);
-      
+
       const debugSection = screen.getByText('Debug Info').closest('details');
       expect(debugSection).toBeInTheDocument();
-      
+
       process.env.NODE_ENV = originalEnv;
     });
   });
@@ -375,7 +375,7 @@ describe('Message Component', () => {
   describe('Accessibility', () => {
     test('has proper ARIA attributes', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const messageElement = screen.getByRole('listitem');
       assertAriaAttributes(messageElement, {
         'aria-label': 'Message from AI Assistant'
@@ -384,7 +384,7 @@ describe('Message Component', () => {
 
     test('time element has proper attributes', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const timeElement = screen.getByRole('time');
       expect(timeElement).toHaveAttribute('datetime', baseMessage.timestamp);
       expect(timeElement).toHaveAttribute('title');
@@ -392,7 +392,7 @@ describe('Message Component', () => {
 
     test('copy button has proper accessibility attributes', () => {
       renderWithContext(<Message {...defaultProps} />);
-      
+
       const copyButton = screen.getByLabelText('Copy message');
       expect(copyButton).toHaveAttribute('title', 'Copy to clipboard');
     });
@@ -404,11 +404,11 @@ describe('Message Component', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 480,
+        value: 480
       });
 
       renderWithContext(<Message {...defaultProps} />);
-      
+
       // Component should render without errors on mobile
       expect(screen.getByRole('listitem')).toBeInTheDocument();
     });
@@ -460,7 +460,7 @@ describe('Message Component', () => {
       renderWithContext(<Message />);
 
       expect(consoleSpy).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -475,7 +475,7 @@ describe('Message Component', () => {
       renderWithContext(<Message message={invalidMessage} />);
 
       expect(consoleSpy).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -499,12 +499,12 @@ describe('Message Component', () => {
       const { rerender } = renderWithContext(<Message {...defaultProps} />);
 
       const startTime = performance.now();
-      
+
       // Simulate many re-renders
       for (let i = 0; i < 100; i++) {
         rerender(<Message {...defaultProps} isLatest={i % 2 === 0} />);
       }
-      
+
       const endTime = performance.now();
 
       // Should handle re-renders efficiently

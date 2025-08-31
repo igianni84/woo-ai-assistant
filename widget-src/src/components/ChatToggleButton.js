@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 
 /**
  * Chat Toggle Button Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {boolean} props.isOpen - Whether chat window is open
@@ -107,19 +107,19 @@ const ChatToggleButton = ({
         </span>
 
         {/* Connection status indicator */}
-        <span 
+        <span
           className="woo-ai-assistant-toggle-status"
           aria-hidden="true"
         >
-          <StatusDot 
-            isConnected={isConnected} 
-            hasError={hasError} 
+          <StatusDot
+            isConnected={isConnected}
+            hasError={hasError}
           />
         </span>
 
         {/* Unread message indicator */}
         {messageCount > 0 && !isOpen && (
-          <span 
+          <span
             className="woo-ai-assistant-toggle-badge"
             aria-label={`${messageCount} unread messages`}
           >
@@ -129,17 +129,17 @@ const ChatToggleButton = ({
 
         {/* Pulsing animation for new messages */}
         {messageCount > 0 && !isOpen && (
-          <span 
-            className="woo-ai-assistant-toggle-pulse" 
-            aria-hidden="true" 
+          <span
+            className="woo-ai-assistant-toggle-pulse"
+            aria-hidden="true"
           />
         )}
       </button>
 
       {/* Screen reader status text */}
       {buttonState.statusText && (
-        <span 
-          id="woo-ai-assistant-status" 
+        <span
+          id="woo-ai-assistant-status"
           className="sr-only"
         >
           {buttonState.statusText}
@@ -151,14 +151,14 @@ const ChatToggleButton = ({
 
 /**
  * Status Dot Component
- * 
+ *
  * @param {Object} props
  * @param {boolean} props.isConnected
  * @param {boolean} props.hasError
  */
 const StatusDot = ({ isConnected, hasError }) => {
   let className = 'woo-ai-assistant-status-dot';
-  
+
   if (hasError) {
     className += ' woo-ai-assistant-status-dot--error';
   } else if (isConnected) {
@@ -166,7 +166,7 @@ const StatusDot = ({ isConnected, hasError }) => {
   } else {
     className += ' woo-ai-assistant-status-dot--disconnected';
   }
-  
+
   return <span className={className} />;
 };
 
@@ -174,34 +174,34 @@ const StatusDot = ({ isConnected, hasError }) => {
  * Chat Icon Component
  */
 const ChatIcon = () => (
-  <svg 
-    width="28" 
-    height="28" 
-    viewBox="0 0 28 28" 
-    fill="none" 
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 28 28"
+    fill="none"
     aria-hidden="true"
   >
     <path
       d="M21 6H7C5.9 6 5 6.9 5 8V16C5 17.1 5.9 18 7 18H8V22L12 18H21C22.1 18 23 17.1 23 16V8C23 6.9 22.1 6 21 6Z"
       fill="currentColor"
     />
-    <rect 
-      x="8" 
-      y="10" 
-      width="8" 
-      height="1.5" 
-      rx="0.75" 
-      fill="white" 
-      opacity="0.8" 
+    <rect
+      x="8"
+      y="10"
+      width="8"
+      height="1.5"
+      rx="0.75"
+      fill="white"
+      opacity="0.8"
     />
-    <rect 
-      x="8" 
-      y="12.5" 
-      width="10" 
-      height="1.5" 
-      rx="0.75" 
-      fill="white" 
-      opacity="0.8" 
+    <rect
+      x="8"
+      y="12.5"
+      width="10"
+      height="1.5"
+      rx="0.75"
+      fill="white"
+      opacity="0.8"
     />
   </svg>
 );
@@ -210,11 +210,11 @@ const ChatIcon = () => (
  * Close Icon Component
  */
 const CloseIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -231,32 +231,32 @@ const CloseIcon = () => (
  * Error Icon Component
  */
 const ErrorIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
     aria-hidden="true"
   >
-    <circle 
-      cx="12" 
-      cy="12" 
-      r="10" 
-      stroke="currentColor" 
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
       strokeWidth="2"
     />
-    <line 
-      x1="12" 
-      y1="8" 
-      x2="12" 
-      y2="12" 
-      stroke="currentColor" 
+    <line
+      x1="12"
+      y1="8"
+      x2="12"
+      y2="12"
+      stroke="currentColor"
       strokeWidth="2"
     />
-    <circle 
-      cx="12" 
-      cy="16" 
-      r="1" 
+    <circle
+      cx="12"
+      cy="16"
+      r="1"
       fill="currentColor"
     />
   </svg>
@@ -266,11 +266,11 @@ const ErrorIcon = () => (
  * Disconnected Icon Component
  */
 const DisconnectedIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -280,12 +280,12 @@ const DisconnectedIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <line 
-      x1="1" 
-      y1="1" 
-      x2="23" 
-      y2="23" 
-      stroke="currentColor" 
+    <line
+      x1="1"
+      y1="1"
+      x2="23"
+      y2="23"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
     />

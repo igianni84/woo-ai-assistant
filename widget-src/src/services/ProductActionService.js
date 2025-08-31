@@ -96,7 +96,7 @@ class ProductActionService {
       // Call API
       const response = await apiService.addToCart({
         productId: productData.productId,
-        quantity: quantity,
+        quantity,
         variationId: productData.variationId,
         variation: productData.variation
       });
@@ -105,8 +105,8 @@ class ProductActionService {
       this.emit('cartUpdated', {
         action: 'add',
         productId: productData.productId,
-        quantity: quantity,
-        response: response
+        quantity,
+        response
       });
 
       return {
@@ -117,7 +117,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'addToCart',
         error: errorMessage,
@@ -156,7 +156,7 @@ class ProductActionService {
       // Emit success event
       this.emit('couponApplied', {
         couponCode: trimmedCode,
-        response: response
+        response
       });
 
       return {
@@ -167,7 +167,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'applyCoupon',
         error: errorMessage,
@@ -203,7 +203,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'removeCoupon',
         error: errorMessage,
@@ -247,7 +247,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'updateCartItem',
         error: errorMessage,
@@ -271,7 +271,7 @@ class ProductActionService {
   async getCart() {
     try {
       const response = await apiService.get('/cart');
-      
+
       return {
         success: true,
         data: response,
@@ -280,7 +280,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'getCart',
         error: errorMessage
@@ -302,7 +302,7 @@ class ProductActionService {
   async getAvailableCoupons() {
     try {
       const response = await apiService.get('/coupons/available');
-      
+
       return {
         success: true,
         data: response,
@@ -311,7 +311,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       return {
         success: false,
         error: errorMessage,
@@ -329,10 +329,10 @@ class ProductActionService {
   async generatePersonalizedCoupon(context = {}) {
     try {
       const response = await apiService.post('/actions/generate-coupon', {
-        context: context,
+        context,
         conversation_id: context.conversationId
       });
-      
+
       this.emit('couponGenerated', {
         context,
         response
@@ -346,7 +346,7 @@ class ProductActionService {
 
     } catch (error) {
       const errorMessage = apiService.getErrorMessage(error);
-      
+
       this.emit('error', {
         action: 'generatePersonalizedCoupon',
         error: errorMessage,
@@ -397,9 +397,9 @@ class ProductActionService {
   async validateProductAvailability(productId, quantity = 1) {
     try {
       const response = await apiService.get(`/products/${productId}/availability`, {
-        quantity: quantity
+        quantity
       });
-      
+
       return {
         success: true,
         available: response.available,
@@ -426,10 +426,10 @@ class ProductActionService {
   async getProductRecommendations(context = {}) {
     try {
       const response = await apiService.post('/products/recommendations', {
-        context: context,
+        context,
         limit: context.limit || 5
       });
-      
+
       return {
         success: true,
         data: response.products || [],

@@ -186,7 +186,7 @@ export const mockWordPressGlobals = (overrides = {}) => {
   if (!Element.prototype.scrollIntoView) {
     Element.prototype.scrollIntoView = jest.fn();
   }
-  
+
   const defaults = {
     wp: {
       i18n: {

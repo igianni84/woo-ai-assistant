@@ -14,10 +14,10 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../../App';
-import { 
-  renderWithContext, 
+import {
+  renderWithContext,
   mockWordPressGlobals,
-  createMockApiResponse 
+  createMockApiResponse
 } from '../utils/testUtils';
 import { mockMessages, mockUser, mockWidgetSettings } from '../mocks/mockData';
 
@@ -72,7 +72,7 @@ describe('Chat Components Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockWordPressGlobals();
-    
+
     // Reset useChat mock
     useChat.mockReturnValue({
       messages: [],
@@ -94,14 +94,14 @@ describe('Chat Components Integration', () => {
     test('App renders with chat components when opened', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Initially closed
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Chat window should be visible
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByLabelText('AI Assistant Chat')).toBeInTheDocument();
@@ -110,11 +110,11 @@ describe('Chat Components Integration', () => {
     test('ChatWindow renders with proper components structure', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Verify all main components are present
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/AI Shopping Assistant/i);
       expect(screen.getByRole('log')).toBeInTheDocument(); // Messages area
@@ -157,11 +157,11 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Verify messages are displayed
       expect(screen.getByText('Hello! How can I help?')).toBeInTheDocument();
       expect(screen.getByText('I need help with products')).toBeInTheDocument();
@@ -170,11 +170,11 @@ describe('Chat Components Integration', () => {
     test('shows empty state when no messages', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should show empty state
       expect(screen.getByText("Hi! I'm your AI shopping assistant.")).toBeInTheDocument();
       expect(screen.getByText('Ask me about products, orders, or anything else!')).toBeInTheDocument();
@@ -200,11 +200,11 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should show typing indicator
       expect(screen.getByRole('status')).toBeInTheDocument();
       expect(screen.getByLabelText(/is typing/i)).toBeInTheDocument();
@@ -228,11 +228,11 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should not show typing indicator
       expect(screen.queryByLabelText(/is typing/i)).not.toBeInTheDocument();
     });
@@ -241,7 +241,7 @@ describe('Chat Components Integration', () => {
   describe('Message Sending Integration', () => {
     test('sending message calls useChat sendMessage function', async () => {
       const mockSendMessage = jest.fn();
-      
+
       useChat.mockReturnValue({
         messages: [],
         isTyping: false,
@@ -259,24 +259,24 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Type and send message
       const input = screen.getByLabelText('Message input');
       const sendButton = screen.getByLabelText('Send message');
-      
+
       await user.type(input, 'Hello there!');
       await user.click(sendButton);
-      
+
       expect(mockSendMessage).toHaveBeenCalledWith('Hello there!');
     });
 
     test('Enter key sends message through useChat', async () => {
       const mockSendMessage = jest.fn();
-      
+
       useChat.mockReturnValue({
         messages: [],
         isTyping: false,
@@ -294,22 +294,22 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Type message and press Enter
       const input = screen.getByLabelText('Message input');
       await user.type(input, 'Test message');
       await user.keyboard('{Enter}');
-      
+
       expect(mockSendMessage).toHaveBeenCalledWith('Test message');
     });
 
     test('cannot send message when not connected', async () => {
       const mockSendMessage = jest.fn();
-      
+
       useChat.mockReturnValue({
         messages: [],
         isTyping: false,
@@ -327,15 +327,15 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Input and send button should be disabled
       const input = screen.getByLabelText('Message input');
       const sendButton = screen.getByLabelText('Send message');
-      
+
       expect(input).toBeDisabled();
       expect(sendButton).toBeDisabled();
     });
@@ -365,11 +365,11 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should show error message
       expect(screen.getByText('Connection Error')).toBeInTheDocument();
       expect(screen.getByText(testError.message)).toBeInTheDocument();
@@ -394,11 +394,11 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should show connecting status
       expect(screen.getByText('Connecting...')).toBeInTheDocument();
     });
@@ -407,7 +407,7 @@ describe('Chat Components Integration', () => {
   describe('Clear Messages Integration', () => {
     test('clear button calls useChat clearMessages function', async () => {
       const mockClearMessages = jest.fn();
-      
+
       useChat.mockReturnValue({
         messages: mockMessages,
         isTyping: false,
@@ -425,29 +425,29 @@ describe('Chat Components Integration', () => {
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Click clear button
       const clearButton = screen.getByLabelText('Clear conversation');
       await user.click(clearButton);
-      
+
       expect(mockClearMessages).toHaveBeenCalledTimes(1);
     });
 
     test('clear button only appears when there are messages', async () => {
       const { rerender } = renderWithContext(<App {...defaultAppProps} />);
-      
+
       const user = userEvent.setup();
-      
+
       // Open chat with no messages
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       expect(screen.queryByLabelText('Clear conversation')).not.toBeInTheDocument();
-      
+
       // Update to have messages
       useChat.mockReturnValue({
         messages: mockMessages,
@@ -463,9 +463,9 @@ describe('Chat Components Integration', () => {
         messageCount: mockMessages.length,
         hasUnreadMessages: false
       });
-      
+
       rerender(<App {...defaultAppProps} />);
-      
+
       expect(screen.getByLabelText('Clear conversation')).toBeInTheDocument();
     });
   });
@@ -476,16 +476,16 @@ describe('Chat Components Integration', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 480,
+        value: 480
       });
 
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Should render without errors on mobile
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByLabelText('Message input')).toBeInTheDocument();
@@ -496,18 +496,18 @@ describe('Chat Components Integration', () => {
     test('keyboard navigation works across components', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Tab through interactive elements
       await user.tab(); // Should focus minimize button
       expect(screen.getByLabelText('Minimize chat')).toHaveFocus();
-      
+
       await user.tab(); // Should focus close button
       expect(screen.getByLabelText('Close chat')).toHaveFocus();
-      
+
       await user.tab(); // Should focus input
       expect(screen.getByLabelText('Message input')).toHaveFocus();
     });
@@ -515,11 +515,11 @@ describe('Chat Components Integration', () => {
     test('ARIA roles and labels are properly set across components', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Verify ARIA attributes
       expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'AI Assistant Chat');
       expect(screen.getByRole('log')).toHaveAttribute('aria-label', 'Chat messages');
@@ -552,16 +552,16 @@ describe('Chat Components Integration', () => {
       });
 
       const user = userEvent.setup();
-      
+
       const startTime = performance.now();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       const endTime = performance.now();
-      
+
       // Should render within reasonable time even with many messages
       expect(endTime - startTime).toBeLessThan(1000);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -572,11 +572,11 @@ describe('Chat Components Integration', () => {
     test('App passes props correctly to ChatWindow', async () => {
       const user = userEvent.setup();
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Open chat
       const toggleButton = screen.getByLabelText(/Open AI Assistant Chat/i);
       await user.click(toggleButton);
-      
+
       // Verify props are passed correctly (evidenced by proper display)
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByText('AI Shopping Assistant')).toBeInTheDocument();
@@ -585,7 +585,7 @@ describe('Chat Components Integration', () => {
 
     test('useChat hook receives correct configuration', () => {
       renderWithContext(<App {...defaultAppProps} />);
-      
+
       // Verify useChat was called with correct parameters
       expect(useChat).toHaveBeenCalledWith({
         userContext: defaultAppProps.userContext,

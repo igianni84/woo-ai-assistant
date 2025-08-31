@@ -15,19 +15,19 @@ import PropTypes from 'prop-types';
 
 /**
  * Widget Error Boundary Class Component
- * 
+ *
  * @component
  */
 class WidgetErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
+    this.state = {
+      hasError: false,
+      error: null,
       errorInfo: null,
-      retryCount: 0 
+      retryCount: 0
     };
-    
+
     // Bind methods
     this.handleRetry = this.handleRetry.bind(this);
     this.handleReportError = this.handleReportError.bind(this);
@@ -35,20 +35,20 @@ class WidgetErrorBoundary extends React.Component {
 
   /**
    * Static method to update state when an error occurs
-   * 
+   *
    * @param {Error} error - The error that occurred
    * @returns {Object} New state object
    */
   static getDerivedStateFromError(error) {
-    return { 
-      hasError: true, 
-      error: error 
+    return {
+      hasError: true,
+      error
     };
   }
 
   /**
    * Handle component errors and log them
-   * 
+   *
    * @param {Error} error - The error that occurred
    * @param {Object} errorInfo - Error information including component stack
    */
@@ -57,11 +57,11 @@ class WidgetErrorBoundary extends React.Component {
     if (process.env.NODE_ENV === 'development') {
       console.error('Woo AI Assistant Widget Error:', error, errorInfo);
     }
-    
+
     // Update state with error info
     this.setState({
-      error: error,
-      errorInfo: errorInfo
+      error,
+      errorInfo
     });
 
     // Send error to logging service if available
@@ -104,7 +104,7 @@ class WidgetErrorBoundary extends React.Component {
    */
   handleReportError() {
     const { error, errorInfo } = this.state;
-    
+
     // Create error report
     const errorReport = {
       error: error?.toString(),
@@ -143,7 +143,7 @@ class WidgetErrorBoundary extends React.Component {
 
       // Default error UI
       return (
-        <div 
+        <div
           className="woo-ai-assistant-error-boundary"
           role="alert"
           aria-live="assertive"
@@ -152,13 +152,13 @@ class WidgetErrorBoundary extends React.Component {
             <div className="woo-ai-assistant-error-icon">
               <ErrorIcon />
             </div>
-            
+
             <div className="woo-ai-assistant-error-message">
               <h3>Chat Temporarily Unavailable</h3>
               <p>
                 We're experiencing a technical issue. Please try refreshing or contact support if the problem persists.
               </p>
-              
+
               {process.env.NODE_ENV === 'development' && (
                 <details className="woo-ai-assistant-error-details">
                   <summary>Error Details (Development)</summary>
@@ -179,7 +179,7 @@ class WidgetErrorBoundary extends React.Component {
               >
                 {retryCount >= 3 ? 'Max Retries Reached' : 'Try Again'}
               </button>
-              
+
               <button
                 type="button"
                 className="woo-ai-assistant-btn woo-ai-assistant-btn-secondary"
@@ -201,32 +201,32 @@ class WidgetErrorBoundary extends React.Component {
  * Error Icon Component
  */
 const ErrorIcon = () => (
-  <svg 
-    width="48" 
-    height="48" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+  <svg
+    width="48"
+    height="48"
+    viewBox="0 0 24 24"
+    fill="none"
     aria-hidden="true"
   >
-    <circle 
-      cx="12" 
-      cy="12" 
-      r="10" 
-      stroke="currentColor" 
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
       strokeWidth="2"
     />
-    <line 
-      x1="12" 
-      y1="8" 
-      x2="12" 
-      y2="12" 
-      stroke="currentColor" 
+    <line
+      x1="12"
+      y1="8"
+      x2="12"
+      y2="12"
+      stroke="currentColor"
       strokeWidth="2"
     />
-    <circle 
-      cx="12" 
-      cy="16" 
-      r="1" 
+    <circle
+      cx="12"
+      cy="16"
+      r="1"
       fill="currentColor"
     />
   </svg>

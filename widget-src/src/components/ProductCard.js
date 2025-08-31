@@ -17,7 +17,7 @@ import QuickAction from './QuickAction';
 
 /**
  * Product Card Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {Object} props.product - Product object
@@ -62,11 +62,11 @@ const ProductCard = ({
     }
 
     setIsLoading(true);
-    
+
     try {
       await onAddToCart({
         productId: product.id,
-        quantity: quantity,
+        quantity,
         variationId: selectedVariation?.id || null,
         variation: selectedVariation?.attributes || {}
       });
@@ -93,7 +93,7 @@ const ProductCard = ({
   }, []);
 
   // Check if product is on sale
-  const isOnSale = product.salePrice && product.regularPrice && 
+  const isOnSale = product.salePrice && product.regularPrice &&
                    parseFloat(product.salePrice) < parseFloat(product.regularPrice);
 
   // Get price display
@@ -135,22 +135,22 @@ const ProductCard = ({
   const getCardClasses = () => {
     const baseClass = 'woo-ai-assistant-product-card';
     const classes = [baseClass, `${baseClass}--${size}`];
-    
+
     if (isOnSale) classes.push(`${baseClass}--on-sale`);
     if (!product.inStock) classes.push(`${baseClass}--out-of-stock`);
     if (isLoading) classes.push(`${baseClass}--loading`);
-    
+
     return classes.join(' ');
   };
 
   // Truncate text helper
   const truncateText = (text, maxLength) => {
     if (!text || text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    return `${text.substring(0, maxLength)  }...`;
   };
 
   return (
-    <div 
+    <div
       className={getCardClasses()}
       role="article"
       aria-label={`Product: ${product.name}`}
@@ -177,9 +177,9 @@ const ProductCard = ({
             }}
           />
         ) : null}
-        
+
         {/* Fallback placeholder */}
-        <div 
+        <div
           className="woo-ai-assistant-product-image-placeholder"
           style={{ display: product.image ? 'none' : 'flex' }}
           data-testid="image-placeholder"
@@ -197,8 +197,8 @@ const ProductCard = ({
             onClick={handleViewProduct}
             aria-label={`View product details for ${product.name}`}
           >
-            {size === 'small' 
-              ? truncateText(product.name, 40) 
+            {size === 'small'
+              ? truncateText(product.name, 40)
               : product.name
             }
           </button>
@@ -225,7 +225,7 @@ const ProductCard = ({
         {(product.shortDescription || product.description) && size !== 'small' && (
           <div className="woo-ai-assistant-product-description">
             {truncateText(
-              product.shortDescription || product.description, 
+              product.shortDescription || product.description,
               size === 'medium' ? 100 : 200
             )}
           </div>
@@ -236,7 +236,7 @@ const ProductCard = ({
           <div className="woo-ai-assistant-product-actions">
             {/* Quantity Selector */}
             <div className="woo-ai-assistant-product-quantity">
-              <label 
+              <label
                 htmlFor={`qty-${product.id}`}
                 className="woo-ai-assistant-product-quantity-label"
               >
@@ -266,7 +266,7 @@ const ProductCard = ({
                 size={size === 'small' ? 'small' : 'medium'}
                 primary
               />
-              
+
               <QuickAction
                 type="view-product"
                 label="View Details"
@@ -289,11 +289,11 @@ const ProductCard = ({
  * Sale Icon Component
  */
 const SaleIcon = () => (
-  <svg 
-    width="12" 
-    height="12" 
-    viewBox="0 0 12 12" 
-    fill="none" 
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -310,11 +310,11 @@ const SaleIcon = () => (
  * Image Placeholder Icon Component
  */
 const ImagePlaceholderIcon = () => (
-  <svg 
-    width="32" 
-    height="32" 
-    viewBox="0 0 32 32" 
-    fill="none" 
+  <svg
+    width="32"
+    height="32"
+    viewBox="0 0 32 32"
+    fill="none"
     aria-hidden="true"
   >
     <rect width="32" height="32" rx="4" fill="currentColor" opacity="0.1"/>
@@ -332,11 +332,11 @@ const ImagePlaceholderIcon = () => (
  * Cart Icon Component
  */
 const CartIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -355,11 +355,11 @@ const CartIcon = () => (
  * View Icon Component
  */
 const ViewIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path

@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 
 /**
  * Quick Action Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {string} props.type - Action type (add-to-cart, apply-coupon, view-product, etc.)
@@ -61,7 +61,7 @@ const QuickAction = ({
   // Handle click with loading state management
   const handleClick = useCallback(async (event) => {
     event.preventDefault();
-    
+
     if (disabled || loading || isProcessing || !onClick) {
       return;
     }
@@ -85,18 +85,18 @@ const QuickAction = ({
 
     // Add type-specific class
     if (type) classes.push(`${baseClass}--${type}`);
-    
+
     // Add variant class
     classes.push(`${baseClass}--${resolvedVariant}`);
-    
+
     // Add size class
     classes.push(`${baseClass}--${size}`);
-    
+
     // Add state classes
     if (disabled) classes.push(`${baseClass}--disabled`);
     if (loading || isProcessing) classes.push(`${baseClass}--loading`);
     if (fullWidth) classes.push(`${baseClass}--full-width`);
-    
+
     // Add custom classes
     if (className) classes.push(className);
 
@@ -106,7 +106,7 @@ const QuickAction = ({
   // Get loading text
   const getLoadingText = () => {
     if (loadingText) return loadingText;
-    
+
     // Default loading text based on action type
     switch (type) {
       case 'add-to-cart':
@@ -127,11 +127,11 @@ const QuickAction = ({
   // Get aria label
   const getAriaLabel = () => {
     if (ariaLabel) return ariaLabel;
-    
+
     if (loading || isProcessing) {
       return `${getLoadingText()} ${label}`;
     }
-    
+
     return label;
   };
 
@@ -140,7 +140,7 @@ const QuickAction = ({
     if (loading || isProcessing) {
       return <LoadingSpinner size={size} />;
     }
-    
+
     return icon;
   };
 
@@ -230,27 +230,27 @@ const LoadingSpinner = ({ size = 'medium' }) => {
  * Quick Action Group Component
  * Container for grouping multiple quick actions
  */
-export const QuickActionGroup = ({ 
-  children, 
-  direction = 'horizontal', 
+export const QuickActionGroup = ({
+  children,
+  direction = 'horizontal',
   spacing = 'medium',
   className = '',
-  ...props 
+  ...props
 }) => {
   const getGroupClasses = () => {
     const baseClass = 'woo-ai-assistant-quick-action-group';
     const classes = [baseClass];
-    
+
     classes.push(`${baseClass}--${direction}`);
     classes.push(`${baseClass}--spacing-${spacing}`);
-    
+
     if (className) classes.push(className);
-    
+
     return classes.join(' ');
   };
 
   return (
-    <div 
+    <div
       className={getGroupClasses()}
       role="group"
       {...props}
@@ -327,11 +327,11 @@ export const CheckoutAction = ({ ...props }) => (
  * Cart Icon Component
  */
 const CartIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -350,11 +350,11 @@ const CartIcon = () => (
  * Coupon Icon Component
  */
 const CouponIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -372,11 +372,11 @@ const CouponIcon = () => (
  * View Icon Component
  */
 const ViewIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -394,11 +394,11 @@ const ViewIcon = () => (
  * Checkout Icon Component
  */
 const CheckoutIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path

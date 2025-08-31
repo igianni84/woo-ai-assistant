@@ -1,6 +1,6 @@
 /**
  * API Service Tests
- * 
+ *
  * Comprehensive tests for the ApiService class covering all functionality
  * including HTTP methods, error handling, retry logic, and streaming support.
  */
@@ -24,11 +24,11 @@ describe('ApiService', () => {
     // Reset the service instance - create new instance from class
     const ApiServiceClass = require('../../services/ApiService').default.constructor;
     apiService = new ApiServiceClass();
-    
+
     // Reset all mocks
     jest.clearAllMocks();
     mockFetch.mockReset();
-    
+
     // Clear timers
     jest.clearAllTimers();
     jest.useFakeTimers();
@@ -329,7 +329,7 @@ describe('ApiService', () => {
       }));
 
       // Mock a slow response
-      mockFetch.mockImplementationOnce(() => 
+      mockFetch.mockImplementationOnce(() =>
         new Promise(resolve => setTimeout(resolve, 60000))
       );
 
@@ -517,9 +517,9 @@ describe('ApiService', () => {
     });
 
     it('should get conversation history', async () => {
-      const responseData = { 
-        success: true, 
-        conversation: { id: 'conv-123', messages: [] } 
+      const responseData = {
+        success: true,
+        conversation: { id: 'conv-123', messages: [] }
       };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -708,16 +708,16 @@ describe('ApiService', () => {
     it('should provide user-friendly error messages', () => {
       expect(apiService.getErrorMessage(new ApiError('Test', 401)))
         .toBe('Authentication required. Please refresh the page and try again.');
-      
+
       expect(apiService.getErrorMessage(new ApiError('Test', 403)))
         .toBe('You don\'t have permission to perform this action.');
-      
+
       expect(apiService.getErrorMessage(new ApiError('Test', 404)))
         .toBe('The requested resource was not found.');
-      
+
       expect(apiService.getErrorMessage(new ApiError('Test', 429)))
         .toBe('Too many requests. Please wait a moment and try again.');
-      
+
       expect(apiService.getErrorMessage(new ApiError('Test', 503)))
         .toBe('Service is temporarily unavailable. Please try again later.');
 

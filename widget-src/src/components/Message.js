@@ -19,7 +19,7 @@ import productActionService from '../services/ProductActionService';
 
 /**
  * Message Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {Object} props.message - Message object
@@ -36,10 +36,10 @@ import productActionService from '../services/ProductActionService';
  * @param {Function} props.onActionError - Error callback for actions
  * @returns {JSX.Element} Message component
  */
-const Message = ({ 
-  message, 
-  isLatest = false, 
-  userContext = {}, 
+const Message = ({
+  message,
+  isLatest = false,
+  userContext = {},
   wooCommerceData = {},
   config = {},
   onActionSuccess,
@@ -96,7 +96,7 @@ const Message = ({
   const handleProductAction = async (actionData) => {
     try {
       let result;
-      
+
       switch (actionData.type) {
         case 'add-to-cart':
           result = await productActionService.addToCart(actionData.data);
@@ -132,9 +132,9 @@ const Message = ({
     if (content) {
       const allowedTags = ['b', 'strong', 'i', 'em', 'br', 'p', 'ul', 'ol', 'li'];
       const sanitizedContent = content.replace(/<(?!\/?(?:b|strong|i|em|br|p|ul|ol|li)\b)[^>]*>/gi, '');
-      
+
       components.push(
-        <div 
+        <div
           key="text-content"
           className="woo-ai-assistant-message-text"
           dangerouslySetInnerHTML={{ __html: sanitizedContent }}
@@ -211,11 +211,11 @@ const Message = ({
   const getMessageClasses = () => {
     const baseClass = 'woo-ai-assistant-message';
     const classes = [baseClass, `${baseClass}--${message.type}`];
-    
+
     if (isVisible) classes.push(`${baseClass}--visible`);
     if (isLatest) classes.push(`${baseClass}--latest`);
     if (message.metadata?.hasError) classes.push(`${baseClass}--error`);
-    
+
     return classes.join(' ');
   };
 
@@ -226,8 +226,8 @@ const Message = ({
         return (
           <div className="woo-ai-assistant-message-avatar woo-ai-assistant-message-avatar--user">
             {userContext.userAvatar ? (
-              <img 
-                src={userContext.userAvatar} 
+              <img
+                src={userContext.userAvatar}
                 alt={`${getUserName()}'s avatar`}
                 className="woo-ai-assistant-avatar-image"
               />
@@ -276,19 +276,19 @@ const Message = ({
   };
 
   return (
-    <div 
+    <div
       className={getMessageClasses()}
       role="listitem"
       aria-label={`Message from ${getSenderName()}`}
     >
       {renderAvatar()}
-      
+
       <div className="woo-ai-assistant-message-content">
         <div className="woo-ai-assistant-message-header">
           <span className="woo-ai-assistant-message-sender">
             {getSenderName()}
           </span>
-          <time 
+          <time
             className="woo-ai-assistant-message-timestamp"
             dateTime={message.timestamp}
             title={new Date(message.timestamp).toLocaleString()}
@@ -296,10 +296,10 @@ const Message = ({
             {formatTimestamp(message.timestamp)}
           </time>
         </div>
-        
+
         <div className="woo-ai-assistant-message-body">
           {renderContent(message.content, message.metadata)}
-          
+
           {/* Message metadata (for debugging in development) */}
           {process.env.NODE_ENV === 'development' && message.metadata && (
             <details className="woo-ai-assistant-message-debug">
@@ -308,7 +308,7 @@ const Message = ({
             </details>
           )}
         </div>
-        
+
         {/* Message actions (like/dislike, copy, etc.) */}
         {message.type === 'assistant' && (
           <div className="woo-ai-assistant-message-actions">
@@ -333,11 +333,11 @@ const Message = ({
  * User Icon Component
  */
 const UserIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 20 20" 
-    fill="none" 
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -351,11 +351,11 @@ const UserIcon = () => (
  * Bot Icon Component
  */
 const BotIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 20 20" 
-    fill="none" 
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -380,11 +380,11 @@ const BotIcon = () => (
  * System Icon Component
  */
 const SystemIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 20 20" 
-    fill="none" 
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -401,11 +401,11 @@ const SystemIcon = () => (
  * Error Icon Component
  */
 const ErrorIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 20 20" 
-    fill="none" 
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
     aria-hidden="true"
   >
     <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/>
@@ -417,11 +417,11 @@ const ErrorIcon = () => (
  * Copy Icon Component
  */
 const CopyIcon = () => (
-  <svg 
-    width="14" 
-    height="14" 
-    viewBox="0 0 14 14" 
-    fill="none" 
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
     aria-hidden="true"
   >
     <path

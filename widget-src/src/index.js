@@ -61,10 +61,10 @@ function initializeWidget() {
 
     // Load configuration from WordPress
     const config = loadWidgetConfiguration();
-    
+
     // Load user context
     const userContext = loadUserContext();
-    
+
     // Load WooCommerce data
     const wooCommerceData = loadWooCommerceData();
 
@@ -74,7 +74,7 @@ function initializeWidget() {
     // Mount React app with WordPress data
     widgetRoot = createRoot(container);
     widgetRoot.render(
-      <App 
+      <App
         userContext={userContext}
         wooCommerceData={wooCommerceData}
         config={config}
@@ -114,12 +114,12 @@ function initializeWidget() {
     }
 
     return widgetInstance;
-    
+
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Woo AI Assistant: Failed to initialize widget', error);
     }
-    
+
     // Track initialization error
     if (window.wooAiAssistant?.trackEvent) {
       window.wooAiAssistant.trackEvent('widget_init_error', {
@@ -128,7 +128,7 @@ function initializeWidget() {
         url: window.location.href
       });
     }
-    
+
     return null;
   }
 }
@@ -164,12 +164,12 @@ function shouldLoadWidget() {
   // Check page-specific rules
   const pageRules = settings.pageRules || {};
   const currentPath = window.location.pathname;
-  
+
   // Check excluded pages
   if (pageRules.excludedPages && pageRules.excludedPages.some(path => currentPath.includes(path))) {
     return false;
   }
-  
+
   // Check included pages (if specified)
   if (pageRules.includedPages && pageRules.includedPages.length > 0) {
     if (!pageRules.includedPages.some(path => currentPath.includes(path))) {
@@ -192,15 +192,15 @@ function createWidgetContainer() {
   const container = document.createElement('div');
   container.id = 'woo-ai-assistant-widget';
   container.className = 'woo-ai-assistant-widget';
-  
+
   // Set accessibility attributes
   container.setAttribute('role', 'complementary');
   container.setAttribute('aria-label', 'AI Shopping Assistant');
-  
+
   // Add data attributes for styling and targeting
   container.setAttribute('data-version', window.wooAiAssistant?.version || '1.0.0');
   container.setAttribute('data-theme', window.wooAiAssistant?.settings?.theme || 'default');
-  
+
   return container;
 }
 
@@ -329,7 +329,7 @@ function detectCurrentProduct() {
     const productId = document.querySelector('[data-product_id]')?.dataset.product_id;
     const productTitle = document.querySelector('.product_title, h1.entry-title')?.textContent;
     const productPrice = document.querySelector('.price .amount, .price')?.textContent;
-    
+
     if (productId || productTitle) {
       return {
         id: productId,
@@ -343,7 +343,7 @@ function detectCurrentProduct() {
       console.warn('Could not detect current product:', e);
     }
   }
-  
+
   return null;
 }
 
@@ -354,7 +354,7 @@ function detectCurrentCategory() {
   try {
     const categoryTitle = document.querySelector('.page-title, h1.entry-title')?.textContent;
     const categoryDescription = document.querySelector('.term-description')?.textContent;
-    
+
     if (categoryTitle) {
       return {
         name: categoryTitle,
@@ -367,7 +367,7 @@ function detectCurrentCategory() {
       console.warn('Could not detect current category:', e);
     }
   }
-  
+
   return null;
 }
 
@@ -377,7 +377,7 @@ function detectCurrentCategory() {
 function setupGlobalAPI() {
   // Extend global object with widget API
   window.wooAiAssistant = window.wooAiAssistant || {};
-  
+
   // Widget control methods
   window.wooAiAssistant.widget = {
     open: () => widgetInstance?.root?._internalRoot?.current?.setState?.({ isOpen: true }),
@@ -387,14 +387,14 @@ function setupGlobalAPI() {
     reload: reloadWidget,
     getInstance: () => widgetInstance
   };
-  
+
   // Event tracking method
   window.wooAiAssistant.trackEvent = window.wooAiAssistant.trackEvent || ((event, data) => {
     if (process.env.NODE_ENV === 'development') {
       debugLog('Event:', event, data);
     }
   });
-  
+
   // Error logging method
   window.wooAiAssistant.logError = window.wooAiAssistant.logError || ((type, data) => {
     if (process.env.NODE_ENV === 'development') {
@@ -410,10 +410,10 @@ function setupEventListeners() {
   // Listen for cart updates
   document.body.addEventListener('added_to_cart', handleCartUpdate);
   document.body.addEventListener('removed_from_cart', handleCartUpdate);
-  
+
   // Listen for WooCommerce events
   document.body.addEventListener('wc_cart_changed', handleCartUpdate);
-  
+
   // Listen for page visibility changes
   document.addEventListener('visibilitychange', handleVisibilityChange);
 }
@@ -449,7 +449,7 @@ function handlePageChange() {
   if (widgetInstance) {
     const newUserContext = loadUserContext();
     const newWooCommerceData = loadWooCommerceData();
-    
+
     // Update widget with new context
     // This will be implemented with proper state updates in future tasks
     if (window.wooAiAssistant?.trackEvent) {
@@ -494,9 +494,9 @@ function reloadWidget() {
 }
 
 // Export for testing
-export { 
-  initializeWidget, 
-  shouldLoadWidget, 
+export {
+  initializeWidget,
+  shouldLoadWidget,
   createWidgetContainer,
   loadWidgetConfiguration,
   loadUserContext,

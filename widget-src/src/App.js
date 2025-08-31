@@ -20,7 +20,7 @@ import { useChat } from './hooks/useChat';
 
 /**
  * Main App Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {Object} props.userContext - User context data from WordPress
@@ -32,7 +32,7 @@ const App = ({ userContext = {}, wooCommerceData = {}, config = {} }) => {
   // Widget visibility state
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  
+
   // Chat hook for conversation management
   const {
     messages,
@@ -52,7 +52,7 @@ const App = ({ userContext = {}, wooCommerceData = {}, config = {} }) => {
   const handleToggle = useCallback(() => {
     setIsOpen(prev => {
       const newState = !prev;
-      
+
       // Track widget interactions for analytics
       if (window.wooAiAssistant?.trackEvent) {
         window.wooAiAssistant.trackEvent('widget_toggle', {
@@ -61,7 +61,7 @@ const App = ({ userContext = {}, wooCommerceData = {}, config = {} }) => {
           conversationId
         });
       }
-      
+
       return newState;
     });
   }, [conversationId]);
@@ -109,7 +109,7 @@ const App = ({ userContext = {}, wooCommerceData = {}, config = {} }) => {
 
   return (
     <WidgetErrorBoundary>
-      <div 
+      <div
         className={`woo-ai-assistant-app ${
           Object.entries(widgetState)
             .filter(([, value]) => value)
@@ -148,10 +148,10 @@ const App = ({ userContext = {}, wooCommerceData = {}, config = {} }) => {
         )}
 
         {/* Accessibility announcements */}
-        <div 
-          id="woo-ai-assistant-announcements" 
-          className="sr-only" 
-          aria-live="polite" 
+        <div
+          id="woo-ai-assistant-announcements"
+          className="sr-only"
+          aria-live="polite"
           aria-atomic="true"
         />
       </div>

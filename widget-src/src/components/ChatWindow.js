@@ -18,7 +18,7 @@ import TypingIndicator from './TypingIndicator';
 
 /**
  * Chat Window Component
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {boolean} props.isVisible - Whether the chat window is visible
@@ -54,7 +54,7 @@ const ChatWindow = ({
   // Local state
   const [inputValue, setInputValue] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
-  
+
   // Refs
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -63,7 +63,7 @@ const ChatWindow = ({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
+      messagesEndRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'end'
       });
@@ -84,7 +84,7 @@ const ChatWindow = ({
   const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     setInputValue(value);
-    
+
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = 'auto';
@@ -94,14 +94,14 @@ const ChatWindow = ({
   // Handle message sending
   const handleSendMessage = useCallback((e) => {
     e.preventDefault();
-    
+
     if (!inputValue.trim() || !isConnected || isTyping) {
       return;
     }
 
     onSendMessage(inputValue.trim());
     setInputValue('');
-    
+
     // Reset textarea height
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
@@ -146,7 +146,7 @@ const ChatWindow = ({
             AI Shopping Assistant
           </h2>
           <div className="woo-ai-assistant-connection-status">
-            <span 
+            <span
               className={`woo-ai-assistant-status-indicator ${connectionStatus.className}`}
               title={connectionStatus.text}
             />
@@ -155,7 +155,7 @@ const ChatWindow = ({
             </span>
           </div>
         </div>
-        
+
         <div className="woo-ai-assistant-chat-controls">
           <button
             className="woo-ai-assistant-chat-minimize"
@@ -180,7 +180,7 @@ const ChatWindow = ({
 
       {/* Messages Area */}
       <div className="woo-ai-assistant-chat-content">
-        <div 
+        <div
           className="woo-ai-assistant-messages"
           ref={messagesContainerRef}
           role="log"
@@ -198,7 +198,7 @@ const ChatWindow = ({
               </div>
             </div>
           )}
-          
+
           {messages.map((message, index) => (
             <Message
               key={message.id}
@@ -223,15 +223,15 @@ const ChatWindow = ({
                 if (window.wooAiAssistant?.trackEvent) {
                   window.wooAiAssistant.trackEvent('action_error', {
                     type: actionType,
-                    error: error
+                    error
                   });
                 }
               }}
             />
           ))}
-          
+
           {isTyping && <TypingIndicator />}
-          
+
           {error && (
             <div className="woo-ai-assistant-error-message">
               <div className="woo-ai-assistant-message-content error">
@@ -239,7 +239,7 @@ const ChatWindow = ({
                 <div>
                   <strong>Connection Error</strong>
                   <p>{error.message || 'Unable to connect to chat service'}</p>
-                  <button 
+                  <button
                     className="woo-ai-assistant-retry-button"
                     onClick={() => window.location.reload()}
                   >
@@ -249,12 +249,12 @@ const ChatWindow = ({
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <form 
+        <form
           className="woo-ai-assistant-input-area"
           onSubmit={handleSendMessage}
         >
@@ -301,7 +301,7 @@ const ChatWindow = ({
               </button>
             </div>
           </div>
-          
+
           <div className="woo-ai-assistant-input-footer">
             <span className="woo-ai-assistant-character-count">
               {inputValue.length}/2000
@@ -319,11 +319,11 @@ const ChatWindow = ({
  * Minimize Icon Component
  */
 const MinimizeIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -339,11 +339,11 @@ const MinimizeIcon = () => (
  * Close Icon Component
  */
 const CloseIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -360,11 +360,11 @@ const CloseIcon = () => (
  * Send Icon Component
  */
 const SendIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -381,11 +381,11 @@ const SendIcon = () => (
  * Bot Icon Component
  */
 const BotIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -410,11 +410,11 @@ const BotIcon = () => (
  * Error Icon Component
  */
 const ErrorIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2"/>
@@ -427,11 +427,11 @@ const ErrorIcon = () => (
  * Clear Icon Component
  */
 const ClearIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
   >
     <path
@@ -448,11 +448,11 @@ const ClearIcon = () => (
  * Loading Icon Component
  */
 const LoadingIcon = () => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 16 16" 
-    fill="none" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
     aria-hidden="true"
     className="woo-ai-assistant-loading"
   >

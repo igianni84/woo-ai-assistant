@@ -12,11 +12,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import TypingIndicator, { MinimalTypingIndicator } from '../../components/TypingIndicator';
-import { 
-  renderWithContext, 
-  assertAriaAttributes, 
+import {
+  renderWithContext,
+  assertAriaAttributes,
   assertComponentNaming,
-  mockWordPressGlobals 
+  mockWordPressGlobals
 } from '../utils/testUtils';
 
 describe('TypingIndicator Component', () => {
@@ -35,7 +35,7 @@ describe('TypingIndicator Component', () => {
   describe('Component Rendering', () => {
     test('renders TypingIndicator component correctly', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       expect(screen.getByRole('status')).toBeInTheDocument();
       expect(screen.getByLabelText('AI Assistant is typing')).toBeInTheDocument();
     });
@@ -46,9 +46,9 @@ describe('TypingIndicator Component', () => {
 
     test('applies visibility animation on mount', async () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const indicatorElement = screen.getByRole('status');
-      
+
       await waitFor(() => {
         expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-indicator--visible');
       }, { timeout: 200 });
@@ -56,13 +56,13 @@ describe('TypingIndicator Component', () => {
 
     test('displays assistant name correctly', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     });
 
     test('uses default assistant name when not provided', () => {
       renderWithContext(<TypingIndicator config={{}} />);
-      
+
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     });
   });
@@ -70,17 +70,17 @@ describe('TypingIndicator Component', () => {
   describe('Avatar Section', () => {
     test('renders avatar with bot icon', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const avatar = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-avatar');
       expect(avatar).toBeInTheDocument();
-      
+
       const botIcon = avatar.querySelector('svg');
       expect(botIcon).toBeInTheDocument();
     });
 
     test('avatar has correct styling classes', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const avatar = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-avatar');
       expect(avatar).toHaveClass('woo-ai-assistant-typing-avatar');
     });
@@ -89,19 +89,19 @@ describe('TypingIndicator Component', () => {
   describe('Typing Animation', () => {
     test('renders typing dots animation', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const dotsContainer = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-dots');
       expect(dotsContainer).toBeInTheDocument();
-      
+
       const dots = dotsContainer.querySelectorAll('.woo-ai-assistant-typing-dot');
       expect(dots).toHaveLength(3);
     });
 
     test('each dot has proper styling class', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const dots = screen.getByRole('status').querySelectorAll('.woo-ai-assistant-typing-dot');
-      
+
       dots.forEach(dot => {
         expect(dot).toHaveClass('woo-ai-assistant-typing-dot');
       });
@@ -109,7 +109,7 @@ describe('TypingIndicator Component', () => {
 
     test('animation container has proper structure', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const animationContainer = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-animation');
       expect(animationContainer).toBeInTheDocument();
       expect(animationContainer).toHaveClass('woo-ai-assistant-typing-animation');
@@ -119,7 +119,7 @@ describe('TypingIndicator Component', () => {
   describe('Status Message', () => {
     test('displays random typing status message', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const possibleMessages = [
         'is typing...',
         'is thinking...',
@@ -129,20 +129,20 @@ describe('TypingIndicator Component', () => {
 
       const statusElement = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-status');
       expect(statusElement).toBeInTheDocument();
-      
+
       const statusText = statusElement.textContent;
       expect(possibleMessages).toContain(statusText);
     });
 
     test('status message remains consistent during component lifecycle', () => {
       const { rerender } = renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const statusElement = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-status');
       const initialText = statusElement.textContent;
-      
+
       // Re-render component
       rerender(<TypingIndicator {...defaultProps} />);
-      
+
       const statusElementAfterRerender = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-status');
       expect(statusElementAfterRerender.textContent).toBe(initialText);
     });
@@ -151,19 +151,19 @@ describe('TypingIndicator Component', () => {
   describe('Header Section', () => {
     test('renders header with sender name and status', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const header = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-header');
       expect(header).toBeInTheDocument();
-      
+
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     });
 
     test('header has proper structure and classes', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const senderElement = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-sender');
       const statusElement = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-status');
-      
+
       expect(senderElement).toBeInTheDocument();
       expect(statusElement).toBeInTheDocument();
     });
@@ -172,7 +172,7 @@ describe('TypingIndicator Component', () => {
   describe('Accessibility', () => {
     test('has proper ARIA attributes', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const indicatorElement = screen.getByRole('status');
       assertAriaAttributes(indicatorElement, {
         'aria-live': 'polite',
@@ -182,14 +182,14 @@ describe('TypingIndicator Component', () => {
 
     test('provides meaningful status announcement', () => {
       renderWithContext(<TypingIndicator assistantName="ChatBot" />);
-      
+
       const indicatorElement = screen.getByRole('status');
       expect(indicatorElement).toHaveAttribute('aria-label', 'ChatBot is typing');
     });
 
     test('uses semantic role for status updates', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const indicatorElement = screen.getByRole('status');
       expect(indicatorElement).toBeInTheDocument();
     });
@@ -200,7 +200,7 @@ describe('TypingIndicator Component', () => {
       expect(() => {
         renderWithContext(<TypingIndicator />);
       }).not.toThrow();
-      
+
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     });
 
@@ -208,13 +208,13 @@ describe('TypingIndicator Component', () => {
       expect(() => {
         renderWithContext(<TypingIndicator assistantName="TestBot" config={{}} />);
       }).not.toThrow();
-      
+
       expect(screen.getByText('TestBot')).toBeInTheDocument();
     });
 
     test('accepts custom assistant name', () => {
       renderWithContext(<TypingIndicator assistantName="Custom Bot" />);
-      
+
       expect(screen.getByText('Custom Bot')).toBeInTheDocument();
     });
   });
@@ -222,19 +222,19 @@ describe('TypingIndicator Component', () => {
   describe('CSS Classes and Structure', () => {
     test('has proper CSS class structure', () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const indicatorElement = screen.getByRole('status');
       expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-indicator');
-      
+
       const content = indicatorElement.querySelector('.woo-ai-assistant-typing-content');
       expect(content).toBeInTheDocument();
     });
 
     test('animation becomes visible after mount', async () => {
       renderWithContext(<TypingIndicator {...defaultProps} />);
-      
+
       const indicatorElement = screen.getByRole('status');
-      
+
       await waitFor(() => {
         expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-indicator--visible');
       });
@@ -246,7 +246,7 @@ describe('MinimalTypingIndicator Component', () => {
   describe('Component Rendering', () => {
     test('renders MinimalTypingIndicator component correctly', () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       expect(screen.getByRole('status')).toBeInTheDocument();
       expect(screen.getByLabelText('AI is typing')).toBeInTheDocument();
     });
@@ -257,9 +257,9 @@ describe('MinimalTypingIndicator Component', () => {
 
     test('applies visibility animation on mount', async () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const indicatorElement = screen.getByRole('status');
-      
+
       await waitFor(() => {
         expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-minimal--visible');
       }, { timeout: 200 });
@@ -269,20 +269,20 @@ describe('MinimalTypingIndicator Component', () => {
   describe('Minimal Animation', () => {
     test('renders three dots for animation', () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const dotsContainer = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-dots-minimal');
       expect(dotsContainer).toBeInTheDocument();
-      
+
       const dots = dotsContainer.querySelectorAll('span');
       expect(dots).toHaveLength(3);
     });
 
     test('dots have proper structure', () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const dotsContainer = screen.getByRole('status').querySelector('.woo-ai-assistant-typing-dots-minimal');
       const dots = dotsContainer.querySelectorAll('span');
-      
+
       dots.forEach(dot => {
         expect(dot).toBeInTheDocument();
       });
@@ -292,7 +292,7 @@ describe('MinimalTypingIndicator Component', () => {
   describe('Accessibility', () => {
     test('has proper ARIA attributes', () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const indicatorElement = screen.getByRole('status');
       assertAriaAttributes(indicatorElement, {
         'aria-live': 'polite',
@@ -304,16 +304,16 @@ describe('MinimalTypingIndicator Component', () => {
   describe('CSS Classes', () => {
     test('has minimal styling classes', () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const indicatorElement = screen.getByRole('status');
       expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-minimal');
     });
 
     test('becomes visible after mount', async () => {
       renderWithContext(<MinimalTypingIndicator />);
-      
+
       const indicatorElement = screen.getByRole('status');
-      
+
       await waitFor(() => {
         expect(indicatorElement).toHaveClass('woo-ai-assistant-typing-minimal--visible');
       });
@@ -325,7 +325,7 @@ describe('Component Comparison', () => {
   test('both components provide status role', () => {
     const { rerender } = renderWithContext(<TypingIndicator />);
     expect(screen.getByRole('status')).toBeInTheDocument();
-    
+
     rerender(<MinimalTypingIndicator />);
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
@@ -333,7 +333,7 @@ describe('Component Comparison', () => {
   test('both components have proper ARIA live regions', () => {
     const { rerender } = renderWithContext(<TypingIndicator />);
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
-    
+
     rerender(<MinimalTypingIndicator />);
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
   });
@@ -341,10 +341,10 @@ describe('Component Comparison', () => {
   test('full version has more elements than minimal version', () => {
     const { rerender } = renderWithContext(<TypingIndicator />);
     const fullVersionElements = screen.getByRole('status').children.length;
-    
+
     rerender(<MinimalTypingIndicator />);
     const minimalVersionElements = screen.getByRole('status').children.length;
-    
+
     expect(fullVersionElements).toBeGreaterThan(minimalVersionElements);
   });
 });
@@ -354,7 +354,7 @@ describe('Animation Performance', () => {
     const startTime = performance.now();
     renderWithContext(<TypingIndicator />);
     const endTime = performance.now();
-    
+
     // Should render quickly
     expect(endTime - startTime).toBeLessThan(100);
   });
@@ -363,23 +363,23 @@ describe('Animation Performance', () => {
     const startTime = performance.now();
     renderWithContext(<MinimalTypingIndicator />);
     const endTime = performance.now();
-    
+
     // Should render quickly
     expect(endTime - startTime).toBeLessThan(50);
   });
 
   test('handles multiple re-renders efficiently', () => {
     const { rerender } = renderWithContext(<TypingIndicator />);
-    
+
     const startTime = performance.now();
-    
+
     // Multiple re-renders
     for (let i = 0; i < 50; i++) {
       rerender(<TypingIndicator assistantName={`Bot ${i}`} />);
     }
-    
+
     const endTime = performance.now();
-    
+
     // Should handle re-renders efficiently
     expect(endTime - startTime).toBeLessThan(500);
   });
@@ -402,7 +402,7 @@ describe('Error Handling', () => {
     expect(() => {
       renderWithContext(<TypingIndicator assistantName="" />);
     }).not.toThrow();
-    
+
     // Should fall back to default
     expect(screen.getByText('AI Assistant')).toBeInTheDocument();
   });
@@ -419,7 +419,7 @@ describe('PropTypes Validation', () => {
     if (process.env.NODE_ENV === 'development') {
       expect(consoleSpy).toHaveBeenCalled();
     }
-    
+
     consoleSpy.mockRestore();
   });
 
@@ -429,7 +429,7 @@ describe('PropTypes Validation', () => {
     renderWithContext(<MinimalTypingIndicator />);
 
     expect(consoleSpy).not.toHaveBeenCalled();
-    
+
     consoleSpy.mockRestore();
   });
 });
