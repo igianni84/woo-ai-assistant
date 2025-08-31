@@ -167,7 +167,6 @@ class Hooks
             $this->setupQueueProcessing();
 
             Logger::info('Knowledge Base Hooks initialized successfully');
-
         } catch (Exception $e) {
             Logger::error('Failed to initialize Knowledge Base Hooks: ' . $e->getMessage());
             throw new Exception('Hooks initialization failed: ' . $e->getMessage());
@@ -346,7 +345,7 @@ class Hooks
         }
 
         // Register custom cron interval
-        add_filter('cron_schedules', function($schedules) {
+        add_filter('cron_schedules', function ($schedules) {
             if (!isset($schedules['five_minutes'])) {
                 $schedules['five_minutes'] = [
                     'interval' => 5 * MINUTE_IN_SECONDS,
@@ -392,7 +391,6 @@ class Hooks
             ]);
 
             Logger::info("Queued knowledge base update for {$post->post_type} {$postId}");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB update for post {$postId}: " . $e->getMessage());
         }
@@ -407,7 +405,7 @@ class Hooks
     public function handleContentDelete($postId): void
     {
         $post = get_post($postId);
-        
+
         if (!$post || !in_array($post->post_type, $this->watchedPostTypes, true)) {
             return;
         }
@@ -422,7 +420,6 @@ class Hooks
             ]);
 
             Logger::info("Queued knowledge base deletion for {$post->post_type} {$postId}");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB deletion for post {$postId}: " . $e->getMessage());
         }
@@ -463,7 +460,6 @@ class Hooks
             ]);
 
             Logger::info("Queued KB update for status change: {$post->post_type} {$post->ID} ({$oldStatus} -> {$newStatus})");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB status change for post {$post->ID}: " . $e->getMessage());
         }
@@ -495,7 +491,6 @@ class Hooks
             ]);
 
             Logger::info("Queued KB update for product {$product->get_id()}");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB update for product {$product->get_id()}: " . $e->getMessage());
         }
@@ -528,7 +523,6 @@ class Hooks
             ]);
 
             Logger::info("Queued KB update for {$taxonomy} term {$termId}");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB update for term {$termId}: " . $e->getMessage());
         }
@@ -568,7 +562,6 @@ class Hooks
             ]);
 
             Logger::info("Queued KB update for WooCommerce setting: {$option}");
-
         } catch (Exception $e) {
             Logger::error("Failed to queue KB update for setting {$option}: " . $e->getMessage());
         }
@@ -593,7 +586,6 @@ class Hooks
             update_option('woo_ai_kb_last_full_sync', current_time('mysql'));
 
             Logger::info('Scheduled full sync completed', $result);
-
         } catch (Exception $e) {
             Logger::error('Scheduled full sync failed: ' . $e->getMessage());
         }
@@ -621,7 +613,6 @@ class Hooks
             update_option('woo_ai_kb_last_incremental_sync', current_time('mysql'));
 
             Logger::info('Scheduled incremental sync completed', $result);
-
         } catch (Exception $e) {
             Logger::error('Scheduled incremental sync failed: ' . $e->getMessage());
         }
@@ -654,7 +645,6 @@ class Hooks
             update_option('woo_ai_kb_health_score', $healthScore);
             update_option('woo_ai_kb_health_issues', $issues);
             update_option('woo_ai_kb_last_health_check', current_time('mysql'));
-
         } catch (Exception $e) {
             Logger::error('Scheduled health check failed: ' . $e->getMessage());
         }
@@ -683,7 +673,6 @@ class Hooks
             $this->optimizeDatabaseTables();
 
             Logger::info('Scheduled cleanup completed');
-
         } catch (Exception $e) {
             Logger::error('Scheduled cleanup failed: ' . $e->getMessage());
         }
@@ -719,7 +708,6 @@ class Hooks
             $this->updateQueue = [];
 
             Logger::info('Update queue processing completed');
-
         } catch (Exception $e) {
             Logger::error('Failed to process update queue: ' . $e->getMessage());
         }
@@ -769,7 +757,6 @@ class Hooks
                     $this->processBatchDelete($updates, $contentType);
                     break;
             }
-
         } catch (Exception $e) {
             Logger::error("Failed to process batch {$action} for {$contentType}: " . $e->getMessage());
         }
@@ -785,7 +772,7 @@ class Hooks
     private function processBatchCreateUpdate(array $updates, string $contentType): void
     {
         $contentIds = array_column($updates, 'content_id');
-        
+
         Logger::info("Processing batch {$contentType} updates", ['count' => count($contentIds)]);
 
         // Scan content
@@ -811,7 +798,7 @@ class Hooks
     private function processBatchDelete(array $updates, string $contentType): void
     {
         $contentIds = array_column($updates, 'content_id');
-        
+
         Logger::info("Processing batch {$contentType} deletions", ['count' => count($contentIds)]);
 
         foreach ($contentIds as $contentId) {
@@ -829,7 +816,7 @@ class Hooks
      * @since 1.0.0
      * @param string $contentType Content type to scan.
      * @param array  $contentIds Content IDs to scan.
-     * 
+     *
      * @return array Scanned content.
      */
     private function scanContentBatch(string $contentType, array $contentIds): array
@@ -862,10 +849,10 @@ class Hooks
     {
         // Remove logs older than 30 days
         $cutoffDate = date('Y-m-d H:i:s', strtotime('-30 days'));
-        
+
         global $wpdb;
         $logsTable = $wpdb->prefix . 'woo_ai_action_logs';
-        
+
         $deleted = $wpdb->query($wpdb->prepare(
             "DELETE FROM {$logsTable} WHERE created_at < %s AND action_type LIKE 'kb_%'",
             $cutoffDate
@@ -884,9 +871,9 @@ class Hooks
     private function cleanupOrphanedEntries(): void
     {
         global $wpdb;
-        
+
         $kbTable = $wpdb->prefix . 'woo_ai_knowledge_base';
-        
+
         // Remove entries for deleted products
         $orphanedProducts = $wpdb->query("
             DELETE kb FROM {$kbTable} kb
@@ -909,7 +896,7 @@ class Hooks
         ");
 
         $totalOrphaned = $orphanedProducts + $orphanedPosts + $orphanedCategories;
-        
+
         if ($totalOrphaned > 0) {
             Logger::info("Cleaned up {$totalOrphaned} orphaned knowledge base entries");
         }
@@ -925,11 +912,10 @@ class Hooks
         try {
             $cache = Cache::getInstance();
             $cleared = $cache->cleanupExpired();
-            
+
             if ($cleared > 0) {
                 Logger::info("Cleaned up {$cleared} expired cache entries");
             }
-
         } catch (Exception $e) {
             Logger::error("Failed to cleanup expired caches: " . $e->getMessage());
         }
@@ -943,7 +929,7 @@ class Hooks
     private function optimizeDatabaseTables(): void
     {
         global $wpdb;
-        
+
         $tables = [
             $wpdb->prefix . 'woo_ai_knowledge_base',
             $wpdb->prefix . 'woo_ai_conversations',
@@ -956,7 +942,6 @@ class Hooks
             try {
                 $wpdb->query("OPTIMIZE TABLE {$table}");
                 Logger::info("Optimized database table: {$table}");
-                
             } catch (Exception $e) {
                 Logger::error("Failed to optimize table {$table}: " . $e->getMessage());
             }
@@ -970,10 +955,11 @@ class Hooks
      */
     public function detectBulkOperationStart(): void
     {
-        if (isset($_GET['bulk_edit']) || isset($_POST['bulk_edit']) || 
+        if (
+            isset($_GET['bulk_edit']) || isset($_POST['bulk_edit']) ||
             (isset($_GET['action']) && $_GET['action'] === 'edit') ||
-            (isset($_POST['action']) && in_array($_POST['action'], ['trash', 'untrash', 'delete']))) {
-            
+            (isset($_POST['action']) && in_array($_POST['action'], ['trash', 'untrash', 'delete']))
+        ) {
             $this->bulkOperationsActive = true;
             Logger::info('Bulk operation detected - deferring knowledge base updates');
         }
@@ -988,7 +974,7 @@ class Hooks
     {
         if ($this->bulkOperationsActive) {
             $this->bulkOperationsActive = false;
-            
+
             // Process any queued updates from bulk operations
             if (!empty($this->updateQueue)) {
                 Logger::info('Bulk operation completed - processing queued updates');
@@ -1026,7 +1012,7 @@ class Hooks
     public function forceProcessQueue(): array
     {
         $queueSize = count($this->updateQueue);
-        
+
         if ($queueSize === 0) {
             return ['message' => 'Queue is empty', 'processed' => 0];
         }
@@ -1037,7 +1023,6 @@ class Hooks
                 'message' => 'Queue processed successfully',
                 'processed' => $queueSize
             ];
-
         } catch (Exception $e) {
             return [
                 'message' => 'Queue processing failed: ' . $e->getMessage(),

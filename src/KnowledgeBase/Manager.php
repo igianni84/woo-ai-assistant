@@ -138,7 +138,6 @@ class Manager
             $this->setupCronSchedules();
 
             Logger::info('Knowledge Base Manager initialized successfully');
-
         } catch (Exception $e) {
             Logger::error('Failed to initialize Knowledge Base Manager: ' . $e->getMessage());
             throw new Exception('Manager initialization failed: ' . $e->getMessage());
@@ -157,11 +156,11 @@ class Manager
      * @param array $args['content_types'] Specific content types to rebuild. Default all.
      * @param int   $args['batch_size'] Batch size for processing. Default 50.
      * @param bool  $args['background'] Whether to run in background. Default false.
-     * 
+     *
      * @return array Results of the rebuild operation.
-     * 
+     *
      * @throws Exception When rebuild operation fails.
-     * 
+     *
      * @example
      * ```php
      * $manager = Manager::getInstance();
@@ -209,7 +208,6 @@ class Manager
                     $results['total_items'] += $typeResult['items_processed'];
                     $results['total_chunks'] += $typeResult['chunks_created'];
                     $results['total_embeddings'] += $typeResult['embeddings_generated'];
-
                 } catch (Exception $e) {
                     $error = "Failed to process {$contentType}: " . $e->getMessage();
                     Logger::error($error);
@@ -231,7 +229,6 @@ class Manager
             Logger::info('Knowledge base rebuild completed', $results);
 
             return $results;
-
         } catch (Exception $e) {
             $this->failOperation($e->getMessage());
             Logger::error('Knowledge base rebuild failed: ' . $e->getMessage());
@@ -250,9 +247,9 @@ class Manager
      * @param string $args['since'] Date/time to check for changes. Default last 24 hours.
      * @param array  $args['content_types'] Content types to check. Default all.
      * @param int    $args['batch_size'] Processing batch size. Default 25.
-     * 
+     *
      * @return array Results of the incremental update.
-     * 
+     *
      * @throws Exception When incremental update fails.
      */
     public function incrementalUpdate(array $args = []): array
@@ -297,7 +294,6 @@ class Manager
             Logger::info('Incremental update completed', $results);
 
             return $results;
-
         } catch (Exception $e) {
             $this->failOperation($e->getMessage());
             Logger::error('Incremental update failed: ' . $e->getMessage());
@@ -320,11 +316,11 @@ class Manager
      * @param bool   $args['stream'] Whether to stream the response. Default false.
      * @param int    $args['max_chunks'] Maximum knowledge chunks to use. Default 5.
      * @param float  $args['similarity_threshold'] Minimum similarity score. Default 0.7.
-     * 
+     *
      * @return array The AI response with metadata.
-     * 
+     *
      * @throws Exception When response generation fails.
-     * 
+     *
      * @example
      * ```php
      * $manager = Manager::getInstance();
@@ -388,7 +384,6 @@ class Manager
             ]);
 
             return $response;
-
         } catch (Exception $e) {
             Logger::error('Failed to generate AI response: ' . $e->getMessage());
 
@@ -408,7 +403,7 @@ class Manager
      *
      * @since 1.0.0
      * @param bool $includeDetailed Whether to include detailed component stats. Default false.
-     * 
+     *
      * @return array Complete statistics array.
      */
     public function getStatistics(bool $includeDetailed = false): array
@@ -473,7 +468,6 @@ class Manager
             }
 
             return $stats;
-
         } catch (Exception $e) {
             Logger::error('Failed to get KB statistics: ' . $e->getMessage());
             return ['error' => 'Failed to retrieve statistics'];
@@ -501,7 +495,7 @@ class Manager
     {
         // Merge with indexer status for complete picture
         $indexerStatus = $this->indexer->getProcessingStatus();
-        
+
         return array_merge($this->processingStatus, [
             'indexer_status' => $indexerStatus,
             'queue_size' => $this->getProcessingQueueSize(),
@@ -517,9 +511,9 @@ class Manager
      *
      * @since 1.0.0
      * @param bool $confirm Confirmation flag to prevent accidental deletion.
-     * 
+     *
      * @return bool True if cleared successfully.
-     * 
+     *
      * @throws Exception When clearing fails.
      */
     public function clearKnowledgeBase(bool $confirm = false): bool
@@ -549,9 +543,8 @@ class Manager
             update_option('woo_ai_kb_last_cleared', current_time('mysql'));
 
             Logger::info('Knowledge base cleared successfully');
-            
-            return true;
 
+            return true;
         } catch (Exception $e) {
             Logger::error('Failed to clear knowledge base: ' . $e->getMessage());
             throw new Exception('Clear operation failed: ' . $e->getMessage());
@@ -566,7 +559,7 @@ class Manager
     private function setupCronSchedules(): void
     {
         // Register custom cron intervals if they don't exist
-        add_filter('cron_schedules', function($schedules) {
+        add_filter('cron_schedules', function ($schedules) {
             if (!isset($schedules['twice_daily'])) {
                 $schedules['twice_daily'] = [
                     'interval' => 12 * HOUR_IN_SECONDS,
@@ -591,7 +584,7 @@ class Manager
      * @since 1.0.0
      * @param string $contentType The content type to process.
      * @param array  $args Processing arguments.
-     * 
+     *
      * @return array Processing results for this content type.
      */
     private function processContentType(string $contentType, array $args): array
@@ -619,7 +612,7 @@ class Manager
 
             // Process in batches
             $batches = array_chunk($content, $args['batch_size']);
-            
+
             foreach ($batches as $batch) {
                 // Index the batch
                 foreach ($batch as $item) {
@@ -627,7 +620,6 @@ class Manager
                         $indexResult = $this->indexer->indexSingleItem($item, $args['force_rebuild']);
                         $results['chunks_created'] += $indexResult['chunks_created'];
                         $results['embeddings_generated'] += $indexResult['embeddings_generated'];
-
                     } catch (Exception $e) {
                         $error = "Failed to index item {$item['id']}: " . $e->getMessage();
                         $results['errors'][] = $error;
@@ -639,7 +631,6 @@ class Manager
             $results['processing_time'] = round(microtime(true) - $startTime, 2);
 
             Logger::info("Processed content type: {$contentType}", $results);
-
         } catch (Exception $e) {
             $results['errors'][] = $e->getMessage();
             Logger::error("Failed to process content type {$contentType}: " . $e->getMessage());
@@ -654,7 +645,7 @@ class Manager
      * @since 1.0.0
      * @param string $contentType The content type to check.
      * @param array  $args Processing arguments.
-     * 
+     *
      * @return array Results of the incremental processing.
      */
     private function processIncrementalContentType(string $contentType, array $args): array
@@ -685,7 +676,6 @@ class Manager
                 $this->indexer->removeContent($deletedId, $contentType);
                 $results['removed']++;
             }
-
         } catch (Exception $e) {
             Logger::error("Incremental processing failed for {$contentType}: " . $e->getMessage());
         }
@@ -699,7 +689,7 @@ class Manager
      * @since 1.0.0
      * @param string $contentType The content type to scan.
      * @param array  $args Scanning arguments.
-     * 
+     *
      * @return array Scanned content items.
      */
     private function scanContentType(string $contentType, array $args): array
@@ -727,13 +717,13 @@ class Manager
      * @since 1.0.0
      * @param string $contentType The content type to check.
      * @param string $since Date threshold for checking deletions.
-     * 
+     *
      * @return array Array of deleted content IDs.
      */
     private function findDeletedContent(string $contentType, string $since): array
     {
         global $wpdb;
-        
+
         try {
             // Get current content IDs
             $currentContent = $this->scanContentType($contentType, ['fields' => 'ids']);
@@ -748,7 +738,6 @@ class Manager
 
             // Find deleted content (in KB but not in current scan)
             return array_diff($indexedIds, $currentIds);
-
         } catch (Exception $e) {
             Logger::error("Failed to find deleted content for {$contentType}: " . $e->getMessage());
             return [];
@@ -867,7 +856,7 @@ class Manager
      *
      * @since 1.0.0
      * @param array $args Processing arguments.
-     * 
+     *
      * @return int Estimated total items.
      */
     private function estimateTotalItems(array $args): int
@@ -953,7 +942,6 @@ class Manager
             $total = $hits + $misses;
 
             return $total > 0 ? round(($hits / $total) * 100, 2) : 0.0;
-
         } catch (Exception $e) {
             return 0.0;
         }
@@ -975,7 +963,6 @@ class Manager
             $successfulRequests = array_sum(array_column($stats, 'successful_requests'));
 
             return $totalRequests > 0 ? round(($successfulRequests / $totalRequests) * 100, 2) : 100.0;
-
         } catch (Exception $e) {
             return 0.0;
         }
@@ -996,7 +983,6 @@ class Manager
             $cache->clearGroup('woo_ai_vectors');
 
             Logger::info('Processing caches cleared');
-
         } catch (Exception $e) {
             Logger::error('Failed to clear processing caches: ' . $e->getMessage());
         }
@@ -1021,7 +1007,6 @@ class Manager
             wp_cache_flush();
 
             Logger::info('All knowledge base caches cleared');
-
         } catch (Exception $e) {
             Logger::error('Failed to clear all caches: ' . $e->getMessage());
         }

@@ -4,7 +4,7 @@
  * Knowledge Base Health Monitoring Class
  *
  * Provides comprehensive health monitoring, statistics, and diagnostic capabilities
- * for the knowledge base system. Monitors data freshness, API connectivity, 
+ * for the knowledge base system. Monitors data freshness, API connectivity,
  * performance metrics, and system integrity to ensure optimal operation.
  *
  * @package WooAiAssistant
@@ -114,7 +114,6 @@ class Health
             $this->loadPerformanceMetrics();
 
             Logger::info('Knowledge Base Health monitoring initialized');
-
         } catch (Exception $e) {
             Logger::error('Failed to initialize Health monitoring: ' . $e->getMessage());
             throw new Exception('Health monitoring initialization failed: ' . $e->getMessage());
@@ -129,7 +128,7 @@ class Health
      *
      * @since 1.0.0
      * @param bool $forceRecalculate Whether to bypass cache and recalculate. Default false.
-     * 
+     *
      * @return float Health score (0-100).
      */
     public function calculateHealthScore(bool $forceRecalculate = false): float
@@ -183,7 +182,6 @@ class Health
             Logger::info("Knowledge base health score calculated: {$finalScore}%");
 
             return $finalScore;
-
         } catch (Exception $e) {
             Logger::error('Failed to calculate health score: ' . $e->getMessage());
             return 0.0;
@@ -198,7 +196,7 @@ class Health
      *
      * @since 1.0.0
      * @param bool $includeWarnings Whether to include warning-level issues. Default true.
-     * 
+     *
      * @return array Array of detected issues with severity and recommendations.
      */
     public function checkForIssues(bool $includeWarnings = true): array
@@ -217,7 +215,7 @@ class Health
             }
 
             // Sort by severity
-            usort($issues, function($a, $b) {
+            usort($issues, function ($a, $b) {
                 $severityOrder = ['critical' => 3, 'warning' => 2, 'info' => 1];
                 return ($severityOrder[$b['severity']] ?? 0) - ($severityOrder[$a['severity']] ?? 0);
             });
@@ -225,7 +223,6 @@ class Health
             Logger::info('Health issues check completed', ['issues_found' => count($issues)]);
 
             return $issues;
-
         } catch (Exception $e) {
             Logger::error('Failed to check for health issues: ' . $e->getMessage());
             return [
@@ -247,7 +244,7 @@ class Health
      *
      * @since 1.0.0
      * @param bool $includeHistorical Whether to include historical data. Default false.
-     * 
+     *
      * @return array Comprehensive health statistics.
      */
     public function getHealthStatistics(bool $includeHistorical = false): array
@@ -275,7 +272,6 @@ class Health
             }
 
             return $stats;
-
         } catch (Exception $e) {
             Logger::error('Failed to get health statistics: ' . $e->getMessage());
             return ['error' => 'Failed to retrieve health statistics'];
@@ -290,7 +286,7 @@ class Health
      *
      * @since 1.0.0
      * @param array $tests Specific tests to run. Default all.
-     * 
+     *
      * @return array Diagnostic results with detailed information.
      */
     public function performDiagnostics(array $tests = []): array
@@ -344,7 +340,6 @@ class Health
             Logger::info('System diagnostics completed', $diagnostics['summary']);
 
             return $diagnostics;
-
         } catch (Exception $e) {
             Logger::error('Failed to perform diagnostics: ' . $e->getMessage());
             return [
@@ -362,7 +357,7 @@ class Health
      *
      * @since 1.0.0
      * @param bool $includeRecommendations Whether to include action recommendations. Default true.
-     * 
+     *
      * @return array Formatted health report.
      */
     public function getHealthReport(bool $includeRecommendations = true): array
@@ -402,7 +397,6 @@ class Health
             }
 
             return $report;
-
         } catch (Exception $e) {
             Logger::error('Failed to generate health report: ' . $e->getMessage());
             return [
@@ -451,7 +445,6 @@ class Health
             if (count($this->performanceMetrics[$metric]) % 10 === 0) {
                 $this->savePerformanceMetrics();
             }
-
         } catch (Exception $e) {
             Logger::error("Failed to record performance metric {$metric}: " . $e->getMessage());
         }
@@ -498,7 +491,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('Data freshness check failed: ' . $e->getMessage());
             return 0;
@@ -534,7 +526,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('API connectivity check failed: ' . $e->getMessage());
             return 0;
@@ -586,7 +577,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('Data integrity check failed: ' . $e->getMessage());
             return 50; // Partial score if we can't check properly
@@ -636,7 +626,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('Performance check failed: ' . $e->getMessage());
             return 70; // Assume decent performance if we can't check
@@ -667,10 +656,10 @@ class Health
             if (function_exists('disk_free_space') && isset($uploadDir['basedir'])) {
                 $freeSpace = disk_free_space($uploadDir['basedir']);
                 $totalSpace = disk_total_space($uploadDir['basedir']);
-                
+
                 if ($freeSpace && $totalSpace) {
                     $freePercentage = ($freeSpace / $totalSpace) * 100;
-                    
+
                     if ($freePercentage < 5) {
                         $score -= 50;
                     } elseif ($freePercentage < 15) {
@@ -688,13 +677,13 @@ class Health
 
             foreach ($tables as $table) {
                 $tableStatus = $wpdb->get_row("SHOW TABLE STATUS LIKE '{$table}'", ARRAY_A);
-                
+
                 if ($tableStatus) {
                     $fragmentation = 0;
                     if ($tableStatus['Data_length'] > 0) {
                         $fragmentation = ($tableStatus['Data_free'] / ($tableStatus['Data_length'] + $tableStatus['Index_length'])) * 100;
                     }
-                    
+
                     if ($fragmentation > 25) {
                         $score -= 10; // Needs optimization
                     }
@@ -702,7 +691,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('Storage health check failed: ' . $e->getMessage());
             return 50; // Assume moderate health if we can't check
@@ -745,7 +733,6 @@ class Health
             }
 
             return max(0, $score);
-
         } catch (Exception $e) {
             Logger::error('Error rate check failed: ' . $e->getMessage());
             return 80; // Assume good if we can't check
@@ -804,7 +791,7 @@ class Health
             if ($manager->isProcessing()) {
                 $status = $manager->getProcessingStatus();
                 $startTime = strtotime($status['started_at'] ?? '');
-                
+
                 if ($startTime && (time() - $startTime) > 3600) { // Stuck for over 1 hour
                     $issues[] = [
                         'type' => 'processing_stuck',
@@ -814,7 +801,6 @@ class Health
                     ];
                 }
             }
-
         } catch (Exception $e) {
             $issues[] = [
                 'type' => 'health_check_failure',
@@ -884,7 +870,6 @@ class Health
                     'recommendation' => 'Consider increasing PHP memory limit or optimizing processing batch sizes'
                 ];
             }
-
         } catch (Exception $e) {
             Logger::error('Warning issues check failed: ' . $e->getMessage());
         }
@@ -897,7 +882,7 @@ class Health
      *
      * @since 1.0.0
      * @param float $score Health score.
-     * 
+     *
      * @return string Status label.
      */
     private function getHealthStatus(float $score): string
@@ -920,7 +905,7 @@ class Health
      *
      * @since 1.0.0
      * @param float $score Health score.
-     * 
+     *
      * @return string CSS color code.
      */
     private function getStatusColor(float $score): string
@@ -943,7 +928,7 @@ class Health
      *
      * @since 1.0.0
      * @param string $metric Metric name.
-     * 
+     *
      * @return float Average value.
      */
     private function calculateAverageMetric(string $metric): float
@@ -967,13 +952,12 @@ class Health
         try {
             $cache = Cache::getInstance();
             $stats = $cache->getStatistics();
-            
+
             $hits = $stats['hits'] ?? 0;
             $misses = $stats['misses'] ?? 0;
             $total = $hits + $misses;
 
             return $total > 0 ? round(($hits / $total) * 100, 2) : 0.0;
-
         } catch (Exception $e) {
             return 0.0;
         }
@@ -990,7 +974,7 @@ class Health
         try {
             global $wpdb;
             $logsTable = $wpdb->prefix . 'woo_ai_action_logs';
-            
+
             $errors = $wpdb->get_results($wpdb->prepare(
                 "SELECT * FROM {$logsTable} 
                 WHERE action_type LIKE %s 
@@ -1002,7 +986,6 @@ class Health
             ));
 
             return $errors ?: [];
-
         } catch (Exception $e) {
             return [];
         }
@@ -1032,7 +1015,7 @@ class Health
     }
 
     // Additional helper methods for comprehensive health reporting...
-    // These would include getDataMetrics(), getApiMetrics(), getStorageMetrics(), 
+    // These would include getDataMetrics(), getApiMetrics(), getStorageMetrics(),
     // getHistoricalHealth(), generateRecommendations(), etc.
     // For brevity, I'm showing the core functionality above.
 
@@ -1041,7 +1024,7 @@ class Health
      *
      * @since 1.0.0
      * @param string $test Test name.
-     * 
+     *
      * @return array Test result.
      */
     private function runDiagnosticTest(string $test): array
@@ -1065,7 +1048,6 @@ class Health
                         'details' => []
                     ];
             }
-
         } catch (Exception $e) {
             return [
                 'status' => 'failed',
@@ -1084,10 +1066,10 @@ class Health
     private function testDatabaseConnectivity(): array
     {
         global $wpdb;
-        
+
         try {
             $result = $wpdb->get_var("SELECT 1");
-            
+
             if ($result == 1) {
                 return [
                     'status' => 'passed',
@@ -1104,7 +1086,6 @@ class Health
                     'details' => ['result' => $result]
                 ];
             }
-
         } catch (Exception $e) {
             return [
                 'status' => 'failed',
@@ -1129,7 +1110,9 @@ class Health
         try {
             $available = $this->components['embedding_generator']->isAvailable();
             $results['embedding_api'] = $available ? 'passed' : 'failed';
-            if (!$available) $overallStatus = 'failed';
+            if (!$available) {
+                $overallStatus = 'failed';
+            }
         } catch (Exception $e) {
             $results['embedding_api'] = 'failed';
             $overallStatus = 'failed';
@@ -1139,7 +1122,9 @@ class Health
         try {
             $available = $this->components['ai_manager']->isAvailable();
             $results['ai_api'] = $available ? 'passed' : 'failed';
-            if (!$available) $overallStatus = 'failed';
+            if (!$available) {
+                $overallStatus = 'failed';
+            }
         } catch (Exception $e) {
             $results['ai_api'] = 'failed';
             $overallStatus = 'failed';
@@ -1224,7 +1209,6 @@ class Health
                     ]
                 ];
             }
-
         } catch (Exception $e) {
             return [
                 'status' => 'failed',
@@ -1244,11 +1228,11 @@ class Health
     {
         $uploadDir = wp_upload_dir();
         $testFile = $uploadDir['basedir'] . '/woo-ai-test-' . uniqid() . '.txt';
-        
+
         try {
             // Test write
             $written = file_put_contents($testFile, 'test');
-            
+
             if ($written === false) {
                 return [
                     'status' => 'failed',
@@ -1259,7 +1243,7 @@ class Health
 
             // Test read
             $content = file_get_contents($testFile);
-            
+
             if ($content !== 'test') {
                 unlink($testFile);
                 return [
@@ -1280,7 +1264,6 @@ class Health
                     'permissions' => 'read/write'
                 ]
             ];
-
         } catch (Exception $e) {
             // Clean up if possible
             if (file_exists($testFile)) {
@@ -1296,6 +1279,6 @@ class Health
     }
 
     // Additional methods would be implemented here for complete functionality...
-    // Including: getHealthyComponentsCount(), getDataMetrics(), getPerformanceMetrics(), 
+    // Including: getHealthyComponentsCount(), getDataMetrics(), getPerformanceMetrics(),
     // getRecentIssues(), calculateUptime(), generateRecommendations(), etc.
 }
