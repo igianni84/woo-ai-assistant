@@ -189,7 +189,7 @@ class EmbeddingGenerator
 
             // Validate and sanitize text
             $text = $this->sanitizeText($text);
-            
+
             if (empty($text)) {
                 Logger::warning('Empty text provided for embedding generation');
                 return $this->getFallbackEmbedding();
@@ -205,7 +205,7 @@ class EmbeddingGenerator
                     Logger::debug('Returning cached embedding');
                     return $cachedEmbedding;
                 }
-                
+
                 $this->stats['cache_misses']++;
             }
 
@@ -232,7 +232,6 @@ class EmbeddingGenerator
             ]);
 
             return $embedding;
-
         } catch (Exception $e) {
             Logger::error('Single embedding generation failed', [
                 'text_length' => strlen($text),
@@ -381,7 +380,6 @@ class EmbeddingGenerator
                         if ($batchIndex < count($textBatches) - 1) {
                             sleep(1);
                         }
-
                     } catch (Exception $e) {
                         Logger::error("Batch {$batchIndex} embedding generation failed", [
                             'error' => $e->getMessage(),
@@ -426,7 +424,6 @@ class EmbeddingGenerator
             ]);
 
             return $finalEmbeddings;
-
         } catch (Exception $e) {
             $processingTime = microtime(true) - $startTime;
             $this->stats['processing_time'] += $processingTime;
@@ -452,7 +449,7 @@ class EmbeddingGenerator
         if ($this->apiConfig->isDevelopmentMode()) {
             $hasDevKey = !empty($this->apiConfig->getApiKey('openai'));
             $useDummyData = defined('WOO_AI_USE_DUMMY_EMBEDDINGS') && WOO_AI_USE_DUMMY_EMBEDDINGS;
-            
+
             return $hasDevKey || $useDummyData;
         }
 
@@ -468,8 +465,8 @@ class EmbeddingGenerator
     {
         try {
             // Calculate derived statistics
-            $avgRequestTime = $this->stats['api_requests'] > 0 
-                ? $this->stats['processing_time'] / $this->stats['api_requests'] 
+            $avgRequestTime = $this->stats['api_requests'] > 0
+                ? $this->stats['processing_time'] / $this->stats['api_requests']
                 : 0;
 
             $cacheHitRate = ($this->stats['cache_hits'] + $this->stats['cache_misses']) > 0
@@ -501,7 +498,6 @@ class EmbeddingGenerator
                     'last_successful_request' => $this->stats['api_requests'] > 0 ? current_time('mysql') : null
                 ]
             ];
-
         } catch (Exception $e) {
             Logger::error('Failed to retrieve embedding statistics', [
                 'error' => $e->getMessage()
@@ -522,14 +518,13 @@ class EmbeddingGenerator
     {
         try {
             $cache = Cache::getInstance();
-            
+
             // Clear all embedding-related cache entries
             // This is a simplified approach - in production, you might want more targeted clearing
             $cache->flush();
 
             Logger::info('Embedding cache cleared');
             return true;
-
         } catch (Exception $e) {
             Logger::error('Failed to clear embedding cache', [
                 'error' => $e->getMessage()
@@ -553,7 +548,7 @@ class EmbeddingGenerator
         if ($this->apiConfig->isDevelopmentMode()) {
             $devBatchSize = get_option('woo_ai_dev_max_batch_size', $this->maxBatchSize);
             $this->maxBatchSize = min((int) $devBatchSize, 100);
-            
+
             $devCacheTtl = get_option('woo_ai_dev_cache_ttl', $this->cacheTtl);
             $this->cacheTtl = max((int) $devCacheTtl, 60); // Minimum 1 minute
         }
@@ -572,7 +567,7 @@ class EmbeddingGenerator
     {
         // Create a zero vector with correct dimensions
         $this->fallbackEmbedding = array_fill(0, $this->modelDimensions, 0.0);
-        
+
         Logger::debug('Fallback embedding initialized', [
             'dimensions' => count($this->fallbackEmbedding)
         ]);
@@ -676,10 +671,9 @@ class EmbeddingGenerator
             ]);
 
             return $embeddings;
-
         } catch (Exception $e) {
             $this->stats['failed_requests']++;
-            
+
             Logger::error('OpenAI embeddings API request failed', [
                 'texts_count' => count($texts),
                 'error' => $e->getMessage(),
@@ -707,13 +701,13 @@ class EmbeddingGenerator
             // Create a simple hash-based "embedding" for consistency
             $hash = md5($text);
             $embedding = [];
-            
+
             for ($i = 0; $i < $this->modelDimensions; $i++) {
                 $charIndex = $i % strlen($hash);
                 $charValue = ord($hash[$charIndex]);
                 $embedding[] = ($charValue - 128) / 128.0; // Normalize to [-1, 1]
             }
-            
+
             $embeddings[] = $embedding;
         }
 
@@ -749,17 +743,17 @@ class EmbeddingGenerator
         switch ($statusCode) {
             case 401:
                 throw new Exception('OpenAI API authentication failed. Check API key.');
-                
+
             case 429:
                 Logger::warning('OpenAI API rate limit exceeded, will retry with fallback');
                 break;
-                
+
             case 500:
             case 502:
             case 503:
                 Logger::warning('OpenAI API server error, will retry with fallback');
                 break;
-                
+
             default:
                 throw new Exception("OpenAI API error ({$statusCode}): {$errorMessage}");
         }
@@ -775,15 +769,15 @@ class EmbeddingGenerator
     {
         // Remove excessive whitespace
         $text = preg_replace('/\s+/', ' ', $text);
-        
+
         // Trim whitespace
         $text = trim($text);
-        
+
         // Limit length to prevent API errors (OpenAI has token limits)
         if (strlen($text) > 8000) { // Conservative limit
             $text = substr($text, 0, 8000) . '...';
         }
-        
+
         return $text;
     }
 
@@ -801,7 +795,7 @@ class EmbeddingGenerator
             'model' => $args['model'] ?? $this->embeddingModel,
             'dimensions' => $args['dimensions'] ?? $this->modelDimensions
         ];
-        
+
         return 'woo_ai_embedding_' . md5(serialize($keyData));
     }
 

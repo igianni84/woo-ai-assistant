@@ -264,7 +264,7 @@ class VectorManager
 
                 try {
                     $batchChunks = $this->getChunksBatch($args, $offset, $batchLimit);
-                    
+
                     if (empty($batchChunks)) {
                         Logger::warning("No chunks returned for batch {$batchNumber}");
                         break;
@@ -273,7 +273,7 @@ class VectorManager
                     $batchResult = $this->processBatchVectors($batchChunks, $batchNumber);
 
                     $totalProcessed += count($batchChunks);
-                    
+
                     Logger::info("Batch {$batchNumber} completed", [
                         'chunks_processed' => count($batchChunks),
                         'successful_upserts' => $batchResult['successful'],
@@ -291,7 +291,6 @@ class VectorManager
                     if ($totalProcessed < $chunks['total']) {
                         sleep(1);
                     }
-
                 } catch (Exception $e) {
                     $errors[] = [
                         'batch' => $batchNumber,
@@ -329,7 +328,6 @@ class VectorManager
                 'errors' => $errors,
                 'timestamp' => current_time('mysql')
             ];
-
         } catch (Exception $e) {
             $this->stats['processing_time'] = microtime(true) - $startTime;
 
@@ -453,7 +451,6 @@ class VectorManager
             ]);
 
             return $results;
-
         } catch (Exception $e) {
             Logger::error('Similarity search failed', [
                 'query_length' => strlen($query),
@@ -513,7 +510,6 @@ class VectorManager
             ]);
 
             return $success;
-
         } catch (Exception $e) {
             Logger::error('Vector deletion failed', [
                 'content_id' => $contentId,
@@ -593,7 +589,6 @@ class VectorManager
                 'rate_limits' => $this->rateLimits,
                 'embedding_generator_stats' => $this->embeddingGenerator->getStatistics()
             ];
-
         } catch (Exception $e) {
             Logger::error('Failed to retrieve vector statistics', [
                 'error' => $e->getMessage()
@@ -774,7 +769,6 @@ class VectorManager
                     'batch' => $batchNumber
                 ];
             }
-
         } catch (Exception $e) {
             $failed = count($chunks);
             $errors[] = [
@@ -862,7 +856,6 @@ class VectorManager
             $this->stats['api_calls']++;
 
             return $data;
-
         } catch (Exception $e) {
             Logger::error('Pinecone vector search failed', [
                 'error' => $e->getMessage(),
@@ -925,7 +918,6 @@ class VectorManager
             $this->stats['api_calls']++;
 
             return ['success' => true, 'upserted_count' => $data['upsertedCount'] ?? count($vectors)];
-
         } catch (Exception $e) {
             Logger::error('Pinecone vector upsert failed', [
                 'error' => $e->getMessage(),
@@ -983,7 +975,6 @@ class VectorManager
             $this->stats['api_calls']++;
 
             return true;
-
         } catch (Exception $e) {
             Logger::error('Pinecone vector deletion failed', [
                 'error' => $e->getMessage(),
@@ -1040,7 +1031,6 @@ class VectorManager
             ]);
 
             return true;
-
         } catch (Exception $e) {
             Logger::error('Failed to update embeddings in database', [
                 'chunks_count' => count($chunks),
@@ -1079,7 +1069,6 @@ class VectorManager
             }
 
             return true;
-
         } catch (Exception $e) {
             Logger::error('Failed to clear embeddings in database', [
                 'content_id' => $contentId,
@@ -1151,10 +1140,10 @@ class VectorManager
         // Enrich Pinecone results with local data
         foreach ($pineconeResults['matches'] as $match) {
             $chunkId = $this->extractChunkIdFromVectorId($match['id']);
-            
+
             if (isset($chunksById[$chunkId])) {
                 $chunk = $chunksById[$chunkId];
-                
+
                 $enrichedMatch = [
                     'id' => $chunkId,
                     'vector_id' => $match['id'],
@@ -1245,7 +1234,7 @@ class VectorManager
     private function generateMockSearchResults(int $topK): array
     {
         $mockMatches = [];
-        
+
         for ($i = 1; $i <= min($topK, 5); $i++) {
             $mockMatches[] = [
                 'id' => "mock_vector_{$i}",
