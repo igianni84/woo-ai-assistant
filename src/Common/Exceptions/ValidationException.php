@@ -115,7 +115,7 @@ class ValidationException extends WooAiException
         if ($this->isSafeToLogValue($this->field, $this->value)) {
             return $this->value;
         }
-        
+
         return '[REDACTED]';
     }
 

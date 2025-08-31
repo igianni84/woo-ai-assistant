@@ -67,11 +67,11 @@ class WooAiException extends Exception
         ?\Throwable $previous = null
     ) {
         $code = static::$errorCodes[$errorCode] ?? static::$errorCodes['GENERIC_ERROR'];
-        
+
         parent::__construct($message, $code, $previous);
-        
+
         $this->context = $context;
-        
+
         // Log the exception
         $this->logException();
     }
@@ -98,7 +98,7 @@ class WooAiException extends Exception
                 return $name;
             }
         }
-        
+
         return 'UNKNOWN_ERROR';
     }
 
@@ -110,12 +110,12 @@ class WooAiException extends Exception
     public function getFormattedMessage(): string
     {
         $message = $this->getMessage();
-        
+
         if (!empty($this->context)) {
             $contextString = json_encode($this->context, JSON_PRETTY_PRINT);
             $message .= "\nContext: " . $contextString;
         }
-        
+
         return $message;
     }
 
@@ -152,11 +152,11 @@ class WooAiException extends Exception
             'code' => $this->getCode(),
             'context' => $this->context
         ];
-        
+
         if ($includeTrace && defined('WOO_AI_ASSISTANT_DEBUG') && WOO_AI_ASSISTANT_DEBUG) {
             $data['trace'] = $this->getTrace();
         }
-        
+
         return $data;
     }
 }

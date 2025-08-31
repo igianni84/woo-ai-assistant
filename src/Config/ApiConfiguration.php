@@ -97,6 +97,41 @@ class ApiConfiguration
     private array $configCache = [];
 
     /**
+     * Server URL configuration with fallback chain
+     *
+     * @var array
+     */
+    private array $serverUrls = [
+        'production' => 'https://api.woo-ai-assistant.eu',
+        'staging' => 'https://staging-api.woo-ai-assistant.eu',
+        'backup' => 'https://backup-api.woo-ai-assistant.eu'
+    ];
+
+    /**
+     * Configuration precedence levels
+     *
+     * @var array
+     */
+    private array $configPrecedence = [
+        'environment_variables',
+        'wp_options',
+        'development_override',
+        'defaults'
+    ];
+
+    /**
+     * Cache TTL for different configuration types
+     *
+     * @var array
+     */
+    private array $cacheTtl = [
+        'api_keys' => 3600,        // 1 hour
+        'server_config' => 1800,   // 30 minutes
+        'model_config' => 7200,    // 2 hours
+        'license_config' => 600    // 10 minutes
+    ];
+
+    /**
      * Initialize API configuration
      *
      * @return void
@@ -355,28 +390,69 @@ class ApiConfiguration
     }
 
     /**
-     * Get intermediate server configuration
+     * Get intermediate server configuration with fallback chain
      *
      * In production, the plugin connects to an intermediate server that handles
      * all API calls and license validation. In development, direct API calls are made.
+     * Supports multiple server URLs with automatic failover.
      *
+     * @param bool $includeBackups Whether to include backup server URLs
      * @return array Intermediate server configuration
      */
-    public function getIntermediateServerConfig(): array
+    public function getIntermediateServerConfig(bool $includeBackups = true): array
     {
+        $cacheKey = 'intermediate_server_config';
+
+        if (isset($this->configCache[$cacheKey])) {
+            return $this->configCache[$cacheKey];
+        }
+
         if ($this->isDevelopmentMode()) {
-            return [
-                'enabled' => false,
-                'url' => $this->developmentConfig->getEnvironmentVariable('WOO_AI_DEVELOPMENT_SERVER_URL'),
-                'bypass_license' => true
+            $config = [
+                'enabled' => $this->shouldUseIntermediateServerInDev(),
+                'primary_url' => $this->getDevelopmentServerUrl(),
+                'fallback_urls' => [],
+                'bypass_license' => true,
+                'timeout' => $this->getDevelopmentTimeout(),
+                'retry_attempts' => 1, // Fewer retries in development
+                'environment' => 'development'
+            ];
+        } else {
+            $config = [
+                'enabled' => true,
+                'primary_url' => $this->getPrimaryServerUrl(),
+                'fallback_urls' => $includeBackups ? $this->getBackupServerUrls() : [],
+                'bypass_license' => false,
+                'timeout' => $this->getProductionTimeout(),
+                'retry_attempts' => 3,
+                'environment' => 'production'
             ];
         }
 
-        return [
+        // Add server health check configuration
+        $config['health_check'] = [
             'enabled' => true,
-            'url' => get_option('woo_ai_assistant_server_url', 'https://api.woo-ai-assistant.eu'),
-            'bypass_license' => false
+            'endpoint' => '/api/v1/health',
+            'interval' => 300, // 5 minutes
+            'timeout' => 10
         ];
+
+        // Add rate limiting configuration
+        $config['rate_limiting'] = [
+            'enabled' => !$this->isDevelopmentMode(),
+            'requests_per_minute' => $this->isDevelopmentMode() ? 1000 : 100,
+            'burst_limit' => $this->isDevelopmentMode() ? 50 : 10
+        ];
+
+        $this->configCache[$cacheKey] = $config;
+
+        Logger::debug('Intermediate server configuration loaded', [
+            'environment' => $config['environment'],
+            'enabled' => $config['enabled'],
+            'has_fallbacks' => count($config['fallback_urls']) > 0
+        ]);
+
+        return $config;
     }
 
     /**
@@ -557,13 +633,393 @@ class ApiConfiguration
     }
 
     /**
+     * Get development server URL with fallbacks
+     *
+     * @return string Development server URL
+     */
+    private function getDevelopmentServerUrl(): string
+    {
+        // Check for explicit development server URL
+        $devUrl = $this->developmentConfig->getEnvironmentVariable('WOO_AI_DEVELOPMENT_SERVER_URL');
+        if (!empty($devUrl)) {
+            return $devUrl;
+        }
+
+        // Check for generic development API URL
+        $apiUrl = $this->developmentConfig->getEnvironmentVariable('WOO_AI_ASSISTANT_API_URL');
+        if (!empty($apiUrl)) {
+            return $apiUrl;
+        }
+
+        // Default development server URL
+        return 'http://localhost:3000';
+    }
+
+    /**
+     * Get primary production server URL
+     *
+     * @return string Primary server URL
+     */
+    private function getPrimaryServerUrl(): string
+    {
+        // Check WordPress options first
+        $configuredUrl = get_option('woo_ai_assistant_server_url');
+        if (!empty($configuredUrl)) {
+            return $configuredUrl;
+        }
+
+        // Use default production URL
+        return $this->serverUrls['production'];
+    }
+
+    /**
+     * Get backup server URLs for failover
+     *
+     * @return array Backup server URLs
+     */
+    private function getBackupServerUrls(): array
+    {
+        $backupUrls = [];
+
+        // Add configured backup URLs from WordPress options
+        $configuredBackups = get_option('woo_ai_assistant_backup_servers', []);
+        if (is_array($configuredBackups)) {
+            $backupUrls = array_merge($backupUrls, $configuredBackups);
+        }
+
+        // Add default backup servers
+        if (isset($this->serverUrls['staging'])) {
+            $backupUrls[] = $this->serverUrls['staging'];
+        }
+        if (isset($this->serverUrls['backup'])) {
+            $backupUrls[] = $this->serverUrls['backup'];
+        }
+
+        // Remove duplicates and the primary URL
+        $primaryUrl = $this->getPrimaryServerUrl();
+        $backupUrls = array_unique($backupUrls);
+        $backupUrls = array_filter($backupUrls, function ($url) use ($primaryUrl) {
+            return $url !== $primaryUrl;
+        });
+
+        return array_values($backupUrls);
+    }
+
+    /**
+     * Should use intermediate server in development mode
+     *
+     * @return bool True if should use intermediate server in development
+     */
+    private function shouldUseIntermediateServerInDev(): bool
+    {
+        // Check explicit environment variable
+        $useServer = $this->developmentConfig->getEnvironmentVariable('WOO_AI_USE_INTERMEDIATE_SERVER');
+        if ($useServer === 'true') {
+            return true;
+        }
+        if ($useServer === 'false') {
+            return false;
+        }
+
+        // Default: use server if development server URL is configured
+        $devUrl = $this->getDevelopmentServerUrl();
+        return !empty($devUrl) && $devUrl !== 'http://localhost:3000';
+    }
+
+    /**
+     * Get development request timeout
+     *
+     * @return int Timeout in seconds
+     */
+    private function getDevelopmentTimeout(): int
+    {
+        $timeout = $this->developmentConfig->getEnvironmentVariable('WOO_AI_DEV_API_TIMEOUT');
+        return !empty($timeout) && is_numeric($timeout) ? (int) $timeout : 30;
+    }
+
+    /**
+     * Get production request timeout
+     *
+     * @return int Timeout in seconds
+     */
+    private function getProductionTimeout(): int
+    {
+        $timeout = get_option('woo_ai_assistant_api_timeout', 60);
+        return is_numeric($timeout) ? (int) $timeout : 60;
+    }
+
+    /**
+     * Test server connectivity
+     *
+     * @param string $serverUrl Server URL to test
+     * @param int $timeout Timeout in seconds
+     * @return array Connectivity test results
+     */
+    public function testServerConnectivity(string $serverUrl, int $timeout = 10): array
+    {
+        $startTime = microtime(true);
+        $healthUrl = rtrim($serverUrl, '/') . '/api/v1/health';
+
+        Logger::debug('Testing server connectivity', [
+            'url' => $this->sanitizeUrlForLogging($healthUrl),
+            'timeout' => $timeout
+        ]);
+
+        try {
+            $response = wp_remote_get($healthUrl, [
+                'timeout' => $timeout,
+                'sslverify' => !$this->isDevelopmentMode(),
+                'headers' => [
+                    'User-Agent' => 'WooAiAssistant/' . $this->getPluginVersion() . ' (Health Check)',
+                ]
+            ]);
+
+            $duration = microtime(true) - $startTime;
+
+            if (is_wp_error($response)) {
+                return [
+                    'success' => false,
+                    'error' => $response->get_error_message(),
+                    'error_code' => $response->get_error_code(),
+                    'duration' => $duration,
+                    'timestamp' => time()
+                ];
+            }
+
+            $statusCode = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+
+            $result = [
+                'success' => $statusCode >= 200 && $statusCode < 300,
+                'status_code' => $statusCode,
+                'duration' => $duration,
+                'timestamp' => time()
+            ];
+
+            // Try to parse response body
+            $responseData = json_decode($body, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $result['response_data'] = $responseData;
+                if (isset($responseData['status'])) {
+                    $result['server_status'] = $responseData['status'];
+                }
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            $duration = microtime(true) - $startTime;
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'error_code' => 'exception',
+                'duration' => $duration,
+                'timestamp' => time()
+            ];
+        }
+    }
+
+    /**
+     * Get all server URLs with their status
+     *
+     * @return array Server URLs with status information
+     */
+    public function getAllServerStatus(): array
+    {
+        $cacheKey = 'all_server_status';
+        $cached = $this->configCache[$cacheKey] ?? null;
+
+        // Return cached result if less than 5 minutes old
+        if ($cached && (time() - $cached['timestamp']) < 300) {
+            return $cached['data'];
+        }
+
+        $serverConfig = $this->getIntermediateServerConfig();
+        $servers = [
+            'primary' => $serverConfig['primary_url']
+        ];
+
+        foreach ($serverConfig['fallback_urls'] as $index => $url) {
+            $servers["fallback_" . ($index + 1)] = $url;
+        }
+
+        $results = [];
+        foreach ($servers as $type => $url) {
+            $results[$type] = array_merge(
+                ['url' => $url, 'type' => $type],
+                $this->testServerConnectivity($url, 5) // Shorter timeout for status check
+            );
+        }
+
+        // Cache the results
+        $this->configCache[$cacheKey] = [
+            'data' => $results,
+            'timestamp' => time()
+        ];
+
+        return $results;
+    }
+
+    /**
+     * Get configuration by precedence
+     *
+     * @param string $key Configuration key
+     * @param mixed $default Default value
+     * @return mixed Configuration value
+     */
+    public function getConfigByPrecedence(string $key, $default = null)
+    {
+        foreach ($this->configPrecedence as $source) {
+            $value = null;
+
+            switch ($source) {
+                case 'environment_variables':
+                    if ($this->isDevelopmentMode()) {
+                        $value = $this->developmentConfig->getEnvironmentVariable($key);
+                    }
+                    break;
+
+                case 'wp_options':
+                    $value = get_option($key);
+                    break;
+
+                case 'development_override':
+                    if ($this->isDevelopmentMode()) {
+                        $value = $this->getDevelopmentOverride($key);
+                    }
+                    break;
+
+                case 'defaults':
+                    $value = $this->getDefaultValue($key);
+                    break;
+            }
+
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get development override value
+     *
+     * @param string $key Configuration key
+     * @return mixed Override value or null
+     */
+    private function getDevelopmentOverride(string $key)
+    {
+        $overrides = [
+            'woo_ai_assistant_max_tokens' => 4000, // Higher limit in development
+            'woo_ai_assistant_temperature' => 0.8,  // More creative in development
+            'woo_ai_assistant_cache_ttl' => 60,     // Shorter cache in development
+        ];
+
+        return $overrides[$key] ?? null;
+    }
+
+    /**
+     * Get default configuration value
+     *
+     * @param string $key Configuration key
+     * @return mixed Default value or null
+     */
+    private function getDefaultValue(string $key)
+    {
+        $defaults = [
+            'woo_ai_assistant_max_tokens' => 2000,
+            'woo_ai_assistant_temperature' => 0.7,
+            'woo_ai_assistant_cache_ttl' => 3600,
+            'woo_ai_assistant_api_timeout' => 60,
+            'woo_ai_assistant_retry_attempts' => 3
+        ];
+
+        return $defaults[$key] ?? null;
+    }
+
+    /**
+     * Validate configuration settings
+     *
+     * @return array Validation results
+     */
+    public function validateConfiguration(): array
+    {
+        $results = [
+            'valid' => true,
+            'errors' => [],
+            'warnings' => [],
+            'recommendations' => []
+        ];
+
+        // Check API keys availability
+        $requiredServices = ['openrouter', 'openai'];
+        foreach ($requiredServices as $service) {
+            $apiKey = $this->getApiKey($service);
+            if (empty($apiKey)) {
+                if ($this->isDevelopmentMode()) {
+                    $results['warnings'][] = "No {$service} API key configured for development";
+                } else {
+                    $results['errors'][] = "Missing {$service} API key for production";
+                    $results['valid'] = false;
+                }
+            }
+        }
+
+        // Check server connectivity in production
+        if (!$this->isDevelopmentMode()) {
+            $serverStatus = $this->getAllServerStatus();
+            $hasWorkingServer = false;
+
+            foreach ($serverStatus as $server) {
+                if ($server['success']) {
+                    $hasWorkingServer = true;
+                    break;
+                }
+            }
+
+            if (!$hasWorkingServer) {
+                $results['errors'][] = 'No intermediate servers are accessible';
+                $results['valid'] = false;
+            } elseif (!$serverStatus['primary']['success']) {
+                $results['warnings'][] = 'Primary server is not accessible, using fallback servers';
+            }
+        }
+
+        // Check license configuration
+        $licenseConfig = $this->getLicenseConfig();
+        if (!$this->isDevelopmentMode()) {
+            if (empty($licenseConfig['key'])) {
+                $results['errors'][] = 'No license key configured';
+                $results['valid'] = false;
+            } elseif ($licenseConfig['status'] !== 'active') {
+                $results['warnings'][] = 'License status is not active: ' . $licenseConfig['status'];
+            }
+        }
+
+        // Performance recommendations
+        $cacheEnabled = get_option('woo_ai_assistant_enable_cache', true);
+        if (!$cacheEnabled) {
+            $results['recommendations'][] = 'Enable caching for better performance';
+        }
+
+        return $results;
+    }
+
+    /**
      * Clear configuration cache
      *
+     * @param string|null $specific Clear specific cache key or all if null
      * @return void
      */
-    public function clearCache(): void
+    public function clearCache(?string $specific = null): void
     {
-        $this->configCache = [];
-        Logger::debug('API configuration cache cleared');
+        if ($specific) {
+            unset($this->configCache[$specific]);
+            Logger::debug("API configuration cache cleared for: {$specific}");
+        } else {
+            $this->configCache = [];
+            Logger::debug('API configuration cache cleared completely');
+        }
     }
 }

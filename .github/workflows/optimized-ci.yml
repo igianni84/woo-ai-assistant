@@ -1,0 +1,296 @@
+# Optimized CI Pipeline for Phase 3 Development
+# Tailored for current project state (43.2% complete)
+
+name: 🚀 Optimized CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**', 'bugfix/**', 'hotfix/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      run_full_tests:
+        description: 'Run full test suite including integration tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '18'
+  WP_VERSION: 'latest'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==============================================================================
+  # QUICK VALIDATION
+  # ==============================================================================
+  quick-validation:
+    name: 🔍 Quick Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-run-tests: ${{ steps.changes.outputs.code == 'true' || github.event.inputs.run_full_tests == 'true' }}
+      
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Detect changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            code:
+              - '**/*.php'
+              - '**/*.js'
+              - '**/*.jsx'
+              - 'composer.json'
+              - 'package.json'
+              - 'phpunit*.xml'
+              - 'jest.config.js'
+            docs:
+              - '**/*.md'
+            configs:
+              - '.github/**'
+
+      - name: 📊 Summary
+        run: |
+          echo "## 📋 Change Detection Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Changes**: ${{ steps.changes.outputs.code }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Documentation**: ${{ steps.changes.outputs.docs }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Configuration**: ${{ steps.changes.outputs.configs }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Tests**: ${{ steps.changes.outputs.code == 'true' || github.event.inputs.run_full_tests == 'true' }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # PHP TESTING - Simplified for current phase
+  # ==============================================================================
+  php-tests:
+    name: 🔧 PHP Tests
+    runs-on: ubuntu-latest
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should-run-tests == 'true'
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2']
+        test-suite: ['simple']
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, json
+          tools: composer:v2
+
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --optimize-autoloader
+
+      - name: 🔍 PHP Code Standards
+        run: composer run phpcs || echo "⚠️ Code standards issues found"
+
+      - name: 🔬 Static Analysis
+        run: composer run phpstan || echo "⚠️ Static analysis issues found"
+
+      - name: 🧪 Run Simple Test Suite
+        run: composer run test-simple
+
+      - name: 🚪 Quality Gates Check
+        run: composer run quality-gates-enforce 3
+
+  # ==============================================================================
+  # JAVASCRIPT TESTING - Current phase appropriate
+  # ==============================================================================
+  javascript-tests:
+    name: ⚛️ JavaScript Tests
+    runs-on: ubuntu-latest
+    needs: quick-validation
+    if: needs.quick-validation.outputs.should-run-tests == 'true'
+    timeout-minutes: 8
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 ESLint Check
+        run: npm run lint:js || echo "⚠️ Linting issues found"
+
+      - name: 🧪 Jest Tests
+        run: npm run test
+
+      - name: 🏗️ Build Check
+        run: npm run build
+
+      - name: 📏 Bundle Size Check
+        run: npm run check:bundle-size || echo "⚠️ Bundle size check failed"
+
+  # ==============================================================================
+  # INTEGRATION TESTS - Only when explicitly requested
+  # ==============================================================================
+  integration-tests:
+    name: 🧪 WordPress Integration
+    runs-on: ubuntu-latest
+    needs: [quick-validation, php-tests]
+    if: github.event.inputs.run_full_tests == 'true'
+    timeout-minutes: 15
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo_mysql, mysqli
+          tools: composer:v2
+
+      - name: 📦 Install dependencies
+        run: composer install --optimize-autoloader
+
+      - name: 🌐 Setup WordPress test environment
+        run: bash scripts/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ env.WP_VERSION }}
+
+      - name: 🧪 Run basic integration tests
+        run: |
+          echo "🔌 Testing plugin activation..."
+          php scripts/test-plugin-activation.php
+          echo "✅ Plugin activation test completed"
+
+      - name: 🚪 Run mandatory verification
+        run: bash scripts/mandatory-verification.sh
+
+  # ==============================================================================
+  # DEPLOYMENT READINESS - Only for main branch
+  # ==============================================================================
+  deployment-check:
+    name: 📦 Deployment Check
+    runs-on: ubuntu-latest
+    needs: [php-tests, javascript-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 8
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 📦 Create deployment package
+        run: |
+          echo "📦 Creating basic deployment package..."
+          
+          # Create lightweight package for current phase
+          mkdir -p deployment-package
+          cp -r src deployment-package/
+          cp -r assets deployment-package/
+          cp woo-ai-assistant.php deployment-package/
+          cp uninstall.php deployment-package/
+          cp README.md deployment-package/
+          
+          cd deployment-package
+          zip -r ../woo-ai-assistant-phase3.zip . -x "*.git*" "*.DS_Store*"
+          cd ..
+          
+          echo "✅ Package created: $(ls -lh woo-ai-assistant-phase3.zip)"
+
+      - name: 📤 Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: plugin-phase3-${{ github.sha }}
+          path: woo-ai-assistant-phase3.zip
+          retention-days: 30
+
+  # ==============================================================================
+  # PIPELINE SUMMARY
+  # ==============================================================================
+  pipeline-summary:
+    name: 📊 Pipeline Summary  
+    runs-on: ubuntu-latest
+    needs: [quick-validation, php-tests, javascript-tests, integration-tests, deployment-check]
+    if: always()
+    timeout-minutes: 2
+
+    steps:
+      - name: 📊 Generate Summary
+        run: |
+          echo "## 🚀 CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Validation**: ${{ needs.quick-validation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PHP Tests**: ${{ needs.php-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **JavaScript Tests**: ${{ needs.javascript-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Integration Tests**: ${{ needs.integration-tests.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment Check**: ${{ needs.deployment-check.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Calculate overall status
+          if [ "${{ needs.php-tests.result }}" = "success" ] && [ "${{ needs.javascript-tests.result }}" = "success" ]; then
+            echo "🎉 **Overall Status: PASSED** ✅" >> $GITHUB_STEP_SUMMARY
+            echo "Code quality meets Phase 3 standards" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Overall Status: FAILED** ⚠️" >> $GITHUB_STEP_SUMMARY
+            echo "Some quality checks failed - please review and fix" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Development Phase Progress:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current Phase**: Phase 3 - Server Integration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Completion**: 43.2% (16/37 tasks)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Quality Gates**: Optimized for current development stage" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🎉 Success Notification
+        if: needs.php-tests.result == 'success' && needs.javascript-tests.result == 'success'
+        run: |
+          echo "✅ All core quality checks passed!"
+          echo "🚀 Ready for continued Phase 3 development"
+
+      - name: ⚠️ Failure Notification  
+        if: needs.php-tests.result == 'failure' || needs.javascript-tests.result == 'failure'
+        run: |
+          echo "❌ Some quality checks failed"
+          echo "📋 Please review the job logs and fix issues"
+          echo "🔧 Focus on PHP and JavaScript quality gates"

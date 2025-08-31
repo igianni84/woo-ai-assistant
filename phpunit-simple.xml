@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
          bootstrap="tests/bootstrap-simple.php"
          cacheDirectory=".phpunit.cache"
          colors="true"
@@ -18,8 +18,8 @@
         </testsuite>
     </testsuites>
 
-    <!-- Code Coverage (basic) -->
-    <coverage includeUncoveredFiles="true">
+    <!-- Source files for coverage -->
+    <source>
         <include>
             <directory suffix=".php">src</directory>
         </include>
@@ -27,6 +27,10 @@
             <directory>vendor</directory>
             <directory>tests</directory>
         </exclude>
+    </source>
+
+    <!-- Code Coverage Reporting -->
+    <coverage includeUncoveredFiles="true">
         <report>
             <html outputDirectory="coverage/html-simple"/>
             <text outputFile="coverage/coverage-simple.txt"/>

@@ -479,4 +479,104 @@ class DevelopmentConfig
             'has_pinecone_key' => !empty($this->getApiKey('pinecone'))
         ];
     }
+
+    /**
+     * Reload environment variables (useful for testing or config changes)
+     *
+     * @return bool True if reload successful
+     */
+    public function reloadEnvironmentVariables(): bool
+    {
+        try {
+            // Clear cached state
+            $this->isDevelopment = null;
+            $this->envVars = [];
+
+            // Reload environment variables
+            $this->loadEnvironmentVariables();
+
+            Logger::info('Environment variables reloaded successfully', [
+                'variables_loaded' => count($this->envVars),
+                'is_development' => $this->isDevelopmentEnvironment()
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Logger::error('Failed to reload environment variables', [
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Validate development environment configuration
+     *
+     * @return array Validation results
+     */
+    public function validateDevelopmentConfiguration(): array
+    {
+        $results = [
+            'valid' => true,
+            'errors' => [],
+            'warnings' => [],
+            'recommendations' => []
+        ];
+
+        if (!$this->isDevelopmentEnvironment()) {
+            $results['warnings'][] = 'Not running in development environment';
+            return $results;
+        }
+
+        // Check environment file
+        $pluginPath = defined('WOO_AI_ASSISTANT_PATH') ? WOO_AI_ASSISTANT_PATH : plugin_dir_path(__FILE__);
+        $envFile = $pluginPath . '.env';
+
+        if (!file_exists($envFile)) {
+            $results['warnings'][] = 'No .env file found - using system environment variables only';
+            $results['recommendations'][] = 'Create a .env file from .env.example for better development experience';
+        } else {
+            if (!is_readable($envFile)) {
+                $results['errors'][] = '.env file exists but is not readable';
+                $results['valid'] = false;
+            }
+        }
+
+        // Check API keys
+        $apiKeysStatus = $this->getAllApiKeysStatus();
+        $hasAnyApiKey = false;
+
+        foreach ($apiKeysStatus as $service => $status) {
+            if ($status['configured']) {
+                $hasAnyApiKey = true;
+                if (!$status['valid_format']) {
+                    $results['warnings'][] = "API key for {$service} has invalid format";
+                }
+            }
+        }
+
+        if (!$hasAnyApiKey) {
+            $results['warnings'][] = 'No API keys configured - some features may not work';
+            $results['recommendations'][] = 'Configure at least OpenRouter and OpenAI API keys for full functionality';
+        }
+
+        // Check WordPress debug settings
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            $results['recommendations'][] = 'Enable WP_DEBUG for better development experience';
+        }
+
+        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+            $results['recommendations'][] = 'Enable WP_DEBUG_LOG to see debug messages in log files';
+        }
+
+        // Check server configuration
+        $serverType = $this->getEnvironmentType();
+        if ($serverType === 'production') {
+            $results['warnings'][] = 'Environment detected as production despite development mode being enabled';
+            $results['recommendations'][] = 'Verify development environment detection is working correctly';
+        }
+
+        return $results;
+    }
 }

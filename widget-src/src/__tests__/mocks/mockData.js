@@ -1,9 +1,9 @@
 /**
  * Mock Data for React Component Testing
- * 
+ *
  * Provides standardized mock data for testing React components
  * in the Woo AI Assistant widget.
- * 
+ *
  * @package WooAiAssistant
  * @subpackage Testing
  * @since 1.0.0

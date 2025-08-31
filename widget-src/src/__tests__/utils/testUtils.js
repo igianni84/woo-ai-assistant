@@ -1,9 +1,9 @@
 /**
  * Test Utilities for React Components
- * 
+ *
  * Common utilities and helpers for testing React components
  * in the Woo AI Assistant widget.
- * 
+ *
  * @package WooAiAssistant
  * @subpackage Testing
  * @since 1.0.0
@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 
 /**
  * Custom render function that wraps components with necessary providers
- * 
+ *
  * @param {React.ReactElement} ui - The component to render
  * @param {Object} options - Additional render options
  * @returns {Object} Render result with additional utilities
@@ -36,46 +36,46 @@ export const renderWithContext = (ui, options = {}) => {
 
   return {
     ...result,
-    user: userEvent.setup(),
+    user: userEvent.setup()
   };
 };
 
 /**
  * Wait for element to be removed with timeout
- * 
+ *
  * @param {Function} queryFunction - Query function to check element
  * @param {Object} options - Wait options
  * @returns {Promise} Promise that resolves when element is removed
  */
 export const waitForElementToBeRemoved = async (queryFunction, options = {}) => {
   const { timeout = 3000 } = options;
-  
+
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
-    
+
     const checkElement = () => {
       const element = queryFunction();
-      
+
       if (!element) {
         resolve();
         return;
       }
-      
+
       if (Date.now() - startTime > timeout) {
         reject(new Error('Element was not removed within timeout'));
         return;
       }
-      
+
       setTimeout(checkElement, 50);
     };
-    
+
     checkElement();
   });
 };
 
 /**
  * Create mock event for testing
- * 
+ *
  * @param {string} type - Event type
  * @param {Object} properties - Event properties
  * @returns {Object} Mock event object
@@ -94,7 +94,7 @@ export const createMockEvent = (type, properties = {}) => ({
 
 /**
  * Mock resize observer for component testing
- * 
+ *
  * @returns {Object} Mock ResizeObserver
  */
 export const mockResizeObserver = () => ({
@@ -105,7 +105,7 @@ export const mockResizeObserver = () => ({
 
 /**
  * Mock intersection observer for component testing
- * 
+ *
  * @returns {Object} Mock IntersectionObserver
  */
 export const mockIntersectionObserver = () => ({
@@ -119,7 +119,7 @@ export const mockIntersectionObserver = () => ({
 
 /**
  * Assert that an element has proper ARIA attributes
- * 
+ *
  * @param {HTMLElement} element - Element to check
  * @param {Object} expectedAttributes - Expected ARIA attributes
  */
@@ -132,13 +132,13 @@ export const assertAriaAttributes = (element, expectedAttributes) => {
 
 /**
  * Check if component follows PascalCase naming convention
- * 
+ *
  * @param {Function} Component - React component
  * @param {string} expectedName - Expected component name
  */
 export const assertComponentNaming = (Component, expectedName) => {
   expect(Component.name).toBe(expectedName);
-  
+
   // Check PascalCase pattern
   const isPascalCase = /^[A-Z][a-zA-Z0-9]*$/.test(expectedName);
   expect(isPascalCase).toBe(true);
@@ -146,14 +146,14 @@ export const assertComponentNaming = (Component, expectedName) => {
 
 /**
  * Assert that function names follow camelCase convention
- * 
+ *
  * @param {Object} obj - Object with methods to check
  * @param {string[]} methodNames - Method names to validate
  */
 export const assertMethodNaming = (obj, methodNames) => {
   methodNames.forEach(methodName => {
     expect(typeof obj[methodName]).toBe('function');
-    
+
     // Check camelCase pattern (starts with lowercase, no underscores)
     const isCamelCase = /^[a-z][a-zA-Z0-9]*$/.test(methodName);
     expect(isCamelCase).toBe(true);
@@ -162,7 +162,7 @@ export const assertMethodNaming = (obj, methodNames) => {
 
 /**
  * Create mock API response
- * 
+ *
  * @param {Object} data - Response data
  * @param {number} status - HTTP status code
  * @param {boolean} success - Success flag
@@ -178,7 +178,7 @@ export const createMockApiResponse = (data = {}, status = 200, success = true) =
 
 /**
  * Mock WordPress globals for testing
- * 
+ *
  * @param {Object} overrides - Override specific global values
  */
 export const mockWordPressGlobals = (overrides = {}) => {

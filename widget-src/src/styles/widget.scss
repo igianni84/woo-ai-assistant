@@ -244,6 +244,331 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+// Error Boundary Styles
+.woo-ai-assistant-error-boundary {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-heavy;
+  padding: 24px;
+  max-width: 400px;
+  width: 90vw;
+  z-index: 1000000;
+  text-align: center;
+
+  .woo-ai-assistant-error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .woo-ai-assistant-error-icon {
+    color: #dc3545;
+    opacity: 0.7;
+  }
+
+  .woo-ai-assistant-error-message {
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-color;
+    }
+
+    p {
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+    }
+  }
+
+  .woo-ai-assistant-error-details {
+    text-align: left;
+    margin-top: 12px;
+    
+    summary {
+      cursor: pointer;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    pre {
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      overflow: auto;
+      max-height: 100px;
+      margin: 4px 0;
+      border: 1px solid #e9ecef;
+
+      &.error-stack {
+        max-height: 150px;
+        font-size: 9px;
+      }
+    }
+  }
+
+  .woo-ai-assistant-error-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+}
+
+// Button Styles
+.woo-ai-assistant-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition-smooth;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.woo-ai-assistant-btn-primary {
+    background: $primary-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($primary-color, 10%);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+
+  &.woo-ai-assistant-btn-secondary {
+    background: #f8f9fa;
+    color: $text-color;
+    border: 1px solid #e9ecef;
+
+    &:hover:not(:disabled) {
+      background: #e9ecef;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+}
+
+// Enhanced Toggle Button Styles
+.woo-ai-assistant-toggle {
+  position: relative;
+  
+  // Status indicator
+  .woo-ai-assistant-toggle-status {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    pointer-events: none;
+  }
+
+  .woo-ai-assistant-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    
+    &--connected {
+      background: #28a745;
+    }
+    
+    &--disconnected {
+      background: #ffc107;
+      animation: pulse 2s infinite;
+    }
+    
+    &--error {
+      background: #dc3545;
+      animation: pulse 1s infinite;
+    }
+  }
+
+  // Message count badge
+  .woo-ai-assistant-toggle-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    text-align: center;
+    border: 2px solid white;
+  }
+
+  // Pulse animation for new messages
+  .woo-ai-assistant-toggle-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: $primary-color;
+    opacity: 0.3;
+    animation: pulse-ring 2s infinite;
+  }
+
+  // State modifiers
+  &--minimized {
+    .woo-ai-assistant-toggle-icon {
+      animation: bounce 0.5s ease-out;
+    }
+  }
+
+  &--has-messages:not(.woo-ai-assistant-toggle--open) {
+    animation: wiggle 0.5s ease-in-out;
+  }
+}
+
+// Pulse animation for status indicators
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Pulse ring animation for new messages
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+// Bounce animation
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+// Wiggle animation for notifications
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+// Enhanced Chat Window Controls
+.woo-ai-assistant-chat-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: $transition-smooth;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: $text-color;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+// Screen reader only text
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// Widget state classes
+.woo-ai-assistant-app {
+  &--is-open {
+    .woo-ai-assistant-toggle-pulse {
+      display: none;
+    }
+  }
+
+  &--has-error {
+    .woo-ai-assistant-toggle {
+      animation: shake 0.5s ease-in-out;
+    }
+  }
+
+  &--is-connected {
+    // Additional styles for connected state
+  }
+
+  &--is-minimized {
+    // Additional styles for minimized state
+  }
+}
+
+// Shake animation for errors
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+// Accessibility improvements
+@media (prefers-reduced-motion: reduce) {
+  .woo-ai-assistant-app * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 // Print styles
 @media print {
   .woo-ai-assistant-app {

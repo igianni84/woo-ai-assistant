@@ -237,7 +237,7 @@ class ApiException extends WooAiException
     public function toArray(bool $includeTrace = false): array
     {
         $data = parent::toArray($includeTrace);
-        
+
         $data['api_error'] = [
             'http_status' => $this->httpStatusCode,
             'service' => $this->service,
@@ -268,21 +268,21 @@ class ApiException extends WooAiException
     private function sanitizeEndpointForLogging(string $endpoint): string
     {
         $parsed = parse_url($endpoint);
-        
+
         if (!$parsed) {
             return '[invalid-endpoint]';
         }
-        
+
         $sanitized = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'unknown');
-        
+
         if (isset($parsed['port'])) {
             $sanitized .= ':' . $parsed['port'];
         }
-        
+
         if (isset($parsed['path'])) {
             $sanitized .= $parsed['path'];
         }
-        
+
         // Don't include query parameters or fragments as they might contain sensitive data
         return $sanitized;
     }

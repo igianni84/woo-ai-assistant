@@ -106,17 +106,18 @@ class IntermediateServerClient
         $this->apiConfiguration = ApiConfiguration::getInstance();
         $this->cache = Cache::getInstance();
 
-        // Set request timeout from environment or default
-        if ($this->developmentConfig->isDevelopmentEnvironment()) {
-            $timeout = $this->developmentConfig->getEnvironmentVariable('WOO_AI_DEV_API_TIMEOUT');
-            if (!empty($timeout) && is_numeric($timeout)) {
-                $this->requestTimeout = (int) $timeout;
-            }
-        }
+        // Get optimized configuration for current environment
+        $optimizedConfig = $this->developmentConfig->getOptimizedConfiguration();
+
+        // Set request timeout and retry attempts from optimized configuration
+        $this->requestTimeout = $optimizedConfig['api_timeout'];
+        $this->maxRetryAttempts = $optimizedConfig['retry_attempts'];
 
         Logger::debug('IntermediateServerClient initialized', [
             'is_development' => $this->developmentConfig->isDevelopmentEnvironment(),
+            'environment_type' => $this->developmentConfig->getEnvironmentType(),
             'timeout' => $this->requestTimeout,
+            'retry_attempts' => $this->maxRetryAttempts,
             'endpoints' => array_keys($this->endpoints)
         ]);
     }
@@ -172,7 +173,7 @@ class IntermediateServerClient
             if (!is_string($text)) {
                 throw new ValidationException("Text at index {$index} must be string", "texts[{$index}]", 'type');
             }
-            
+
             if (strlen($text) > 8000) { // OpenAI embedding limit
                 throw new ValidationException("Text at index {$index} exceeds maximum length", "texts[{$index}]", 'max_length');
             }
@@ -203,7 +204,7 @@ class IntermediateServerClient
         // In development mode, bypass license validation if configured
         if ($this->shouldBypassLicenseValidation()) {
             Logger::debug('Bypassing license validation in development mode');
-            
+
             return [
                 'valid' => true,
                 'status' => 'active',
@@ -291,15 +292,15 @@ class IntermediateServerClient
     private function makeRequest(string $endpoint, array $data, array $options = []): array
     {
         $startTime = microtime(true);
-        
+
         // Check rate limits
         $this->checkRateLimit($endpoint);
-        
+
         // Prepare request
         $url = $this->buildUrl($endpoint);
         $headers = $this->buildHeaders($endpoint, $data, $options);
         $requestData = $this->prepareRequestData($endpoint, $data, $options);
-        
+
         Logger::debug("Making request to intermediate server", [
             'endpoint' => $endpoint,
             'url' => $this->sanitizeUrlForLogging($url),
@@ -319,10 +320,10 @@ class IntermediateServerClient
         while ($attempt <= $this->maxRetryAttempts) {
             try {
                 $response = $this->executeHttpRequest($url, $requestData, $headers, $options);
-                
+
                 // Update rate limit counters
                 $this->updateRateLimit($endpoint);
-                
+
                 // Log successful request
                 $duration = microtime(true) - $startTime;
                 Logger::debug("Request completed successfully", [
@@ -330,12 +331,11 @@ class IntermediateServerClient
                     'attempt' => $attempt,
                     'duration' => round($duration, 3) . 's'
                 ]);
-                
+
                 return $response;
-                
             } catch (ApiException $e) {
                 $lastException = $e;
-                
+
                 Logger::warning("Request attempt failed", [
                     'endpoint' => $endpoint,
                     'attempt' => $attempt,
@@ -343,12 +343,12 @@ class IntermediateServerClient
                     'status' => $e->getHttpStatusCode(),
                     'should_retry' => $e->shouldRetry()
                 ]);
-                
+
                 // Don't retry if the error indicates we shouldn't
                 if (!$e->shouldRetry()) {
                     break;
                 }
-                
+
                 // If this isn't the last attempt, wait before retrying
                 if ($attempt < $this->maxRetryAttempts) {
                     $delay = $this->calculateRetryDelay($attempt, $e);
@@ -359,7 +359,7 @@ class IntermediateServerClient
                     ]);
                     sleep($delay);
                 }
-                
+
                 $attempt++;
             }
         }
@@ -462,11 +462,11 @@ class IntermediateServerClient
     {
         $serverConfig = $this->apiConfiguration->getIntermediateServerConfig();
         $baseUrl = rtrim($serverConfig['url'], '/');
-        
+
         if (!isset($this->endpoints[$endpoint])) {
             throw new ValidationException("Unknown endpoint: {$endpoint}", 'endpoint', 'exists');
         }
-        
+
         return $baseUrl . $this->endpoints[$endpoint];
     }
 
@@ -492,7 +492,7 @@ class IntermediateServerClient
         if (!($options['skip_auth'] ?? false)) {
             $signature = $this->generateRequestSignature($endpoint, $data);
             $headers['X-Signature'] = $signature;
-            
+
             $licenseConfig = $this->apiConfiguration->getLicenseConfig();
             if (!empty($licenseConfig['key'])) {
                 $headers['X-License-Key'] = $licenseConfig['key'];
@@ -513,7 +513,7 @@ class IntermediateServerClient
     private function prepareRequestData(string $endpoint, array $data, array $options = []): array
     {
         $requestData = $data;
-        
+
         // Add metadata
         $requestData['_meta'] = [
             'timestamp' => time(),
@@ -538,7 +538,7 @@ class IntermediateServerClient
     {
         $licenseConfig = $this->apiConfiguration->getLicenseConfig();
         $licenseKey = $licenseConfig['key'] ?? '';
-        
+
         if (empty($licenseKey)) {
             Logger::warning('Cannot generate request signature: no license key available');
             return '';
@@ -572,7 +572,7 @@ class IntermediateServerClient
     {
         $cacheKey = "rate_limit_{$endpoint}";
         $currentCount = $this->cache->get($cacheKey, 0);
-        
+
         // Rate limits per hour
         $rateLimits = [
             'chat' => 1000,
@@ -581,9 +581,9 @@ class IntermediateServerClient
             'license/usage' => 1000,
             'health' => 10000
         ];
-        
+
         $limit = $rateLimits[$endpoint] ?? 100;
-        
+
         if ($currentCount >= $limit) {
             $resetTime = $this->cache->getTtl($cacheKey);
             throw new ApiException(
@@ -633,7 +633,7 @@ class IntermediateServerClient
         // Exponential backoff: 2^attempt seconds with jitter
         $delay = min(pow(2, $attempt - 1), 60); // Max 60 seconds
         $jitter = rand(0, (int)($delay * 0.1)); // Add up to 10% jitter
-        
+
         return $delay + $jitter;
     }
 
@@ -779,21 +779,21 @@ class IntermediateServerClient
     private function sanitizeUrlForLogging(string $url): string
     {
         $parsed = parse_url($url);
-        
+
         if (!$parsed) {
             return '[invalid-url]';
         }
-        
+
         $sanitized = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'unknown');
-        
+
         if (isset($parsed['port'])) {
             $sanitized .= ':' . $parsed['port'];
         }
-        
+
         if (isset($parsed['path'])) {
             $sanitized .= $parsed['path'];
         }
-        
+
         // Don't include query parameters in logs as they might contain sensitive data
         return $sanitized;
     }
@@ -809,7 +809,7 @@ class IntermediateServerClient
         $cacheKey = "rate_limit_{$endpoint}";
         $currentCount = $this->cache->get($cacheKey, 0);
         $resetTime = $this->cache->getTtl($cacheKey);
-        
+
         $rateLimits = [
             'chat' => 1000,
             'embeddings' => 10000,
@@ -817,9 +817,9 @@ class IntermediateServerClient
             'license/usage' => 1000,
             'health' => 10000
         ];
-        
+
         $limit = $rateLimits[$endpoint] ?? 100;
-        
+
         return [
             'endpoint' => $endpoint,
             'current' => $currentCount,
@@ -858,5 +858,134 @@ class IntermediateServerClient
         ]);
 
         return $success;
+    }
+
+    /**
+     * Get comprehensive client status for debugging and monitoring
+     *
+     * @return array Client status information
+     */
+    public function getClientStatus(): array
+    {
+        $serverConfig = $this->apiConfiguration->getIntermediateServerConfig();
+        $developmentConfig = $this->developmentConfig->getDevelopmentConfig();
+
+        $status = [
+            'client_initialized' => true,
+            'environment' => [
+                'type' => $this->developmentConfig->getEnvironmentType(),
+                'is_development' => $this->developmentConfig->isDevelopmentEnvironment(),
+                'bypass_intermediate_server' => $this->shouldBypassIntermediateServer(),
+                'bypass_license_validation' => $this->shouldBypassLicenseValidation()
+            ],
+            'configuration' => [
+                'request_timeout' => $this->requestTimeout,
+                'max_retry_attempts' => $this->maxRetryAttempts,
+                'intermediate_server_enabled' => $serverConfig['enabled'],
+                'has_fallback_servers' => count($serverConfig['fallback_urls'] ?? []) > 0,
+                'server_urls' => [
+                    'primary' => $serverConfig['primary_url'] ?? $serverConfig['url'] ?? null,
+                    'fallback_count' => count($serverConfig['fallback_urls'] ?? [])
+                ]
+            ],
+            'rate_limits' => [],
+            'timestamp' => time()
+        ];
+
+        // Get rate limit status for all endpoints
+        foreach (array_keys($this->endpoints) as $endpoint) {
+            $status['rate_limits'][$endpoint] = $this->getRateLimitStatus($endpoint);
+        }
+
+        // Test server connectivity if not bypassing (quick check)
+        if (!$this->shouldBypassIntermediateServer()) {
+            $status['server_connectivity'] = $this->apiConfiguration->getAllServerStatus();
+        } else {
+            $status['server_connectivity'] = [
+                'bypassed' => true,
+                'reason' => 'Using direct API calls in development mode'
+            ];
+        }
+
+        return $status;
+    }
+
+    /**
+     * Validate client configuration and connectivity
+     *
+     * @return array Validation results
+     */
+    public function validateClientConfiguration(): array
+    {
+        $results = [
+            'valid' => true,
+            'errors' => [],
+            'warnings' => [],
+            'recommendations' => []
+        ];
+
+        // Validate API configuration
+        $apiConfigValidation = $this->apiConfiguration->validateConfiguration();
+        if (!$apiConfigValidation['valid']) {
+            $results['valid'] = false;
+            $results['errors'] = array_merge($results['errors'], $apiConfigValidation['errors']);
+        }
+        $results['warnings'] = array_merge($results['warnings'], $apiConfigValidation['warnings']);
+        $results['recommendations'] = array_merge($results['recommendations'], $apiConfigValidation['recommendations']);
+
+        // Validate development configuration if in development mode
+        if ($this->developmentConfig->isDevelopmentEnvironment()) {
+            $devConfigValidation = $this->developmentConfig->validateDevelopmentConfiguration();
+            if (!$devConfigValidation['valid']) {
+                $results['valid'] = false;
+                $results['errors'] = array_merge($results['errors'], $devConfigValidation['errors']);
+            }
+            $results['warnings'] = array_merge($results['warnings'], $devConfigValidation['warnings']);
+            $results['recommendations'] = array_merge($results['recommendations'], $devConfigValidation['recommendations']);
+        }
+
+        // Check server connectivity (if not bypassing)
+        if (!$this->shouldBypassIntermediateServer()) {
+            $serverStatus = $this->apiConfiguration->getAllServerStatus();
+            $hasWorkingServer = false;
+
+            foreach ($serverStatus as $server) {
+                if ($server['success']) {
+                    $hasWorkingServer = true;
+                    break;
+                }
+            }
+
+            if (!$hasWorkingServer) {
+                $results['errors'][] = 'No intermediate servers are accessible';
+                $results['valid'] = false;
+            } elseif (!$serverStatus['primary']['success']) {
+                $results['warnings'][] = 'Primary server is not accessible, relying on fallback servers';
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Get optimized request options based on current environment
+     *
+     * @param array $baseOptions Base options to merge with
+     * @return array Optimized request options
+     */
+    public function getOptimizedRequestOptions(array $baseOptions = []): array
+    {
+        $optimizedConfig = $this->developmentConfig->getOptimizedConfiguration();
+
+        $options = array_merge([
+            'timeout' => $optimizedConfig['api_timeout'],
+            'retry_attempts' => $optimizedConfig['retry_attempts'],
+            'cache_ttl' => $optimizedConfig['cache_ttl'],
+            'skip_ssl_verify' => $optimizedConfig['skip_ssl_verify'] ?? false,
+            'detailed_errors' => $optimizedConfig['detailed_errors'] ?? false,
+            'enhanced_logging' => $this->developmentConfig->shouldEnableEnhancedLogging()
+        ], $baseOptions);
+
+        return $options;
     }
 }
