@@ -295,4 +295,89 @@ class Utils
             error_log($message);
         }
     }
+
+    /**
+     * Get user IP address with proxy support
+     *
+     * @return string User IP address
+     */
+    public static function getUserIp(): string
+    {
+        $ipKeys = [
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        ];
+
+        foreach ($ipKeys as $key) {
+            if (array_key_exists($key, $_SERVER) && !empty($_SERVER[$key])) {
+                $ips = explode(',', $_SERVER[$key]);
+                $ip = trim($ips[0]);
+
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    return $ip;
+                }
+            }
+        }
+
+        return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    }
+
+    /**
+     * Get user agent string
+     *
+     * @return string User agent
+     */
+    public static function getUserAgent(): string
+    {
+        return $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+    }
+
+    /**
+     * Ensure WooCommerce cart is initialized
+     *
+     * @return bool True if cart is available, false otherwise
+     */
+    public static function ensureWooCommerceCart(): bool
+    {
+        if (!self::isWooCommerceActive()) {
+            return false;
+        }
+
+        // Initialize WooCommerce if not already done
+        if (!did_action('woocommerce_init')) {
+            WC();
+        }
+
+        // Initialize cart if not already done
+        if (is_null(WC()->cart)) {
+            wc_load_cart();
+        }
+
+        return !is_null(WC()->cart);
+    }
+
+    /**
+     * Check if cart functionality is available for current request
+     *
+     * @return bool True if cart can be used, false otherwise
+     */
+    public static function canUseCart(): bool
+    {
+        if (!self::isWooCommerceActive()) {
+            return false;
+        }
+
+        // Don't use cart in admin (unless it's AJAX)
+        if (is_admin() && !wp_doing_ajax()) {
+            return false;
+        }
+
+        // Ensure WooCommerce is initialized
+        return self::ensureWooCommerceCart();
+    }
 }
